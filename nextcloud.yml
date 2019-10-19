@@ -133,6 +133,18 @@
       args:
         warn: no
 
+    - name: check ncadmin.txt generated
+      stat:
+        path: /opt/ncadmin.txt
+      register: nc_ncadmin
+
+    - name: bootstrap nextcloud with admin if not done
+      shell: 
+        echo -n $(openssl rand -base64 32) > /opt/ncadmin.txt
+        chown apache:apache /opt/ncadmin.txt
+        sudo -u apache /usr/bin/php occ maintenance:install --database "mysql" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
+      when: nc_ncadmin.stat.exists == false
+
     - name: apache service restarted
       systemd:
         name: httpd
