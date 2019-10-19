@@ -129,6 +129,11 @@
         %' /etc/httpd/conf/httpd.conf
         mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
 
+    - name: apache service restarted
+      systemd:
+        name: httpd
+        state: restarted
+
     - name: certbot initial configuration
       shell: certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }}
 
