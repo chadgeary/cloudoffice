@@ -153,6 +153,22 @@
         line: "    '{{ nc_friendly }}',"
         state: present
 
+    - name: check nextcloud.db in /opt/nextcloud
+      stat:
+        path: /opt/nextcloud/nextcloud.db
+      register: nc_datadir
+
+    - name: move data directory to /opt
+      shell: mv /var/www/html/nextcloud/data /opt/nextcloud
+      when: nc_datadir.stat.exists == false
+
+    - name: ensure datadir defined in config.php
+      replace:
+        path: /var/www/html/nextcloud/config/config.php
+        regexp: "^  'datadirectory' => '/var/www/html/nextcloud/data',"
+        replace: "  'datadirectory' => '/opt/nextcloud',"
+      when: nc_datadir.stat.exists == false
+
     - name: apache service restarted
       systemd:
         name: httpd
