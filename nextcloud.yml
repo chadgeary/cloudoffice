@@ -145,7 +145,7 @@
 
     - name: certbot initial configuration
       shell: |
-        certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }} --domains {{ nc_friendly }}
+        certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }} --domains {{ nc_friendly }} --redirect
         touch /opt/certbot.done
 
     - name: certbot auto renew cron, 4AM on the second day of the month
