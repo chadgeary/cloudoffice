@@ -20,3 +20,6 @@ nextcloud1.chadg.net
 # certbot_contact_email - an email address to register with eff / certbot, e.g.:
 someadmin@chadg.net
 ```
+
+# Admin authentication
+admin is created at installation, password is randomly generated @ /opt/ncadmin.txt
