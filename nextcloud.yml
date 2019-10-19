@@ -126,7 +126,7 @@
         \
           ServerName {{ nc_friendly }}\
         \
-        <VirtualHost>>\
+        </VirtualHost>\
         %' /etc/httpd/conf/httpd.conf
         mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
       when: nc_friendly_httpdconf.rc != 0
@@ -136,8 +136,15 @@
         name: httpd
         state: restarted
 
+    - name: check certbot init complete
+      stat:
+        path: /opt/certbot.done
+      register: certbot_init_complete
+
     - name: certbot initial configuration
-      shell: certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }}
+      shell: |
+        certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }}
+        touch /opt/certbot.done
 
     - name: certbot auto renew cron, 4AM on the second day of the month
       cron:
