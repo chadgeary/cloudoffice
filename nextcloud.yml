@@ -74,15 +74,15 @@
 
     - name: check nextcloud unarchived (look for AUTHORS file)
       stat:
-        path: /var/www/html/AUTHORS
-      register: nc_downloaded
+        path: /var/www/html/nextcloud/AUTHORS
+      register: nc_unarchived
 
     - name: unarchive nextcloud if not unarchived
       unarchive:
         src: /opt/nextcloud-{{ nc_release }}.zip
-        dest: /var/www/html
+        dest: /var/www/html/
         remote_src: yes
-      when: nc_downloaded.stat.exists == false
+      when: nc_unarchived.stat.exists == false
 
     - name: 755/644 apache:apache html directory recurively
       file:
