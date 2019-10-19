@@ -171,9 +171,9 @@
     - name: certbot auto renew cron, 4AM on the second day of the month
       cron:
         name: "certbot renew nextcloud"
-        minute: 00
-        hour: 04
-        day: 02
+        minute: '00'
+        hour: '04'
+        day: '02'
         job: "/usr/bin/certbot renew"
         state: present
         user: root
