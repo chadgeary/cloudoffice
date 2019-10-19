@@ -62,13 +62,13 @@
 
     - name: check nextcloud downloaded
       stat:
-        path: /opt/nextcloud-{{ nc_version }}.zip
+        path: /opt/nextcloud-{{ nc_release }}.zip
       register: nc_downloaded
 
     - name: download nextcloud when not downloaded
       get_url:
-        url: https://download.nextcloud.com/server/releases/nextcloud-{{ nc_version }}.zip
-        dest: /opt/nextcloud-{{ nc_version }}.zip
+        url: https://download.nextcloud.com/server/releases/nextcloud-{{ nc_release }}.zip
+        dest: /opt/nextcloud-{{ nc_release }}.zip
         mode: '0440'
       when: nc_downloaded.stat.exists == false
 
@@ -79,7 +79,7 @@
 
     - name: unarchive nextcloud if not unarchived
       unarchive:
-        src: /opt/nextcloud-{{ nc_version }}.zip
+        src: /opt/nextcloud-{{ nc_release }}.zip
         dest: /var/www/html
         remote_src: yes
       when: nc_downloaded.stat.exists == false
