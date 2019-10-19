@@ -55,9 +55,9 @@
         dest: "{{ item.dest }}"
         state: link
       with_items:
-        - { src: /opt/rh/httpd24/root/etc/httpd/conf.d/rh-php72-php.conf, dest: /etc/httpd/conf.d/ }
-        - { src: /opt/rh/httpd24/root/etc/httpd/conf.modules.d/15-rh-php72-php.conf, dest: /etc/httpd/conf.modules.d/ }
-        - { src: /opt/rh/httpd24/root/etc/httpd/modules/librh-php72-php7.so, dest: /etc/httpd/modules/ }
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.d/rh-php72-php.conf, dest: /etc/httpd/conf.d/rh-php72-php.conf }
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.modules.d/15-rh-php72-php.conf, dest: /etc/httpd/conf.modules.d/15-rh-php72-php.conf }
+        - { src: /opt/rh/httpd24/root/etc/httpd/modules/librh-php72-php7.so, dest: /etc/httpd/modules/librh-php72-php7.so }
         - { src: /opt/rh/rh-php72/root/bin/php, dest: /usr/bin/php }
 
     - name: check nextcloud downloaded
