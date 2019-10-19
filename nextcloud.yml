@@ -145,6 +145,13 @@
         cd /var/www/html/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
+    - name: set friendly name as a trusted domain in config.php
+      lineinfile:
+        path: /var/www/html/nextcloud/config/config.php
+        insertafter: "^    0 => 'localhost',"
+        line: "    '{{ nc_friendly }}',"
+        state: present
+
     - name: apache service restarted
       systemd:
         name: httpd
