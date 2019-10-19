@@ -130,6 +130,8 @@
         %' /etc/httpd/conf/httpd.conf
         mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
       when: nc_friendly_httpdconf.rc != 0
+      args:
+        warn: no
 
     - name: apache service restarted
       systemd:
