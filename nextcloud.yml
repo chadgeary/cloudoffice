@@ -117,6 +117,7 @@
     - name: validate httpd.conf
       shell: grep --quiet "{{ nc_friendly }}" /etc/httpd/conf/httpd.conf
       register: nc_friendly_httpdconf
+      ignore_errors: yes
 
     - name: configure httpd.conf/move ssl.conf if friendly not present
       shell: |
@@ -128,6 +129,7 @@
         <VirtualHost>>\
         %' /etc/httpd/conf/httpd.conf
         mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
+      when: nc_friendly_httpdconf.rc != 0
 
     - name: apache service restarted
       systemd:
