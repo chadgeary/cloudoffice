@@ -88,7 +88,7 @@
       file:
         path: /var/www/html
         mode: u=rwX,g=rX,o=rX
-        user: apache
+        owner: apache
         group: apache
         recurse: yes
 
