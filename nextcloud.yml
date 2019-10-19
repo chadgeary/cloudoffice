@@ -126,7 +126,7 @@
         owner: root
         mode: '0644'
 
-      name: move ssl.conf if friendly not present
+    - name: move ssl.conf if friendly not present
       shell: mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
       when: nc_friendly_httpdconf.rc != 0
       args:
