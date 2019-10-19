@@ -142,7 +142,7 @@
       shell: 
         echo -n $(openssl rand -base64 32) > /opt/ncadmin.txt
         chown apache:apache /opt/ncadmin.txt
-        cd /var/www/html/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "mysql" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
+        cd /var/www/html/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
     - name: apache service restarted
