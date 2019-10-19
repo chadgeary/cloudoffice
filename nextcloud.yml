@@ -1,0 +1,143 @@
+---
+- name: nextcloud
+  hosts: '{{ target }}'
+  vars:
+  become: True
+  become_user: root
+  tasks:
+    - name: epel and scl repo packages
+      yum:
+        name: "{{ repo_packages }}"
+        state: latest
+      vars:
+        repo_packages:
+          - epel-release
+          - centos-release-scl
+
+    - name: nextcloud packages
+      yum:
+        name: "{{ nc_packages }}"
+        state: latest
+      vars:
+        nc_packages:
+          - yum-utils
+          - unzip
+          - curl
+          - wget
+          - bash-completion
+          - policycoreutils-python
+          - python2-certbot-apache
+          - mlocate
+          - bzip2
+          - httpd
+          - redis
+          - mod_ssl
+          - rh-php72
+          - rh-php72-php
+          - rh-php72-php-gd
+          - rh-php72-php-mbstring
+          - rh-php72-php-intl
+          - rh-php72-php-pecl-apcu
+          - rh-php72-php-mysqlnd
+          - rh-php72-php-pecl-redis
+          - rh-php72-php-opcache
+          - rh-php72-php-imagick 
+
+    - name: apache service enabled/started
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: php7 symlinks
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      with_items:
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.d/rh-php72-php.conf, dest: /etc/httpd/conf.d/ }
+        - { src: /opt/rh/httpd24/root/etc/httpd/conf.modules.d/15-rh-php72-php.conf, dest: /etc/httpd/conf.modules.d/ }
+        - { src: /opt/rh/httpd24/root/etc/httpd/modules/librh-php72-php7.so, dest: /etc/httpd/modules/ }
+        - { src: /opt/rh/rh-php72/root/bin/php, dest: /usr/bin/php }
+
+    - name: check nextcloud downloaded
+      stat:
+        path: /opt/nextcloud-{{ nc_version }}.zip
+      register: nc_downloaded
+
+    - name: download nextcloud when not downloaded
+      get_url:
+        url: https://download.nextcloud.com/server/releases/nextcloud-{{ nc_version }}.zip
+        dest: /opt/nextcloud-{{ nc_version }}.zip
+        mode: '0440'
+      when: nc_downloaded.stat.exists == false
+
+    - name: check nextcloud unarchived (look for AUTHORS file)
+      stat:
+        path: /var/www/html/AUTHORS
+      register: nc_downloaded
+
+    - name: unarchive nextcloud if not unarchived
+      unarchive:
+        src: /opt/nextcloud-{{ nc_version }}.zip
+        dest: /var/www/html
+        remote_src: yes
+      when: nc_downloaded.stat.exists == false
+
+    - name: 755/644 apache:apache html directory recurively
+      file:
+        path: /var/www/html
+        mode: u=rwX,g=rX,o=rX
+        user: apache
+        group: apache
+        recurse: yes
+
+    - name: set selinux file context on html directory recursively
+      sefcontext:
+        target: '/var/www/html(/.*)?'
+        setype: httpd_sys_rw_content_t
+        reload: True
+        state: present
+
+    - name: restore selinux file context on html directory recursively
+      shell: restorecon -Rv /var/www/html/
+
+    - name: selinux allow ldap auth for httpd
+      seboolean:
+        name: httpd_can_connect_ldap
+        state: yes
+        persistent: yes
+
+    - name: selinux allow nfs for httpd
+      seboolean:
+        name: httpd_use_nfs
+        state: yes
+        persistent: yes
+
+    - name: validate httpd.conf
+      shell: grep --quiet "{{ nc_friendly }}" /etc/httpd/conf/httpd.conf
+      register: nc_friendly_httpdconf
+
+    - name: configure httpd.conf/move ssl.conf if friendly not present
+      shell: |
+        sed -i 's%ServerAdmin root@localhost%ServerAdmin root@localhost\
+        <VirtualHost *:80>\
+        \
+          ServerName {{ nc_friendly }}\
+        \
+        <VirtualHost>>\
+        %' /etc/httpd/conf/httpd.conf
+        mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
+
+    - name: certbot initial configuration
+        shell: certbot --apache --non-interactive --agree-tos --email "{{ certbot_contact_email }}"
+
+    - name: certbot auto renew cron, 4AM on the second day of the month
+      cron:
+        name: "certbot renew nextcloud"
+        minute: 00
+        hour: 04
+        day: 02
+        job: "/usr/bin/certbot renew"
+        state: present
+        user: root
