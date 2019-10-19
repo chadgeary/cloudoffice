@@ -115,20 +115,19 @@
         persistent: yes
 
     - name: validate httpd.conf
-      shell: grep --quiet "{{ nc_friendly }}" /etc/httpd/conf/httpd.conf
+      shell: grep --quiet "{{ nc_friendly }}" /etc/httpd/conf.d/nextcloud.conf
       register: nc_friendly_httpdconf
       ignore_errors: yes
 
-    - name: configure httpd.conf/move ssl.conf if friendly not present
-      shell: |
-        sed -i 's%ServerAdmin root@localhost%ServerAdmin root@localhost\
-        <VirtualHost *:80>\
-        \
-          ServerName {{ nc_friendly }}\
-        \
-        </VirtualHost>\
-        %' /etc/httpd/conf/httpd.conf
-        mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
+    - name: set nextcloud.conf
+      template:
+        src: nextcloud.conf
+        dest: /etc/httpd/conf.d/nextcloud.conf
+        owner: root
+        mode: '0644'
+
+      name: move ssl.conf if friendly not present
+      shell: mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
       when: nc_friendly_httpdconf.rc != 0
       args:
         warn: no
