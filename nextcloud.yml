@@ -74,19 +74,19 @@
 
     - name: check nextcloud unarchived (look for AUTHORS file)
       stat:
-        path: /var/www/html/nextcloud/AUTHORS
+        path: /var/www/{{ nc_friendly }}/AUTHORS
       register: nc_unarchived
 
     - name: unarchive nextcloud if not unarchived
       unarchive:
         src: /opt/nextcloud-{{ nc_release }}.zip
-        dest: /var/www/html/
+        dest: /var/www/{{ nc_friendly }}
         remote_src: yes
       when: nc_unarchived.stat.exists == false
 
     - name: 755/644 apache:apache html directory recurively
       file:
-        path: /var/www/html
+        path: /var/www/{{ nc_friendly }}
         mode: u=rwX,g=rX,o=rX
         owner: apache
         group: apache
@@ -94,13 +94,13 @@
 
     - name: set selinux file context on html directory recursively
       sefcontext:
-        target: '/var/www/html(/.*)?'
+        target: '/var/www/{{ nc_friendly }}(/.*)?'
         setype: httpd_sys_rw_content_t
         reload: True
         state: present
 
     - name: restore selinux file context on html directory recursively
-      shell: restorecon -Rv /var/www/html/
+      shell: restorecon -Rv /var/www/{{ nc_friendly }}
 
     - name: selinux allow ldap auth for httpd
       seboolean:
@@ -126,6 +126,13 @@
         owner: root
         mode: '0644'
 
+    - name: set httpd-le-ssl.conf
+      template:
+        src: httpd-le-ssl.conf
+        dest: /etc/httpd/conf/httpd-le-ssl.conf
+        owner: root
+        mode: '0644'
+
     - name: move ssl.conf if friendly not present
       shell: mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
       when: nc_friendly_httpdconf.rc != 0
@@ -143,12 +150,12 @@
         echo -n $(openssl rand -base64 32) > /opt/ncadmin.txt
         chown apache:apache /opt/ncadmin.txt
         chmod 400 /opt/ncadmin.txt
-        cd /var/www/html/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
+        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
     - name: set friendly name as a trusted domain in config.php
       lineinfile:
-        path: /var/www/html/nextcloud/config/config.php
+        path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
         insertafter: "^    0 => 'localhost',"
         line: "    '{{ nc_friendly }}',"
         state: present
@@ -159,13 +166,13 @@
       register: nc_datadir
 
     - name: move data directory to /opt
-      shell: mv /var/www/html/nextcloud/data /opt/nextcloud
+      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data /opt/nextcloud
       when: nc_datadir.stat.exists == false
 
     - name: ensure datadir defined in config.php
       replace:
-        path: /var/www/html/nextcloud/config/config.php
-        regexp: "^  'datadirectory' => '/var/www/html/nextcloud/data',"
+        path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
+        regexp: "^  'datadirectory' => '/var/www',"
         replace: "  'datadirectory' => '/opt/nextcloud',"
       when: nc_datadir.stat.exists == false
 
@@ -174,12 +181,7 @@
         name: httpd
         state: restarted
 
-    - name: check certbot init complete
-      stat:
-        path: /opt/certbot.done
-      register: certbot_init_complete
-
-    - name: certbot initial configuration
+    - name: certbot configuration
       shell: |
         certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }} --domains {{ nc_friendly }} --redirect
         touch /opt/certbot.done
