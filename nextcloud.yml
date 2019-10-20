@@ -191,7 +191,7 @@
     - name: ensure datadir var defined in config.php
       replace:
         path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
-        regexp: "^  'datadirectory' => '/var/www',"
+        regexp: "^  'datadirectory' => '/var/www.*"
         replace: "  'datadirectory' => '{{ nc_datadir }}',"
       when: nc_datadir_db.stat.exists == false
 
