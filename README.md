@@ -17,6 +17,9 @@ somehost.chadg.net
 # nc_friendly - the dns name of the httpd server, must be resolvable externally, e.g:
 nextcloud1.chadg.net
 
+# nc_datadir - the directory nextcloud will store user/service data, e.g.:
+/opt/nextcloud
+
 # certbot_contact_email - an email address to register with eff / certbot, e.g.:
 someadmin@chadg.net
 ```

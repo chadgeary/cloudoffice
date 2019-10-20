@@ -1,7 +1,6 @@
 ---
 - name: nextcloud
   hosts: '{{ target }}'
-  vars:
   become: True
   become_user: root
   tasks:
@@ -92,6 +91,14 @@
         group: apache
         recurse: yes
 
+    - name: nc_datadir
+      file:
+        path: {{ nc_datadir }}
+        state: directory
+        mode: '0755'
+        owner: apache
+        group: apache
+
     - name: set selinux file context on html directory recursively
       sefcontext:
         target: '/var/www/{{ nc_friendly }}(/.*)?'
@@ -142,15 +149,15 @@
 
     - name: check ncadmin.txt generated
       stat:
-        path: /opt/ncadmin.txt
+        path: "{{ nc_datadir }}/ncadmin.txt"
       register: nc_ncadmin
 
     - name: bootstrap nextcloud with admin if not done
       shell: 
-        echo -n $(openssl rand -base64 32) > /opt/ncadmin.txt
-        chown apache:apache /opt/ncadmin.txt
-        chmod 400 /opt/ncadmin.txt
-        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat /opt/ncadmin.txt)"
+        echo -n $(openssl rand -base64 32) > {{ nc_datadir }}/ncadmin.txt
+        chown apache:apache {{ nc_datadir }}/ncadmin.txt
+        chmod 400 {{ nc_datadir }}/ncadmin.txt
+        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
     - name: set friendly name as a trusted domain in config.php
@@ -160,21 +167,21 @@
         line: "    '{{ nc_friendly }}',"
         state: present
 
-    - name: check nextcloud.db in /opt/nextcloud
+    - name: check nextcloud.db in nc_datadir
       stat:
         path: /opt/nextcloud/nextcloud.db
-      register: nc_datadir
+      register: nc_datadir_db
 
-    - name: move data directory to /opt
-      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data /opt/nextcloud
-      when: nc_datadir.stat.exists == false
+    - name: move nc default data directory to nc_datadir
+      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}
+      when: nc_datadir_db.stat.exists == false
 
-    - name: ensure datadir defined in config.php
+    - name: ensure datadir var defined in config.php
       replace:
         path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
         regexp: "^  'datadirectory' => '/var/www',"
-        replace: "  'datadirectory' => '/opt/nextcloud',"
-      when: nc_datadir.stat.exists == false
+        replace: "  'datadirectory' => '{{ nc_datadir }}',"
+      when: nc_datadir_db.stat.exists == false
 
     - name: apache service restarted
       systemd:
