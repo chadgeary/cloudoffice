@@ -93,7 +93,7 @@
 
     - name: nc_datadir
       file:
-        path: {{ nc_datadir }}
+        path: "{{ nc_datadir }}"
         state: directory
         mode: '0755'
         owner: apache
