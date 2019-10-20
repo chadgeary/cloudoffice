@@ -76,6 +76,14 @@
         path: /var/www/{{ nc_friendly }}/AUTHORS
       register: nc_unarchived
 
+    - name: nc web dir
+      file:
+        path: "/var/www/{{ nc_friendly }}"
+        state: directory
+        mode: '0755'
+        owner: apache
+        group: apache
+
     - name: unarchive nextcloud if not unarchived
       unarchive:
         src: /opt/nextcloud-{{ nc_release }}.zip
