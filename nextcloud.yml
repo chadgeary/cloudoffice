@@ -160,9 +160,12 @@
         path: "{{ nc_datadir }}/ncadmin.txt"
       register: nc_ncadmin
 
-    - name: bootstrap nextcloud with admin if not done
+    - name: generate admin credential
       shell: 
         echo -n $(openssl rand -base64 32) > {{ nc_datadir }}/ncadmin.txt
+      when: nc_ncadmin.stat.exists == false
+
+    - name: set permissions and perform nc bootstrap
         chown apache:apache {{ nc_datadir }}/ncadmin.txt
         chmod 400 {{ nc_datadir }}/ncadmin.txt
         cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
