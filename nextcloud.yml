@@ -73,7 +73,7 @@
 
     - name: check nextcloud unarchived (look for AUTHORS file)
       stat:
-        path: /var/www/{{ nc_friendly }}/AUTHORS
+        path: /var/www/{{ nc_friendly }}/nextcloud/AUTHORS
       register: nc_unarchived
 
     - name: nc web dir
@@ -181,11 +181,11 @@
 
     - name: check nextcloud.db in nc_datadir
       stat:
-        path: /opt/nextcloud/nextcloud.db
+        path: /opt/nextcloud/data/nextcloud.db
       register: nc_datadir_db
 
     - name: move nc default data directory to nc_datadir
-      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}
+      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}/
       when: nc_datadir_db.stat.exists == false
 
     - name: ensure datadir var defined in config.php
