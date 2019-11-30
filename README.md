@@ -12,7 +12,7 @@ Ansible playbook installs standalone Nextcloud with LetsEncrypt TLS Certificate
 somehost.chadg.net
 
 # nc_release - the version of nextcloud to fetch/install, e.g.:
-16.0.4
+17.0.1
 
 # nc_friendly - the dns name of the httpd server, must be resolvable externally, e.g:
 nextcloud1.chadg.net
