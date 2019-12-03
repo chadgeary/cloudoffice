@@ -26,3 +26,11 @@ someadmin@chadg.net
 
 # Admin authentication
 admin is created at installation, password is randomly generated @ /opt/ncadmin.txt
+
+# LDAP authentication
+```
+# before enabling the Nextcloud LDAP addon
+sudo yum install rh-php72-php-ldap
+sudo setsebool -P httpd_can_connect_ldap on
+sudo systemctl restart httpd
+```
