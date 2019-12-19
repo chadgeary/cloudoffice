@@ -33,4 +33,7 @@ admin is created at installation, password is randomly generated @ /opt/ncadmin.
 sudo yum install rh-php72-php-ldap
 sudo setsebool -P httpd_can_connect_ldap on
 sudo systemctl restart httpd
+
+# freeipa user query example
+(&(&(|(objectclass=posixAccount))(|(memberof=cn=ipausers,cn=groups,cn=accounts,dc=chadg,dc=net)))(uid=%uid))
 ```
