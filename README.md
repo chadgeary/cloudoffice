@@ -4,7 +4,13 @@ Ansible playbook installs standalone Nextcloud with LetsEncrypt TLS Certificate
 # Requirements
 - centos 7
 - epel and centos-release-scl repositories ( installed )
-- dns resolution (for certificate)
+- valid public dns resolution (for certificate)
+
+# Deployment
+```
+# locally
+ansible-playbook nextcloud.yml --extra-vars "target=localhost nc_release='17.0.1' nc_friendly='mynextcloud.mydomain.com' nc_datadir='/opt/nextcloud' certbot_contact_email='someone@mydomain.com'"
+```
 
 # Variables
 ```
