@@ -3,8 +3,8 @@ Ansible playbook installs standalone Nextcloud with LetsEncrypt TLS Certificate
 
 # Requirements
 - centos 7
-- epel and centos-release-scl repositories ( installed )
 - valid public dns resolution (for certificate)
+- firewall allow port 80/443 (for certbot)
 
 # Deployment
 ```
@@ -42,4 +42,10 @@ sudo systemctl restart httpd
 
 # freeipa user query example
 (&(&(|(objectclass=posixAccount))(|(memberof=cn=ipausers,cn=groups,cn=accounts,dc=chadg,dc=net)))(uid=%uid))
+```
+
+# Todo
+```
+RHEL 7 (and 8)
+Ubuntu 1804
 ```
