@@ -129,11 +129,6 @@
         state: yes
         persistent: yes
 
-    - name: validate httpd.conf
-      shell: grep --quiet "{{ nc_friendly }}" /etc/httpd/conf.d/nextcloud.conf
-      register: nc_friendly_httpdconf
-      ignore_errors: yes
-
     - name: set nextcloud.conf
       template:
         src: nextcloud.conf
@@ -148,19 +143,12 @@
         owner: root
         mode: '0644'
 
-    - name: move ssl.conf if friendly not present
-      shell: mv /etc/httpd/conf.d/ssl.conf /opt/ssl.conf.beforecertbot
-      when: nc_friendly_httpdconf.rc != 0
-      ignore_errors: yes
-      args:
-        warn: no
-
-    - name: check ncadmin.txt generated
+    - name: check ncadmin.txt credential generated
       stat:
         path: "{{ nc_datadir }}/ncadmin.txt"
       register: nc_ncadmin
 
-    - name: generate admin credential
+    - name: generate admin credential if not generated
       shell: 
         echo -n $(openssl rand -base64 32) > {{ nc_datadir }}/ncadmin.txt
       when: nc_ncadmin.stat.exists == false
@@ -169,7 +157,7 @@
       shell: |
         chown apache:apache {{ nc_datadir }}/ncadmin.txt
         chmod 400 {{ nc_datadir }}/ncadmin.txt
-        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "password" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
+        cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "$(cat {{ nc_datadir }}/ncadmin.txt)" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
     - name: set friendly name as a trusted domain in config.php
