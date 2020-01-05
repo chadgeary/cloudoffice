@@ -3,8 +3,14 @@ Ansible playbook installs standalone Nextcloud with LetsEncrypt TLS Certificate
 
 # Requirements
 - centos 7
-- epel and centos-release-scl repositories ( installed )
-- dns resolution (for certificate)
+- valid public dns resolution (for certificate)
+- firewall allow port 80/443 (for certbot)
+
+# Deployment
+```
+# locally
+ansible-playbook nextcloud.yml --extra-vars "target=localhost nc_release='17.0.1' nc_friendly='mynextcloud.mydomain.com' nc_datadir='/opt/nextcloud' certbot_contact_email='someone@mydomain.com'"
+```
 
 # Variables
 ```
@@ -33,4 +39,13 @@ admin is created at installation, password is randomly generated @ /opt/ncadmin.
 sudo yum install rh-php72-php-ldap
 sudo setsebool -P httpd_can_connect_ldap on
 sudo systemctl restart httpd
+
+# freeipa user query example
+(&(&(|(objectclass=posixAccount))(|(memberof=cn=ipausers,cn=groups,cn=accounts,dc=chadg,dc=net)))(uid=%uid))
+```
+
+# Todo
+```
+RHEL 7 (and 8)
+Ubuntu 1804
 ```
