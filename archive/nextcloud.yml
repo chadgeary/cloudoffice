@@ -91,7 +91,7 @@
         remote_src: yes
       when: nc_unarchived.stat.exists == false
 
-    - name: 755/644 apache:apache html directory recurively
+    - name: 755/644 apache:apache html directory recursively
       file:
         path: /var/www/{{ nc_friendly }}
         mode: u=rwX,g=rX,o=rX

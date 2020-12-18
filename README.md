@@ -1,51 +1,12 @@
-# Reference
-Ansible playbook installs standalone Nextcloud with LetsEncrypt TLS Certificate
+# Overview
+Nextcloud built in the cloud automatically using Terraform with Ansible. Available for AWS. Azure, GCP and OCI to come + a standalone installation.
 
-# Requirements
-- centos 7
-- valid public dns resolution (for certificate)
-- firewall allow port 80/443 (for certbot)
+# Instructions
+Several deployment options are available, see the README of each subdirectory for platform-specific guides.
+- AWS (Amazon)
 
-# Deployment
-```
-# locally
-ansible-playbook nextcloud.yml --extra-vars "target=localhost nc_release='17.0.1' nc_friendly='mynextcloud.mydomain.com' nc_datadir='/opt/nextcloud' certbot_contact_email='someone@mydomain.com'"
-```
+# Videos
+### PLACEHOLDER ###
 
-# Variables
-```
-# target - the host(s) to install nextcloud, e.g.:
-somehost.chadg.net
-
-# nc_release - the version of nextcloud to fetch/install, e.g.:
-17.0.1
-
-# nc_friendly - the dns name of the httpd server, must be resolvable externally, e.g:
-nextcloud1.chadg.net
-
-# nc_datadir - the directory nextcloud will store user/service data, e.g.:
-/opt/nextcloud
-
-# certbot_contact_email - an email address to register with eff / certbot, e.g.:
-someadmin@chadg.net
-```
-
-# Admin authentication
-admin is created at installation, password is randomly generated @ /opt/ncadmin.txt
-
-# LDAP authentication
-```
-# before enabling the Nextcloud LDAP addon
-sudo yum install rh-php72-php-ldap
-sudo setsebool -P httpd_can_connect_ldap on
-sudo systemctl restart httpd
-
-# freeipa user query example
-(&(&(|(objectclass=posixAccount))(|(memberof=cn=ipausers,cn=groups,cn=accounts,dc=chadg,dc=net)))(uid=%uid))
-```
-
-# Todo
-```
-RHEL 7 (and 8)
-Ubuntu 1804
-```
+# Discussion
+[Discord Room](https://discord.gg/zmu6GVnPnj)
