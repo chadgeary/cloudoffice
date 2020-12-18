@@ -130,7 +130,10 @@ Alternatively, check [AWS State Manager](https://console.aws.amazon.com/systems-
 Edit the vars file (aws.tfvars) to customize the deployment, especially:
 ```
 # admin_password
-# password to access the webui, user is ncadmin
+# password to access the webui (and db root user), user is ncadmin
+
+# db_password
+# password set on database for nextcloud application
 
 # instance_key
 # a public SSH key for SSH access to the instance via user `ubuntu`.

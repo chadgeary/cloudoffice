@@ -22,11 +22,11 @@ resource "aws_security_group_rule" "nc-pubsg-mgmt-ssh-in" {
 resource "aws_security_group_rule" "nc-pubsg-mgmt-https-in" {
   security_group_id       = aws_security_group.nc-pubsg.id
   type                    = "ingress"
-  description             = "IN FROM MGMT - HTTPS"
+  description             = "IN FROM WORLD - HTTPS"
   from_port               = "443"
   to_port                 = "443"
   protocol                = "tcp"
-  cidr_blocks             = [var.mgmt_cidr]
+  cidr_blocks             = ["0.0.0.0/0"]
 }
 
 resource "aws_security_group_rule" "nc-pubsg-out-tcp" {

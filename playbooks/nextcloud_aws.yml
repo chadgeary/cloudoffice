@@ -149,7 +149,7 @@
           PUID: "{{ db_user.uid }}"
           PGID: "{{ db_user.group }}"
         volumes:
-          - /opt/nextcloud_db:/var/lib/mysql:rw
+          - /opt/nextcloud_db:/config:rw
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -231,6 +231,16 @@
         - "else"
         - "  echo 'S3 storage exists, skipping.'"
         - "fi"
+
+    - name: wait for nextcloud 200OK
+      uri:
+        url: "https://127.0.0.1:443/"
+        status_code: 200
+        validate_certs: no
+      register: nc_wait_result
+      until: nc_wait_result.status == 200
+      retries: 180
+      delay: 1
 
     - name: nextcloud s3 storage (execute)
       shell:
