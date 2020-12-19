@@ -119,7 +119,7 @@
         ciphertext: "{{ db_password_cipher }}"
         service_endpoint: "{{ oci_kms_endpoint }}"
         key_id: "{{ oci_kms_keyid }}"
-      register: admin_password_decrypt
+      register: db_password_decrypt
 
     - name: get backup from storage if exists
       oci_object_storage_object:
@@ -130,7 +130,7 @@
         dest: "/opt/nextcloud_backup.tar.gz"
       ignore_errors: True
 
-    - name: Determine wireguard state
+    - name: Determine nextcloud state
       stat:
         path: /opt/nextcloud/var
       register: nextcloud_state
