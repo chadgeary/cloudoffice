@@ -2,7 +2,10 @@
 - name: nextcloud
   hosts: localhost
   connection: local
-  become: True
+  collections:
+    - oracle.oci
+  gather_facts: true
+  become: true
   become_user: root
   tasks:
 
@@ -16,13 +19,10 @@
         state: latest
         update_cache: yes
 
-    - name: docker and boto python packages
+    - name: docker python packages
       pip:
         name:
           - docker
-          - boto
-          - boto3
-          - botocore
         executable: /usr/bin/pip3
         state: latest
 
@@ -94,25 +94,43 @@
         - httpd-ssl.conf
         - httpd.conf
 
-    - name: Get SSM parameter admin_password
-      set_fact:
-        admin_password: "{{ lookup('aws_ssm', name_prefix + '-admin-password-' + name_suffix, decrypt=True, region=aws_region) }}"
-      no_log: True
+    - name: secure proxy to pihole confs
+      template:
+        src: "{{ item }}"
+        dest: "/opt/webproxy/{{ item }}"
+        owner: root
+        group: root
+        mode: 0444
+      with_items:
+        - httpd-ssl.conf
+        - httpd.conf
 
-    - name: Get SSM parameter db_password
-      set_fact:
-        db_password: "{{ lookup('aws_ssm', name_prefix + '-db-password-' + name_suffix, decrypt=True, region=aws_region) }}"
-      no_log: True
+    - name: fetch decrypt admin pass
+      oci_key_management_decrypted_data:
+        auth_type: "instance_principal"
+        ciphertext: "{{ admin_password_cipher }}"
+        service_endpoint: "{{ oci_kms_endpoint }}"
+        key_id: "{{ oci_kms_keyid }}"
+      register: admin_password_decrypt
 
-    - name: get backup from s3 if exists
-      aws_s3:
-        mode: get
-        bucket: "{{ s3_bucket }}"
-        object: "/nextcloud/nextcloud_backup.tar.gz"
+    - name: fetch decrypt db pass
+      oci_key_management_decrypted_data:
+        auth_type: "instance_principal"
+        ciphertext: "{{ db_password_cipher }}"
+        service_endpoint: "{{ oci_kms_endpoint }}"
+        key_id: "{{ oci_kms_keyid }}"
+      register: admin_password_decrypt
+
+    - name: get backup from storage if exists
+      oci_object_storage_object:
+        auth_type: "instance_principal"
+        namespace_name: "{{ oci_storage_namespace }}"
+        bucket_name: "{{ oci_storage_bucketname }}"
+        object_name: "nextcloud/nextcloud_backup.tar.gz"
         dest: "/opt/nextcloud_backup.tar.gz"
       ignore_errors: True
 
-    - name: Determine nextcloud state
+    - name: Determine wireguard state
       stat:
         path: /opt/nextcloud/var
       register: nextcloud_state
@@ -142,8 +160,8 @@
           - name: nextcloud
             ipv4_address: "{{ docker_db }}"
         env:
-          MYSQL_ROOT_PASSWORD: "{{ admin_password }}"
-          MYSQL_PASSWORD: "{{ db_password }}"
+          MYSQL_ROOT_PASSWORD: "{{ admin_password_decrypt.decrypted_data.plaintext | b64decode }}"
+          MYSQL_PASSWORD: "{{ db_password_decrypt.decrypted_data.plaintext | b64decode }}"
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: nextcloud
           PUID: "{{ db_user.uid }}"
@@ -163,13 +181,13 @@
           - name: nextcloud
             ipv4_address: "{{ docker_nextcloud }}"
         env:
-          NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_password }}"
+          NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_password_decrypt.decrypted_data.plaintext | b64decode }}"
           NEXTCLOUD_ADMIN_USER: ncadmin
           NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
           OVERWRITEHOST: "{{ instance_public_ip }}"
           OVERWRITEPROTOCOL: https
-          MYSQL_PASSWORD: "{{ db_password }}"
+          MYSQL_PASSWORD: "{{ db_password_decrypt.decrypted_data.plaintext | b64decode }}"
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: nextcloud
           MYSQL_HOST: "{{ docker_db }}"
@@ -202,6 +220,20 @@
         purge_networks: yes
         restart_policy: "always"
 
+    - name: iptables accept HTTPS
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: '443'
+        ctstate: 'NEW'
+        jump: ACCEPT
+        action: insert
+        rule_num: '2'
+
+    - name: iptables Persistent
+      shell: |
+        iptables-save
+
     - name: nextcloud s3 storage (clear)
       file:
         path: /opt/nextcloud-s3-storage.sh
@@ -227,7 +259,7 @@
         - "if [ $? -ne 0 ]"
         - "then"
         - "  echo 'Creating S3 storage in Nextcloud'"
-        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ oci_storage_bucketname }}-data -c hostname={{ oci_storage_namespace }}.compat.objectstorage.{{ oci_region }}.oraclecloud.com -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
         - "else"
         - "  echo 'S3 storage exists, skipping.'"
         - "fi"
@@ -250,7 +282,7 @@
 
     - name: nextcloud to cloud storage playbook (clear)
       file:
-        path: /opt/nextcloud-to-cloudstorage.yml
+        path: /opt/nextcloud-to-backup.yml
         state: absent
 
     - name: nextcloud to cloud storage playbook (set)
@@ -266,6 +298,8 @@
         - "- name: nextcloud-to-cloudstorage.yml"
         - "  hosts: localhost"
         - "  gather_facts: false"
+        - "  collections:"
+        - "    - oracle.oci"
         - "  tasks:"
         - "  "
         - "    - name: archive nextcloud locally"
@@ -280,15 +314,13 @@
         - "        - nextcloud"
         - "        - nextcloud_db"
         - "   "
-        - "    - name: upload nextcloud archive to s3"
-        - "      aws_s3:"
-        - "        mode: put"
-        - "        bucket: \"{{ s3_bucket }}\""
-        - "        object: \"nextcloud/{{ item }}_backup.tar.gz\""
+        - "    - name: upload nextcloud archive to storage"
+        - "      oci_object_storage_object:"
+        - "        auth_type: \"instance_principal\""
+        - "        namespace_name: \"{{ oci_storage_namespace }}\""
+        - "        bucket_name: \"{{ oci_storage_bucketname }}\""
+        - "        object_name: \"nextcloud/{{ item }}_backup.tar.gz\""
         - "        src: \"/opt/{{ item }}_backup.tar.gz\""
-        - "        encrypt: yes"
-        - "        encryption_mode: aws:kms"
-        - "        encryption_kms_key_id: \"{{ kms_key_id }}\""
         - "      with_items: "
         - "        - nextcloud "
         - "        - nextcloud_db "
@@ -303,11 +335,9 @@
         block: |
           [Unit]
           Description=Archives and copies to cloud storage
-          
           [Timer]
           OnUnitActiveSec=12h
           Unit=nextcloud-to-cloudstorage.service
-          
           [Install]
           WantedBy=multi-user.target
 
@@ -322,12 +352,10 @@
           [Unit]
           Description=Archives and copies to cloud storage
           After=network.target
-          
           [Service]
           ExecStart=/usr/local/bin/ansible-playbook /opt/nextcloud-to-cloudstorage.yml
           Type=simple
           Restart=no
-          
           [Install]
           WantedBy=multi-user.target
 
