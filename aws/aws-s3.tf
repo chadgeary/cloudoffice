@@ -13,6 +13,14 @@ resource "aws_s3_bucket" "nc-bucket" {
       }
     }
   }
+  lifecycle_rule {
+    id                    = "${var.name_prefix}-backup-lifecycle"
+    enabled               = true
+    prefix                = "nextcloud/"
+    noncurrent_version_expiration {
+      days                  = 7
+    }
+  }
   force_destroy           = true
   policy                  = <<POLICY
 {

@@ -23,7 +23,7 @@ resource "oci_identity_policy" "nc-id-storageobject-policy" {
   compartment_id          = data.oci_identity_compartment.nc-root-compartment.id
   name                    = "${var.nc_prefix}-id-storageobject-policy"
   description             = "Identity Policy for objectstorage service"
-  statements              = ["Allow service objectstorage-${var.oci_region} to use keys in compartment id ${oci_identity_compartment.nc-compartment.id} where target.vault.id='${oci_kms_vault.nc-kms-storage-vault.id}'"]
+  statements              = ["Allow service objectstorage-${var.oci_region} to use keys in compartment id ${oci_identity_compartment.nc-compartment.id} where target.vault.id='${oci_kms_vault.nc-kms-storage-vault.id}'","Allow service objectstorage-${var.oci_region} to manage object-family in compartment id ${oci_identity_compartment.nc-compartment.id}"]
 }
 
 resource "oci_identity_group" "nc-bucket-group" {

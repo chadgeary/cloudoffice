@@ -21,3 +21,20 @@ resource "oci_objectstorage_bucket" "nc-bucket-data" {
   storage_tier            = "Standard"
   versioning              = "Enabled"
 }
+
+resource "oci_objectstorage_object_lifecycle_policy" "nc-bucket-lifecycle" {
+  bucket                  = oci_objectstorage_bucket.nc-bucket.name
+  namespace               = data.oci_objectstorage_namespace.nc-bucket-namespace.namespace
+  rules {
+    action                  = "DELETE"
+    is_enabled              = "true"
+    name                    = "${var.nc_prefix} lifecycle policy"
+    object_name_filter {
+      inclusion_prefixes      = ["nextcloud/"]
+    }
+    target                  = "previous-object-versions"
+    time_amount             = 7
+    time_unit               = "DAYS"
+  }
+  depends_on              = [oci_identity_policy.nc-id-storageobject-policy]
+}
