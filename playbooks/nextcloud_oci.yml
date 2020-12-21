@@ -118,17 +118,6 @@
         - httpd-ssl.conf
         - httpd.conf
 
-    - name: secure proxy to pihole confs
-      template:
-        src: "{{ item }}"
-        dest: "/opt/webproxy/{{ item }}"
-        owner: root
-        group: root
-        mode: 0444
-      with_items:
-        - httpd-ssl.conf
-        - httpd.conf
-
     - name: fetch decrypt admin pass
       oci_key_management_decrypted_data:
         auth_type: "instance_principal"
