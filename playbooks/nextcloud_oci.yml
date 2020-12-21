@@ -180,7 +180,7 @@
         auth_type: "instance_principal"
         namespace_name: "{{ oci_storage_namespace }}"
         bucket_name: "{{ oci_storage_bucketname }}"
-        object_name: "nextcloud/nextcloud__db_backup.tar.gz"
+        object_name: "nextcloud/nextcloud_db_backup.tar.gz"
         dest: "/opt/nextcloud_db_backup.tar.gz"
       ignore_errors: True
 
