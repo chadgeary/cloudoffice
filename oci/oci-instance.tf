@@ -18,10 +18,13 @@ data "template_file" "nc-user-data" {
     docker_webproxy = var.docker_webproxy
     admin_password_cipher = oci_kms_encrypted_data.nc-kms-nc-admin-secret.ciphertext
     db_password_cipher = oci_kms_encrypted_data.nc-kms-nc-db-secret.ciphertext
+    bucket_user_key_cipher = oci_kms_encrypted_data.nc-kms-bucket-user-key-secret.ciphertext
+    bucket_user_id = oci_identity_customer_secret_key.nc-bucker-user-key.id
     oci_kms_endpoint = oci_kms_vault.nc-kms-storage-vault.crypto_endpoint
     oci_kms_keyid = oci_kms_key.nc-kms-storage-key.id
     oci_storage_namespace = data.oci_objectstorage_namespace.nc-bucket-namespace.namespace
     oci_storage_bucketname = "${var.nc_prefix}-bucket"
+    oci_region = var.oci_region
     oci_root_compartment = var.oci_root_compartment
   }
 }
@@ -47,5 +50,5 @@ resource "oci_core_instance" "nc-instance" {
     ssh_authorized_keys       = var.ssh_key
     user_data                 = base64encode(data.template_file.nc-user-data.rendered)
   }
-  depends_on                = [oci_identity_policy.nc-id-storage-policy,oci_identity_policy.nc-id-disk-policy]
+  depends_on                = [oci_identity_policy.nc-id-instance-policy,oci_identity_policy.nc-id-bucket-policy,oci_identity_policy.nc-id-disk-policy]
 } 

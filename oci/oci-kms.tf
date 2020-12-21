@@ -27,6 +27,12 @@ resource "oci_kms_encrypted_data" "nc-kms-nc-db-secret" {
   plaintext               = base64encode(var.db_password)
 }
 
+resource "oci_kms_encrypted_data" "nc-kms-bucket-user-key-secret" {
+  crypto_endpoint         = oci_kms_vault.nc-kms-storage-vault.crypto_endpoint
+  key_id                  = oci_kms_key.nc-kms-storage-key.id
+  plaintext               = base64encode(oci_identity_customer_secret_key.nc-bucker-user-key.key)
+}
+
 resource "oci_kms_vault" "nc-kms-disk-vault" {
   compartment_id          = oci_identity_compartment.nc-compartment.id
   display_name            = "${var.nc_prefix}-disk-vault-${random_string.nc-random.result}"
