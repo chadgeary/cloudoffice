@@ -228,6 +228,7 @@
         - "then"
         - "  echo 'Creating S3 storage in Nextcloud'"
         - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:option 1 enable_sharing true"
         - "else"
         - "  echo 'S3 storage exists, skipping.'"
         - "fi"
