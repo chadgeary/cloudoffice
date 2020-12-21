@@ -164,7 +164,7 @@
 
     - name: Determine nextcloud state
       stat:
-        path: /opt/nextcloud/var
+        path: /opt/nextcloud/var/www/html/data/ncadmin
       register: nextcloud_state
 
     - name: unarchive backup if dir not exists
@@ -173,6 +173,30 @@
         dest: /opt/
         remote_src: yes
       when: nextcloud_state.stat.exists|bool == False
+      ignore_errors: True
+
+    - name: get db backup from storage if exists
+      oci_object_storage_object:
+        auth_type: "instance_principal"
+        namespace_name: "{{ oci_storage_namespace }}"
+        bucket_name: "{{ oci_storage_bucketname }}"
+        object_name: "nextcloud/nextcloud__db_backup.tar.gz"
+        dest: "/opt/nextcloud_db_backup.tar.gz"
+      ignore_errors: True
+
+    - name: Determine nextcloud db state
+      stat:
+        path: /opt/nextcloud_db/databases/nextcloud
+      register: nextcloud_db_state
+
+    - name: unarchive db backup if dir not exists
+      unarchive:
+        src: /opt/nextcloud_db_backup.tar.gz
+        dest: /opt/
+        remote_src: yes
+        owner: nextclouddb
+        group: nextclouddb
+      when: nextcloud_db_state.stat.exists|bool == False
       ignore_errors: True
 
     - name: docker network

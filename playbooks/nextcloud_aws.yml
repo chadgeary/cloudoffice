@@ -125,6 +125,29 @@
       when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
 
+    - name: get db backup from s3 if exists
+      aws_s3:
+        mode: get
+        bucket: "{{ s3_bucket }}"
+        object: "/nextcloud/nextcloud_db_backup.tar.gz"
+        dest: "/opt/nextcloud_db_backup.tar.gz"
+      ignore_errors: True
+
+    - name: Determine nextcloud db state
+      stat:
+        path: /opt/nextcloud_db/databases/nextcloud
+      register: nextcloud_db_state
+
+    - name: unarchive db backup if dir not exists
+      unarchive:
+        src: /opt/nextcloud_db_backup.tar.gz
+        dest: /opt/
+        remote_src: yes
+        owner: nextclouddb
+        group: nextclouddb
+      when: nextcloud_db_state.stat.exists|bool == False
+      ignore_errors: True
+
     - name: docker network
       docker_network:
         name: nextcloud
