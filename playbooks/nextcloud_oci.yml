@@ -48,6 +48,30 @@
         create_home: False
       register: db_user
 
+    - name: get oci metadata
+      uri:
+        url: http://169.254.169.254/opc/v2/vnics/
+        headers:
+          Authorization: "Bearer Oracle"
+      register: oci_vnic_metadata
+
+    - name: get oci private ip facts
+      oci_network_private_ip_facts:
+        auth_type: "instance_principal"
+        vnic_id: "{{ oci_vnic_metadata.json[0].vnicId }}"
+        tenancy: "{{ oci_root_compartment }}"
+      register: private_ip_data
+
+    - name: get oci public ip facts
+      oci_network_public_ip_facts:
+        auth_type: "instance_principal"
+        private_ip_id: "{{ private_ip_data.private_ips[0].id }}"
+      register: public_ip_data
+
+    - name: set public ip fact for webproxy
+      set_fact:
+        instance_public_ip: "{{ public_ip_data.public_ips[0].ip_address }}"
+
     - name: various container directories - application
       file:
         path: "{{ item }}"
