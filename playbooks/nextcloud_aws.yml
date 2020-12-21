@@ -57,11 +57,11 @@
       with_items:
         - /opt/nextcloud
         - /opt/nextcloud/var
-        - /opt/nextcloud/var/html
-        - /opt/nextcloud/var/html/custom_apps
-        - /opt/nextcloud/var/html/config
-        - /opt/nextcloud/var/html/data
-        - /opt/nextcloud/var/themes
+        - /opt/nextcloud/var/www
+        - /opt/nextcloud/var/www/html
+        - /opt/nextcloud/var/www/html/custom_apps
+        - /opt/nextcloud/var/www/html/config
+        - /opt/nextcloud/var/www/html/data
 
     - name: various container directories - webproxy
       file:
