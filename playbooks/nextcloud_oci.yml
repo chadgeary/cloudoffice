@@ -105,7 +105,7 @@
         group: "{{ db_user.group }}"
         mode: '0750'
       with_items:
-        - /opt/webproxy_db
+        - /opt/nextcloud_db
 
     - name: secure web proxy
       template:

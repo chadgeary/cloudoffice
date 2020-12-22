@@ -81,7 +81,7 @@
         group: "{{ db_user.group }}"
         mode: '0750'
       with_items:
-        - /opt/webproxy_db
+        - /opt/nextcloud_db
 
     - name: secure web proxy
       template:
@@ -114,7 +114,7 @@
 
     - name: Determine nextcloud state
       stat:
-        path: /opt/nextcloud/var
+        path: /opt/nextcloud/var/www/html/data/ncadmin
       register: nextcloud_state
 
     - name: unarchive backup if dir not exists
@@ -251,7 +251,7 @@
         - "then"
         - "  echo 'Creating S3 storage in Nextcloud'"
         - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
-        - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage \|/ {a=$2}END{print a}')"
+        - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
         - "  echo 'S3 storage exists, skipping.'"
@@ -295,8 +295,8 @@
         - "  "
         - "    - name: archive nextcloud locally"
         - "      archive:"
-        - "        path: \"/opt/{{ item }}\""
-        - "        dest: \"/opt/{{ item }}_backup.tar.gz\""
+        - "        path: \"/opt/{{ '{{ item }}' }}\""
+        - "        dest: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        format: gz"
         - "        owner: root"
         - "        group: root"
@@ -309,8 +309,8 @@
         - "      aws_s3:"
         - "        mode: put"
         - "        bucket: \"{{ s3_bucket }}\""
-        - "        object: \"nextcloud/{{ item }}_backup.tar.gz\""
-        - "        src: \"/opt/{{ item }}_backup.tar.gz\""
+        - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
+        - "        src: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        encrypt: yes"
         - "        encryption_mode: aws:kms"
         - "        encryption_kms_key_id: \"{{ kms_key_id }}\""
