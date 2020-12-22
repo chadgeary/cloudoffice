@@ -13,7 +13,7 @@ kms_manager = "some_username"
 ## UNCOMMON ##
 # aws region / instance size
 aws_region = "us-east-1"
-instance_type = "t3a.small"
+instance_type = "t3a.micro"
 
 # The Ubuntu AMI name string, these are occasionally updated with a new date - replace us-east-1 with your region, then run the command:
 # AWS_REGION=us-east-1 && ~/.local/bin/aws ec2 describe-images --region $AWS_REGION --owners 099720109477 --filters 'Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*' 'Name=state,Values=available' --query 'sort_by(Images, &CreationDate)[-1].Name'
