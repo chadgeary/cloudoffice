@@ -18,7 +18,7 @@ EOM
 # Create systemd timer unit file
 tee /etc/systemd/system/nextcloud-ansible-state.timer << EOM
 [Unit]
-Description=Starts NiFi after boot.
+Description=Starts nextcloud ansible state playbook 1min after boot
 
 [Timer]
 OnBootSec=1min
