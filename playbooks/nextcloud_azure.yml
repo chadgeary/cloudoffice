@@ -281,7 +281,7 @@
         - "if [ $? -ne 0 ]"
         - "then"
         - "  echo 'Creating S3 storage in Nextcloud'"
-        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket\={{ nc_prefix }}-storage-container-data -c hostname\={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key=\{{ az_storage_account_name }} -c secret=\{{ az_storage_key.secrets[0].secret }} cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ nc_prefix }}-storage-container-data -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key={{ az_storage_account_name }} -c secret={{ az_storage_key.secrets[0].secret }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
