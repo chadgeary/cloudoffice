@@ -1,0 +1,419 @@
+---
+- name: nextcloud - amd64 azure variant
+  hosts: localhost
+  collections:
+    - azure.azcollection
+  gather_facts: true
+  become: true
+  tasks:
+
+    - name: required packages
+      apt:
+        pkg:
+          - docker.io
+          - libcap2-bin
+          - python3-pip
+          - ssl-cert
+        state: latest
+        update_cache: yes
+
+    - name: docker python packages
+      pip:
+        name:
+          - docker
+        executable: /usr/bin/pip3
+        state: latest
+
+    - name: IP Forwarding enable/persist
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+        sysctl_set: yes
+        sysctl_file: /etc/sysctl.conf
+
+    - name: docker service started/enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: True
+
+    - name: db user
+      user:
+        name: nextclouddb
+        shell: /bin/bash
+        create_home: False
+      register: db_user
+
+    - name: various container directories - application
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: www-data
+        mode: '0750'
+      with_items:
+        - /opt/nextcloud
+        - /opt/nextcloud/var
+        - /opt/nextcloud/var/www
+        - /opt/nextcloud/var/www/html
+        - /opt/nextcloud/var/www/html/custom_apps
+        - /opt/nextcloud/var/www/html/config
+        - /opt/nextcloud/var/www/html/data
+
+    - name: various container directories - webproxy
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0750'
+      with_items:
+        - /opt/webproxy
+
+    - name: various container directories - db
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ db_user.name }}"
+        group: "{{ db_user.group }}"
+        mode: '0750'
+      with_items:
+        - /opt/nextcloud_db
+
+    - name: secure proxy to pihole confs
+      template:
+        src: "{{ item }}"
+        dest: "/opt/webproxy/{{ item }}"
+        owner: root
+        group: root
+        mode: 0444
+      with_items:
+        - httpd-ssl.conf
+        - httpd.conf
+
+    - name: Get admin_password from Azure Vault Secret
+      azure_rm_keyvaultsecret_info:
+        auth_source: msi
+        vault_uri: "https://{{ nc_prefix }}-secret-{{ nc_suffix }}.vault.azure.net"
+        name: "{{ nc_prefix }}-admin-secret"
+        version: "current"
+      register: admin_password
+
+    - name: Get db_password from Azure Vault Secret
+      azure_rm_keyvaultsecret_info:
+        auth_source: msi
+        vault_uri: "https://{{ nc_prefix }}-secret-{{ nc_suffix }}.vault.azure.net"
+        name: "{{ nc_prefix }}-db-secret"
+        version: "current"
+      register: db_password
+
+    - name: Get storage key from Azure Vault Secret
+      azure_rm_keyvaultsecret_info:
+        auth_source: msi
+        vault_uri: "https://{{ nc_prefix }}-secret-{{ nc_suffix }}.vault.azure.net"
+        name: "{{ nc_prefix }}-storage-secret"
+        version: "current"
+      register: az_storage_key
+
+    - name: Get nextcloud backup from Azure storage if exists
+      azure_rm_storageblob:
+        auth_source: msi
+        resource_group: "{{ nc_prefix }}-resourcegroup"
+        storage_account_name: "{{ nc_prefix }}store{{ nc_suffix }}"
+        container: "{{ nc_prefix }}-storage-container"
+        dest: "/opt/nextcloud_backup.tar.gz"
+        blob: "nextcloud/nextcloud_backup.tar.gz"
+      ignore_errors: True
+
+    - name: Determine nextcloud state
+      stat:
+        path: /opt/nextcloud/var/www/html/data/ncadmin
+      register: nextcloud_state
+
+    - name: unarchive backup if dir not exists
+      unarchive:
+        src: /opt/nextcloud_backup.tar.gz
+        dest: /opt/
+        remote_src: yes
+      when: nextcloud_state.stat.exists|bool == False
+      ignore_errors: True
+
+    - name: Get nextcloud backup from Azure storage if exists
+      azure_rm_storageblob:
+        auth_source: msi
+        resource_group: "{{ nc_prefix }}-resourcegroup"
+        storage_account_name: "{{ nc_prefix }}store{{ nc_suffix }}"
+        container: "{{ nc_prefix }}-storage-container"
+        dest: "/opt/nextcloud_db_backup.tar.gz"
+        blob: "nextcloud/nextcloud_db_backup.tar.gz"
+      ignore_errors: True
+
+    - name: Determine nextcloud db state
+      stat:
+        path: /opt/nextcloud_db/databases/nextcloud
+      register: nextcloud_db_state
+
+    - name: unarchive db backup if dir not exists
+      unarchive:
+        src: /opt/nextcloud_db_backup.tar.gz
+        dest: /opt/
+        remote_src: yes
+        owner: nextclouddb
+        group: nextclouddb
+      when: nextcloud_db_state.stat.exists|bool == False
+      ignore_errors: True
+
+    - name: docker network
+      docker_network:
+        name: nextcloud
+        driver: bridge
+        ipam_config:
+          - subnet: "{{ docker_network }}/24"
+            gateway: "{{ docker_gw }}"
+
+    - name: db container
+      docker_container:
+        name: nextcloud_database
+        hostname: nextclouddb
+        image: linuxserver/mariadb:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_db }}"
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ admin_password.secrets[0].secret }}"
+          MYSQL_PASSWORD: "{{ db_password.secrets[0].secret }}"
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: nextcloud
+          PUID: "{{ db_user.uid }}"
+          PGID: "{{ db_user.group }}"
+        volumes:
+          - /opt/nextcloud_db:/config:rw
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+
+    - name: nextcloud container
+      docker_container:
+        name: nextcloud_application
+        hostname: nextcloudapp
+        image: nextcloud:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_nextcloud }}"
+        env:
+          NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_password.secrets[0].secret }}"
+          NEXTCLOUD_ADMIN_USER: ncadmin
+          NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
+          TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
+          OVERWRITEHOST: "{{ instance_public_ip }}"
+          OVERWRITEPROTOCOL: https
+          MYSQL_PASSWORD: "{{ db_password.secrets[0].secret }}"
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: nextcloud
+          MYSQL_HOST: "{{ docker_db }}"
+        volumes:
+          - /opt/nextcloud/var/www/html:/var/www/html:rw
+          - /opt/nextcloud/var/www/html/custom_apps:/var/www/html/custom_apps:rw
+          - /opt/nextcloud/var/www/html/config:/var/www/html/config:rw
+          - /opt/nextcloud/var/www/html/data:/var/www/html/data:rw
+          - /opt/nextcloud/var/www/html/themes:/var/www/html/themes:rw
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+
+    - name: web proxy container
+      docker_container:
+        name: nextcloud_web_proxy
+        hostname: nextcloudweb
+        image: httpd:2.4
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_webproxy }}"
+        ports:
+          - "443:443"
+        volumes:
+          - /opt/webproxy/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf:ro
+          - /opt/webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/usr/local/apache2/conf/server.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+
+    - name: azure storage gateway container
+      docker_container:
+        name: nextcloud_storage_gw
+        image: minio/minio:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_storagegw }}"
+        env:
+          MINIO_ACCESS_KEY: "{{ az_storage_account_name }}"
+          MINIO_SECRET_KEY: "{{ az_storage_key.secrets[0].secret }}"
+        command: "gateway azure"
+        pull: yes
+        purge_networks: yes
+        restart_policy: always
+
+    - name: nextcloud s3 storage (clear)
+      file:
+        path: /opt/nextcloud-s3-storage.sh
+        state: absent
+
+    - name: nextcloud s3 storage (set)
+      lineinfile:
+        path: /opt/nextcloud-s3-storage.sh
+        create: yes
+        owner: root
+        group: root
+        mode: '0500'
+        line: "{{ item }}"
+      with_items:
+        - "#!/bin/bash"
+        - "# ensure files_external is enabled"
+        - "docker exec --user www-data nextcloud_application php occ app:enable files_external"
+        - " "
+        - "# check bucket against existing storage"
+        - "docker exec --user www-data nextcloud_application php occ files_external:list | grep --quiet 'cloud-storage'"
+        - "  "
+        - "# if doesn't exist, create"
+        - "if [ $? -ne 0 ]"
+        - "then"
+        - "  echo 'Creating S3 storage in Nextcloud'"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ nc_prefix }}-storage-container-data -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key={{ az_storage_account_name }} -c secret={{ az_storage_key.secrets[0].secret }} cloud-storage amazons3 amazons3::accesskey"
+        - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage \|/ {a=$2}END{print a}')"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
+        - "else"
+        - "  echo 'S3 storage exists, skipping.'"
+        - "fi"
+
+    - name: wait for nextcloud 200OK
+      uri:
+        url: "https://127.0.0.1:443/"
+        status_code: 200
+        validate_certs: no
+      register: nc_wait_result
+      until: nc_wait_result.status == 200
+      retries: 180
+      delay: 1
+
+    - name: nextcloud s3 storage (execute)
+      shell:
+        cmd: /opt/nextcloud-s3-storage.sh
+      args:
+        executable: /bin/bash
+
+    - name: Upload peer confs (Wireguard) to Azure Storage - conf
+      azure_rm_storageblob:
+        auth_source: msi
+        resource_group: "{{ nc_prefix }}-resourcegroup"
+        storage_account_name: "{{ nc_prefix }}store{{ nc_suffix }}"
+        container: "{{ nc_prefix }}-storage-container"
+        src: "/opt/wireguard/peer{{ item }}/peer{{ item }}.png"
+        blob: "wireguard/peer{{ item }}/peer{{ item }}.png"
+        content_type: 'image/png'
+      with_items:
+        - "{{ peer_count }}"
+
+    - name: Archive Wireguard
+      archive:
+        path: /opt/wireguard
+        dest: /opt/wireguard_backup.tar.gz
+        format: gz
+        owner: root
+        group: root
+        mode: '0640'
+
+    - name: Upload Wireguard backup to Azure Storage
+      azure_rm_storageblob:
+        auth_source: msi
+        resource_group: "{{ nc_prefix }}-resourcegroup"
+        storage_account_name: "{{ nc_prefix }}store{{ nc_suffix }}"
+        container: "{{ nc_prefix }}-storage-container"
+        src: "/opt/wireguard_backup.tar.gz"
+        blob: "wireguard/wireguard_backup.tar.gz"
+        content_type: 'application/gzip'
+
+    - name: Pihole to Backup Playbook Clear
+      file:
+        path: /opt/pihole-to-backup.yml
+        state: absent
+
+    - name: Pihole to Backup Playbook Set
+      lineinfile:
+        path: /opt/pihole-to-backup.yml
+        create: yes
+        owner: root
+        group: root
+        mode: '0640'
+        line: "{{ item }}"
+      with_items:
+        - "---"
+        - "- name: pihole-backup.yml"
+        - "  hosts: localhost"
+        - "  gather_facts: false"
+        - "  tasks:"
+        - "  "
+        - "    - name: archive pihole locally"
+        - "      archive:"
+        - "        path: /opt/pihole"
+        - "        dest: /opt/pihole_backup.tar.gz"
+        - "        format: gz"
+        - "        owner: root"
+        - "        group: root"
+        - "        mode: '0640'"
+        - "   "
+        - "    - name: upload pihole backup to azure storage"
+        - "      azure_rm_storageblob:"
+        - "        auth_source: msi"
+        - "        resource_group: \"{{ nc_prefix }}-resourcegroup\""
+        - "        storage_account_name: \"{{ nc_prefix }}store{{ nc_suffix }}\""
+        - "        container: \"{{ nc_prefix }}-storage-container\""
+        - "        src: \"/opt/pihole_backup.tar.gz\""
+        - "        blob: \"pihole/pihole_backup.tar.gz\""
+        - "        content_type: 'application/gzip'"
+
+    - name: pihole to backup timer
+      blockinfile:
+        path: /etc/systemd/system/pihole-to-backup.timer
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          [Unit]
+          Description=Archives and copies pihole to cloud storage
+          [Timer]
+          OnUnitActiveSec=12h
+          Unit=pihole-to-backup.service
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: pihole to s3 backup service
+      blockinfile:
+        path: /etc/systemd/system/pihole-to-backup.service
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          [Unit]
+          Description=Archives and copies pihole to backup
+          After=network.target
+          [Service]
+          ExecStart=/usr/local/bin/ansible-playbook /opt/pihole-to-backup.yml
+          Type=simple
+          Restart=no
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: pihole to backup systemd start/enable
+      systemd:
+        name: "pihole-to-backup.{{ item }}"
+        daemon_reload: yes
+        state: started
+        enabled: yes
+      with_items:
+        - service
+        - timer
