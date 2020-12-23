@@ -332,7 +332,7 @@
         - "        owner: root"
         - "        group: root"
         - "        mode: '0640'"
-        - "      with_items: "
+        - "      with_items:"
         - "        - nextcloud"
         - "        - nextcloud_db"
         - "   "
