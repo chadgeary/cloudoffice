@@ -135,7 +135,7 @@ Edit the vars file (aws.tfvars) to customize the deployment, especially:
 # db_password
 # password set on database for nextcloud application
 
-# instance_key
+# ssh_key
 # a public SSH key for SSH access to the instance via user `ubuntu`.
 # cat ~/.ssh/id_rsa.pub
 

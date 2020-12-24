@@ -55,7 +55,7 @@ git pull
 # Change to playbooks directory
 cd playbooks/
 # Execute playbook
-ansible-playbook nextcloud_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip}' >> /var/log/nextcloud.log
+ansible-playbook nextcloud_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip} az_storage_account_name=${az_storage_account_name}' >> /var/log/nextcloud.log
 EOM
 
 # Start / Enable nextcloud-ansible-state

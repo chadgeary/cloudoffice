@@ -49,7 +49,7 @@ variable "instance_type" {
   description              = "The type of EC2 instance to deploy"
 }
 
-variable "instance_key" {
+variable "ssh_key" {
   type                     = string
   description              = "A public key for SSH access to instance(s)"
 }

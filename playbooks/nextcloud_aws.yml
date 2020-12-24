@@ -228,14 +228,14 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
-    - name: nextcloud s3 storage (clear)
+    - name: nextcloud storage (clear)
       file:
-        path: /opt/nextcloud-s3-storage.sh
+        path: /opt/nextcloud-storage.sh
         state: absent
 
-    - name: nextcloud s3 storage (set)
+    - name: nextcloud storage (set)
       lineinfile:
-        path: /opt/nextcloud-s3-storage.sh
+        path: /opt/nextcloud-storage.sh
         create: yes
         owner: root
         group: root
@@ -252,12 +252,12 @@
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  echo 'Creating S3 storage in Nextcloud'"
+        - "  echo 'Creating cloud storage in Nextcloud'"
         - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
-        - "  echo 'S3 storage exists, skipping.'"
+        - "  echo 'cloud storage exists, skipping.'"
         - "fi"
 
     - name: wait for nextcloud 200OK
@@ -270,20 +270,20 @@
       retries: 180
       delay: 1
 
-    - name: nextcloud s3 storage (execute)
+    - name: nextcloud storage (execute)
       shell:
-        cmd: /opt/nextcloud-s3-storage.sh
+        cmd: /opt/nextcloud-storage.sh
       args:
         executable: /bin/bash
 
-    - name: nextcloud to cloud storage playbook (clear)
+    - name: nextcloud backup playbook (clear)
       file:
-        path: /opt/nextcloud-to-cloudstorage.yml
+        path: /opt/nextcloud-backup.yml
         state: absent
 
-    - name: nextcloud to cloud storage playbook (set)
+    - name: nextcloud backup playbook (set)
       lineinfile:
-        path: /opt/nextcloud-to-cloudstorage.yml
+        path: /opt/nextcloud-backup.yml
         create: yes
         owner: root
         group: root
@@ -291,7 +291,7 @@
         line: "{{ item }}"
       with_items:
         - "---"
-        - "- name: nextcloud-to-cloudstorage.yml"
+        - "- name: nextcloud-backup.yml"
         - "  hosts: localhost"
         - "  gather_facts: false"
         - "  tasks:"
@@ -308,7 +308,7 @@
         - "        - nextcloud"
         - "        - nextcloud_db"
         - "   "
-        - "    - name: upload nextcloud archive to s3"
+        - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
         - "        bucket: \"{{ s3_bucket }}\""
@@ -321,47 +321,47 @@
         - "        - nextcloud "
         - "        - nextcloud_db "
 
-    - name: nextcloud to cloud storage timer
+    - name: nextcloud backup systemd timer
       blockinfile:
-        path: /etc/systemd/system/nextcloud-to-cloudstorage.timer
+        path: /etc/systemd/system/nextcloud-backup.timer
         create: yes
         owner: root
         group: root
         mode: '0644'
         block: |
           [Unit]
-          Description=Archives and copies to cloud storage
+          Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           
           [Timer]
           OnUnitActiveSec=12h
-          Unit=nextcloud-to-cloudstorage.service
+          Unit=nextcloud-backup.service
           
           [Install]
           WantedBy=multi-user.target
 
-    - name: nextcloud to cloud storage service
+    - name: nextcloud backup systemd service
       blockinfile:
-        path: /etc/systemd/system/nextcloud-to-cloudstorage.service
+        path: /etc/systemd/system/nextcloud-backup.service
         create: yes
         owner: root
         group: root
         mode: '0644'
         block: |
           [Unit]
-          Description=Archives and copies to cloud storage
+          Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           After=network.target
           
           [Service]
-          ExecStart=/usr/local/bin/ansible-playbook /opt/nextcloud-to-cloudstorage.yml
+          ExecStart=/usr/local/bin/ansible-playbook /opt/nextcloud-backup.yml
           Type=simple
           Restart=no
           
           [Install]
           WantedBy=multi-user.target
 
-    - name: nextcloud to cloud storage start/enable
+    - name: nextcloud backup start/enable
       systemd:
-        name: "nextcloud-to-cloudstorage.{{ item }}"
+        name: "nextcloud-backup.{{ item }}"
         daemon_reload: yes
         state: started
         enabled: yes

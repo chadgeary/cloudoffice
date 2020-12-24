@@ -4,7 +4,7 @@ admin_password = "changeme"
 db_password = "changeme2"
 
 # public ssh key for instance access
-instance_key = "ssh-rsa AAAAB3NzaC1ychange_me_change_me_change_me="
+ssh_key = "ssh-rsa AAAAB3NzaC1ychange_me_change_me_change_me="
 # ip range permitted access to instance SSH
 mgmt_cidr = "a.b.c.d/32"
 # an AWS IAM username (not root), creates/manages/owns encryption

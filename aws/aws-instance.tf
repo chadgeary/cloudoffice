@@ -1,7 +1,7 @@
 # Instance Key
 resource "aws_key_pair" "nc-instance-key" {
   key_name                = "nc-ssh-pub-key-${random_string.nc-random.result}"
-  public_key              = var.instance_key
+  public_key              = var.ssh_key
   tags                    = {
     Name                    = "nc-ssh-pub-key-${random_string.nc-random.result}"
   }
