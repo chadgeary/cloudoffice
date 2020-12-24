@@ -232,7 +232,7 @@
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
           OVERWRITEHOST: "{{ instance_public_ip }}"
           OVERWRITEPROTOCOL: https
-          MYSQL_PASSWORD: "{{ db_password.json.payload.data | b64decode }}"
+          MYSQL_PASSWORD: "{{ db_secret.json.payload.data | b64decode }}"
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: nextcloud
           MYSQL_HOST: "{{ docker_db }}"
