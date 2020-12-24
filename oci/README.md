@@ -1,5 +1,5 @@
 # Reference
-Nextcloud deployed automatically via Terraform+Ansible in AWS cloud.
+Nextcloud deployed automatically via Terraform+Ansible in Oracle (OCI) cloud.
 
 # Requirements
 - An Oracle cloud account.
@@ -142,8 +142,11 @@ tail -F /var/log/nextcloud.log
 Edit the vars file (oci.tfvars) to customize the deployment, especially:
 
 ```
-# ph_password
-# password to access the pihole webui
+# admin_password
+# password to access the webui, user is ncadmin
+
+# db_password
+# password used by nextcloud application to read/write to databases
 
 # ssh_key
 # A public SSH key for access to the compute instance via SSH, with user ubuntu.

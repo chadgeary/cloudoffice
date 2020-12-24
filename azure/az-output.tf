@@ -15,7 +15,7 @@ output "nc-output" {
   ssh ubuntu@${azurerm_public_ip.nc-public-ip.ip_address}
 
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
-  sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy
+  sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy nextcloud_storagegw
 
   # Update project
   cd /opt/git/nextcloud

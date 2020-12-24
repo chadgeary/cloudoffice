@@ -216,6 +216,7 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
+        container_default_behavior: "compatibility"
 
     - name: nextcloud container
       docker_container:
@@ -245,6 +246,7 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
+        container_default_behavior: "compatibility"
 
     - name: web proxy container
       docker_container:
@@ -264,6 +266,7 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
+        container_default_behavior: "compatibility"
 
     - name: iptables accept HTTPS
       iptables:
