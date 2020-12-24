@@ -17,5 +17,6 @@ resource "google_service_account_iam_policy" "nc-service-account-iam-policy" {
 }
 
 resource "google_storage_hmac_key" "nc-service-account-hmac" {
+  project                           = google_project.nc-project.project_id
   service_account_email             = google_service_account.nc-service-account.email
 }
