@@ -28,8 +28,8 @@ ssh_user = "ubuntu"
 project_url = "https://github.com/chadgeary/nextcloud"
 
 # Change if ip settings would interfere with existing networks, should all be within a /24
-docker_network = "172.18.0.0"
-docker_gw = "172.18.0.1"
-docker_nextcloud = "172.18.0.2"
-docker_db = "172.18.0.3"
-docker_webproxy = "172.18.0.4"
+docker_network = "172.18.1.0"
+docker_gw = "172.18.1.1"
+docker_nextcloud = "172.18.1.2"
+docker_db = "172.18.1.3"
+docker_webproxy = "172.18.1.4"
