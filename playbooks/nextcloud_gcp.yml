@@ -255,10 +255,6 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
-    - name: wait because gcp free tier is very slow
-      wait_for:
-        timeout: 120
-
     - name: nextcloud container
       docker_container:
         name: nextcloud_application
