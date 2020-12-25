@@ -262,7 +262,7 @@
 
     - name: wait for nextcloud 200OK
       uri:
-        url: "https://127.0.0.1:443/"
+        url: "https://127.0.0.1:443/login"
         status_code: 200
         validate_certs: no
       register: nc_wait_result
