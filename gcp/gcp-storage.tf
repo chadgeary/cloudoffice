@@ -11,7 +11,7 @@ resource "google_storage_bucket" "nc-bucket" {
     default_kms_key_name              = google_kms_crypto_key.nc-key-storage.id
   }
   versioning {
-    enabled                           = true
+    enabled                           = false
   }
   depends_on                        = [google_kms_crypto_key_iam_binding.nc-key-storage-binding]
   force_destroy                     = true
@@ -33,11 +33,8 @@ resource "google_storage_bucket" "nc-bucket-data" {
   name                              = "${var.nc_prefix}-bucket-data-${random_string.nc-random.result}"
   location                          = var.gcp_region
   project                           = google_project.nc-project.project_id
-  encryption {
-    default_kms_key_name              = google_kms_crypto_key.nc-key-storage.id
-  }
   versioning {
-    enabled                           = true
+    enabled                           = false
   }
   depends_on                        = [google_kms_crypto_key_iam_binding.nc-key-storage-binding]
   force_destroy                     = true

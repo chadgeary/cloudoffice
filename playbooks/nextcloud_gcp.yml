@@ -164,14 +164,25 @@
           x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
       register: storagegw_secret
 
-    - name: Set storage secret json file
+    - name: storage secret json (clear)
+      file:
+        path: /opt/storagegw/credentials.json
+        state: absent
+
+    - name: storage secret json (set)
       lineinfile:
         path: /opt/storagegw/credentials.json
-        create: yes
         owner: "{{ storagegw_user.name }}"
         group: "{{ storagegw_user.group }}"
         mode: '0440'
-        line: "{{ storage_key.json.payload.data | b64decode }}"
+        create: yes
+        line: "{{ storage_key.json.payload.data | b64decode | b64decode }}"
+
+    - name: storage secret json (format)
+      replace:
+        path: /opt/storagegw/credentials.json
+        regexp: "'"
+        replace: '"'
 
     - name: Get nextcloud backup from storage if exists
       uri:
@@ -388,7 +399,7 @@
         line: "{{ item }}"
       with_items:
         - "---"
-        - "- name: nextcloud-to-cloudstorage.yml"
+        - "- name: nextcloud-backup.yml"
         - "  hosts: localhost"
         - "  gather_facts: false"
         - "  collections:"
@@ -418,14 +429,14 @@
         - "     "
         - "    - name: upload nextcloud archive to storage"
         - "      uri: "
-        - "        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name="
+        - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name={{ '{{ item }}' }}_backup.tar.gz\""
         - "        timeout: 720"
         - "        method: POST"
-        - "        src: /opt/{{ '{{ item }}' }}_backup.tar.gz"
+        - "        src: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        remote_src: yes"
         - "        return_content: yes "
         - "        headers: "
-        - "          Authorization: Bearer {{ '{{' }} gcs_token_resp.json.access_token {{ '}}' }}"
+        - "          Authorization: \"Bearer {{ '{{ gcs_token_resp.json.access_token }}' }}\""
         - "          Content-Type: application/gzip"
         - "      with_items: "
         - "        - nextcloud "
@@ -443,7 +454,7 @@
           Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           [Timer]
           OnUnitActiveSec=12h
-          Unit=nextcloud-to-cloudstorage.service
+          Unit=nextcloud-backup.service
           [Install]
           WantedBy=multi-user.target
 
