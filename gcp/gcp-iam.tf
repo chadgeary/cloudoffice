@@ -16,7 +16,6 @@ resource "google_service_account_iam_policy" "nc-service-account-iam-policy" {
   policy_data                       = data.google_iam_policy.nc-service-account-iam-policy-data.policy_data
 }
 
-resource "google_storage_hmac_key" "nc-service-account-hmac" {
-  project                           = google_project.nc-project.project_id
-  service_account_email             = google_service_account.nc-service-account.email
+resource "google_service_account_key" "nc-service-account-key" {
+  service_account_id                = google_service_account.nc-service-account.name
 }

@@ -44,6 +44,13 @@
         create_home: False
       register: db_user
 
+    - name: storagegw user
+      user:
+        name: storagegw
+        shell: /bin/bash
+        create_home: False
+      register: storagegw_user
+
     - name: various container directories - application
       file:
         path: "{{ item }}"
@@ -68,6 +75,16 @@
         mode: '0750'
       with_items:
         - /opt/webproxy
+
+    - name: various container directories - storagegw
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ storagegw_user.name }}"
+        group: "{{ storagegw_user.group }}"
+        mode: '0750'
+      with_items:
+        - /opt/storagegw
 
     - name: various container directories - db
       file:
@@ -134,6 +151,27 @@
           Content-Type: application/json
           x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
       register: storage_key
+
+    - name: Get storage gateway secret from google secret manager
+      uri:
+        url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-storagegw-password/versions/latest:access
+        method: GET
+        remote_src: yes
+        return_content: yes
+        headers:
+          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
+          Content-Type: application/json
+          x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
+      register: storagegw_secret
+
+    - name: Set storage secret json file
+      lineinfile:
+        path: /opt/storagegw/credentials.json
+        create: yes
+        owner: "{{ storagegw_user.name }}"
+        group: "{{ storagegw_user.group }}"
+        mode: '0440'
+        line: "{{ storage_key.json.payload.data | b64decode }}"
 
     - name: Get nextcloud backup from storage if exists
       uri:
@@ -271,6 +309,26 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
+    - name: storage gateway container
+      docker_container:
+        name: nextcloud_storage_gw
+        image: minio/minio:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_storagegw }}"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: "/credentials.json"
+          MINIO_ACCESS_KEY: "storagegw"
+          MINIO_SECRET_KEY: "{{ storagegw_secret.json.payload.data | b64decode }}"
+        command: "gateway gcs {{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
+        user: "{{ storagegw_user.uid }}:{{ storagegw_user.group }}"
+        volumes:
+          - /opt/storagegw/credentials.json:/credentials.json:ro
+        pull: yes
+        purge_networks: yes
+        restart_policy: always
+        container_default_behavior: "compatibility"
+
     - name: nextcloud storage (clear)
       file:
         path: /opt/nextcloud-storage.sh
@@ -296,7 +354,7 @@
         - "if [ $? -ne 0 ]"
         - "then"
         - "  echo 'Creating cloud storage in Nextcloud'"
-        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ gcp_project_prefix }}-bucket-data-{{ gcp_project_suffix }} -c hostname=storage.googleapis.com -c port=443 -c region=auto -c use_ssl=true -c use_path_style=true -c key={{ bucket_user_id }} -c secret={{ storage_key.json.payload.data | b64decode }} cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ gcp_project_prefix }}-bucket-data-{{ gcp_project_suffix }} -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key=storagegw -c secret={{ storagegw_secret.json.payload.data | b64decode }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
@@ -364,13 +422,15 @@
         - "     "
         - "    - name: upload nextcloud archive to storage"
         - "      uri: "
-        - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=\""
+        - "        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name="
         - "        timeout: 720"
         - "        method: POST"
-        - "        src: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
+        - "        src: /opt/{{ '{{ item }}' }}_backup.tar.gz"
+        - "        remote_src: yes"
         - "        return_content: yes "
         - "        headers: "
-        - "          Authorization: \"Bearer {{ gcs_token_resp.json.access_token }}\""
+        - "          Authorization: Bearer {{ '{{' }} gcs_token_resp.json.access_token {{ '}}' }}"
+        - "          Content-Type: application/gzip"
         - "      with_items: "
         - "        - nextcloud "
         - "        - nextcloud_db "
