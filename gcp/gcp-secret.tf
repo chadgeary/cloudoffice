@@ -76,7 +76,7 @@ resource "google_secret_manager_secret" "nc-secret-storagegw-password" {
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-storagegw-password-version" {
-  secret                            = google_secret_manager_secret.nc-secret-storage-key.id
+  secret                            = google_secret_manager_secret.nc-secret-storagegw-password.id
   secret_data                       = random_password.nc-secret-storagegw-value.result
 }
 
@@ -103,5 +103,11 @@ resource "google_secret_manager_secret_iam_policy" "nc-service-account-db-secret
 resource "google_secret_manager_secret_iam_policy" "nc-service-account-storage-secret-iam-policy" {
   project                           = google_project.nc-project.project_id
   secret_id                         = google_secret_manager_secret.nc-secret-storage-key.secret_id
+  policy_data                       = data.google_iam_policy.nc-service-account-secret-data.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "nc-service-account-storagegw-secret-iam-policy" {
+  project                           = google_project.nc-project.project_id
+  secret_id                         = google_secret_manager_secret.nc-secret-storagegw-password.secret_id
   policy_data                       = data.google_iam_policy.nc-service-account-secret-data.policy_data
 }
