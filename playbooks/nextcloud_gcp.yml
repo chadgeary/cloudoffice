@@ -190,6 +190,7 @@
         force: yes
         owner: root
         group: root
+        mode: '0640'
         timeout: 120
         dest: /opt/nextcloud_backup.tar.gz
         headers:
@@ -215,6 +216,7 @@
         force: yes
         owner: root
         group: root
+        mode: '0640'
         timeout: 120
         dest: /opt/nextcloud_db_backup.tar.gz
         headers:
