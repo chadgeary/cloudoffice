@@ -186,7 +186,7 @@
 
     - name: Get nextcloud backup from storage if exists
       get_url:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud_backup.tar.gz
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_backup.tar.gz
         force: yes
         owner: root
         group: root
@@ -211,7 +211,7 @@
 
     - name: Get nextcloud backup db from storage if exists
       get_url:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud_db_backup.tar.gz
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_db_backup.tar.gz
         force: yes
         owner: root
         group: root
