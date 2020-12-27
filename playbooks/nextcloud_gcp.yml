@@ -185,13 +185,13 @@
         replace: '"'
 
     - name: Get nextcloud backup from storage if exists
-      uri:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_backup.tar.gz
+      get_url:
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud_backup.tar.gz
+        force: yes
+        owner: root
+        group: root
         timeout: 120
-        method: GET
         dest: /opt/nextcloud_backup.tar.gz
-        remote_src: yes
-        return_content: yes
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
       ignore_errors: True
@@ -210,13 +210,13 @@
       ignore_errors: True
 
     - name: Get nextcloud backup db from storage if exists
-      uri:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_db_backup.tar.gz
+      get_url:
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud_db_backup.tar.gz
+        force: yes
+        owner: root
+        group: root
         timeout: 120
-        method: GET
         dest: /opt/nextcloud_db_backup.tar.gz
-        remote_src: yes
-        return_content: yes
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
       ignore_errors: True
