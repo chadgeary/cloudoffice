@@ -26,6 +26,7 @@ resource "google_compute_instance" "nc-instance" {
     initialize_params {
       image                             = data.google_compute_image.nc-gcp-image.self_link
       type                              = "pd-standard"
+      size                              = var.disk_gb
     }
   }
   network_interface {

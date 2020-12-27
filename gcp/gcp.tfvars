@@ -20,6 +20,7 @@ gcp_image_project = "ubuntu-os-cloud"
 ## VERY UNCOMMON ##
 nc_prefix = "nextcloud"
 gcp_machine_type = "f1-micro"
+disk_gb = 30
 project_url = "https://github.com/chadgeary/nextcloud"
 gcp_project_services = ["serviceusage.googleapis.com","cloudkms.googleapis.com","storage-api.googleapis.com","secretmanager.googleapis.com"]
 ssh_user = "ubuntu"

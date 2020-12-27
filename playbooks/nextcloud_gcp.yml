@@ -429,7 +429,7 @@
         - "     "
         - "    - name: upload nextcloud archive to storage"
         - "      uri: "
-        - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name={{ '{{ item }}' }}_backup.tar.gz\""
+        - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        timeout: 720"
         - "        method: POST"
         - "        src: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""

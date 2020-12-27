@@ -40,6 +40,11 @@ variable "gcp_instanceip" {
   description              = "An IP within the gcp_cidr subnet for the GCP instance."
 }
 
+variable "disk_gb" {
+  type                     = number
+  description              = "Size of root disk volume in gigabytes"
+}
+
 variable "admin_password" {
   type                     = string
   description              = "Nextcloud admin password"
