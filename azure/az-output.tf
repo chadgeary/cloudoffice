@@ -23,6 +23,6 @@ output "nc-output" {
 
   # Re-apply Ansible playbook with custom variables
   cd playbooks/
-  ansible-playbook nextcloud_azure.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} instance_public_ip=${azurerm_public_ip.nc-public-ip.ip_address} nc_prefix=${var.nc_prefix} nc_suffix=${random_string.nc-random.result} az_storage_account_name=${azurerm_storage_account.nc-storage-account.name}'
+  ansible-playbook nextcloud_azure.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} instance_public_ip=${azurerm_public_ip.nc-public-ip.ip_address} nc_prefix=${var.nc_prefix} nc_suffix=${random_string.nc-random.result} az_storage_account_name=${azurerm_storage_account.nc-storage-account.name} project_directory=${var.project_directory} web_port=${var.web_port}'
   OUTPUT
 }
