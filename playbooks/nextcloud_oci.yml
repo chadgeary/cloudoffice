@@ -114,7 +114,7 @@
     - name: secure web proxy
       template:
         src: "{{ item }}"
-        dest: "{{ project_directory }}/webproxy/{{ item }}"
+        dest: "{{ project_directory }}/nextcloud_webproxy/{{ item }}"
         owner: root
         group: root
         mode: 0444
