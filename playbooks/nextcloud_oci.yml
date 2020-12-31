@@ -235,7 +235,7 @@
           NEXTCLOUD_ADMIN_USER: ncadmin
           NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
-          OVERWRITEHOST: "{{ instance_public_ip }}"
+          OVERWRITEHOST: "{{ instance_public_ip }}:{{ web_port }}"
           OVERWRITEPROTOCOL: https
           MYSQL_PASSWORD: "{{ db_password_decrypt.decrypted_data.plaintext | b64decode }}"
           MYSQL_DATABASE: nextcloud
