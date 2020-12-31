@@ -324,7 +324,7 @@
 
     - name: storage gateway container
       docker_container:
-        name: nextcloud_storage_gw
+        name: nextcloud_storagegw
         image: minio/minio:latest
         networks:
           - name: nextcloud

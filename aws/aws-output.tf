@@ -9,7 +9,7 @@ output "cloudblock-output" {
   ssh ubuntu@${aws_eip.nc-eip.public_ip}
   
   ## WebUI ##
-  https://${aws_eip.nc-eip.public_ip}/
+  https://${aws_eip.nc-eip.public_ip}:${var.web_port}/
   
   ## Update / Ansible Rerun ##
   # Move vars file to be untracked by git (one time command)
@@ -20,7 +20,7 @@ output "cloudblock-output" {
 
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
   ssh ubuntu@${aws_eip.nc-eip.public_ip}
-  sudo docker rm -f nextcloud web_proxy
+  sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy
   exit
   
   # Re-run terraform apply with your pvars file

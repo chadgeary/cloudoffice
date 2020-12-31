@@ -9,13 +9,13 @@ output "nc-output" {
   ssh ubuntu@${oci_core_instance.nc-instance.public_ip}
 
   ## WebUI ##
-  https://${oci_core_instance.nc-instance.public_ip}/
+  https://${oci_core_instance.nc-instance.public_ip}:${var.web_port}/
 
   ## Update / Ansible Rerun Instructions ##
   ssh ubuntu@${oci_core_instance.nc-instance.public_ip}
 
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
-  sudo docker rm -f nextcloud_db nextcloud_application nextcloud_webproxy
+  sudo docker rm -f nextcloud_database nextcloud_application nextcloud_webproxy
 
   # Update project
   cd /opt/git/nextcloud/

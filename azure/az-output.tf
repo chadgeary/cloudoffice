@@ -9,7 +9,7 @@ output "nc-output" {
   ssh ubuntu@${azurerm_public_ip.nc-public-ip.ip_address}
 
   ## WebUI ##
-  https://${azurerm_public_ip.nc-public-ip.ip_address}/
+  https://${azurerm_public_ip.nc-public-ip.ip_address}:${var.web_port}/
 
   ## Update Containers / Ansible Rerun Instructions ##
   ssh ubuntu@${azurerm_public_ip.nc-public-ip.ip_address}
