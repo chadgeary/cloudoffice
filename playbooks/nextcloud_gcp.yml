@@ -58,13 +58,13 @@
         owner: www-data
         mode: '0750'
       with_items:
-        - /opt/nextcloud
-        - /opt/nextcloud/var
-        - /opt/nextcloud/var/www
-        - /opt/nextcloud/var/www/html
-        - /opt/nextcloud/var/www/html/custom_apps
-        - /opt/nextcloud/var/www/html/config
-        - /opt/nextcloud/var/www/html/data
+        - "{{ project_directory }}/nextcloud_application"
+        - "{{ project_directory }}/nextcloud_application/var"
+        - "{{ project_directory }}/nextcloud_application/var/www"
+        - "{{ project_directory }}/nextcloud_application/var/www/html"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/custom_apps"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/config"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/data"
 
     - name: various container directories - webproxy
       file:
@@ -74,7 +74,7 @@
         group: root
         mode: '0750'
       with_items:
-        - /opt/webproxy
+        - "{{ project_directory }}/nextcloud_webproxy"
 
     - name: various container directories - storagegw
       file:
@@ -84,7 +84,7 @@
         group: "{{ storagegw_user.group }}"
         mode: '0750'
       with_items:
-        - /opt/storagegw
+        - "{{ project_directory }}/nextcloud_storagegw"
 
     - name: various container directories - db
       file:
@@ -94,12 +94,16 @@
         group: "{{ db_user.group }}"
         mode: '0750'
       with_items:
-        - /opt/nextcloud_db
+        - "{{ project_directory }}/nextcloud_database"
 
-    - name: secure proxy to pihole confs
+    - name: web_port if not defined
+      set_fact:
+        web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
+
+    - name: secure proxy confs
       template:
         src: "{{ item }}"
-        dest: "/opt/webproxy/{{ item }}"
+        dest: "/{{ project_directory }}/nextcloud_webproxy/{{ item }}"
         owner: root
         group: root
         mode: 0444
@@ -166,12 +170,12 @@
 
     - name: storage secret json (clear)
       file:
-        path: /opt/storagegw/credentials.json
+        path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         state: absent
 
     - name: storage secret json (set)
       lineinfile:
-        path: /opt/storagegw/credentials.json
+        path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         owner: "{{ storagegw_user.name }}"
         group: "{{ storagegw_user.group }}"
         mode: '0440'
@@ -180,58 +184,58 @@
 
     - name: storage secret json (format)
       replace:
-        path: /opt/storagegw/credentials.json
+        path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         regexp: "'"
         replace: '"'
 
     - name: Get nextcloud backup from storage if exists
       get_url:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_backup.tar.gz
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_application_backup.tar.gz
         force: yes
         owner: root
         group: root
         mode: '0640'
         timeout: 120
-        dest: /opt/nextcloud_backup.tar.gz
+        dest: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
       ignore_errors: True
 
     - name: Determine nextcloud state
       stat:
-        path: /opt/nextcloud/var/www/html/data/ncadmin
+        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
       register: nextcloud_state
 
     - name: unarchive backup if dir not exists
       unarchive:
-        src: /opt/nextcloud_backup.tar.gz
-        dest: /opt/
+        src: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
+        dest: "{{ project_directory }}/"
         remote_src: yes
       when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
 
     - name: Get nextcloud backup db from storage if exists
       get_url:
-        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_db_backup.tar.gz
+        url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_database_backup.tar.gz
         force: yes
         owner: root
         group: root
         mode: '0640'
         timeout: 120
-        dest: /opt/nextcloud_db_backup.tar.gz
+        dest: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
       ignore_errors: True
 
     - name: Determine nextcloud db state
       stat:
-        path: /opt/nextcloud_db/databases/nextcloud
+        path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
       register: nextcloud_db_state
 
     - name: unarchive db backup if dir not exists
       unarchive:
-        src: /opt/nextcloud_db_backup.tar.gz
-        dest: /opt/
+        src: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
+        dest: "{{ project_directory }}/"
         remote_src: yes
         owner: nextclouddb
         group: nextclouddb
@@ -262,7 +266,7 @@
           PUID: "{{ db_user.uid }}"
           PGID: "{{ db_user.group }}"
         volumes:
-          - /opt/nextcloud_db:/config:rw
+          - "{{ project_directory }}/nextcloud_database:/config:rw"
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -281,18 +285,18 @@
           NEXTCLOUD_ADMIN_USER: ncadmin
           NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
-          OVERWRITEHOST: "{{ instance_public_ip }}"
+          OVERWRITEHOST: "{{ instance_public_ip }}:{{ web_port }}"
           OVERWRITEPROTOCOL: https
           MYSQL_PASSWORD: "{{ db_secret.json.payload.data | b64decode }}"
           MYSQL_DATABASE: nextcloud
           MYSQL_USER: nextcloud
           MYSQL_HOST: "{{ docker_db }}"
         volumes:
-          - /opt/nextcloud/var/www/html:/var/www/html:rw
-          - /opt/nextcloud/var/www/html/custom_apps:/var/www/html/custom_apps:rw
-          - /opt/nextcloud/var/www/html/config:/var/www/html/config:rw
-          - /opt/nextcloud/var/www/html/data:/var/www/html/data:rw
-          - /opt/nextcloud/var/www/html/themes:/var/www/html/themes:rw
+          - "{{ project_directory }}/nextcloud_application/var/www/html:/var/www/html:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/custom_apps:/var/www/html/custom_apps:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/config:/var/www/html/config:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/data:/var/www/html/data:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/themes:/var/www/html/themes:rw"
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -300,17 +304,17 @@
 
     - name: web proxy container
       docker_container:
-        name: nextcloud_web_proxy
+        name: nextcloud_webproxy
         hostname: nextcloudweb
         image: httpd:2.4
         networks:
           - name: nextcloud
             ipv4_address: "{{ docker_webproxy }}"
         ports:
-          - "443:443"
+          - "{{ web_port }}:{{ web_port }}"
         volumes:
-          - /opt/webproxy/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf:ro
-          - /opt/webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
+          - "{{ project_directory }}/nextcloud_webproxy/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf:ro"
+          - "{{ project_directory }}/nextcloud_webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro"
           - /etc/ssl/certs/ssl-cert-snakeoil.pem:/usr/local/apache2/conf/server.crt:ro
           - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
         pull: yes
@@ -332,7 +336,7 @@
         command: "gateway gcs {{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
         user: "{{ storagegw_user.uid }}:{{ storagegw_user.group }}"
         volumes:
-          - /opt/storagegw/credentials.json:/credentials.json:ro
+          - "{{ project_directory }}/nextcloud_storagegw/credentials.json:/credentials.json:ro"
         pull: yes
         purge_networks: yes
         restart_policy: always
@@ -340,12 +344,12 @@
 
     - name: nextcloud storage (clear)
       file:
-        path: /opt/nextcloud-storage.sh
+        path: "{{ project_directory }}/nextcloud-storage.sh"
         state: absent
 
     - name: nextcloud storage (set)
       lineinfile:
-        path: /opt/nextcloud-storage.sh
+        path: "{{ project_directory }}/nextcloud-storage.sh"
         create: yes
         owner: root
         group: root
@@ -372,7 +376,7 @@
 
     - name: wait for nextcloud 200OK
       uri:
-        url: "https://127.0.0.1:443/login"
+        url: "https://127.0.0.1:{{ web_port }}/login"
         status_code: 200
         validate_certs: no
       register: nc_wait_result
@@ -382,18 +386,18 @@
 
     - name: nextcloud storage (execute)
       shell:
-        cmd: /opt/nextcloud-storage.sh
+        cmd: "{{ project_directory }}/nextcloud-storage.sh"
       args:
         executable: /bin/bash
 
     - name: nextcloud backup playbook (clear)
       file:
-        path: /opt/nextcloud-backup.yml
+        path: "{{ project_directory }}/nextcloud-backup.yml"
         state: absent
 
     - name: nextcloud backup playbook (set)
       lineinfile:
-        path: /opt/nextcloud-backup.yml
+        path: "{{ project_directory }}/nextcloud-backup.yml"
         create: yes
         owner: root
         group: root
@@ -410,15 +414,15 @@
         - "  "
         - "    - name: archive nextcloud locally"
         - "      archive:"
-        - "        path: \"/opt/{{ '{{ item }}' }}\""
-        - "        dest: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
+        - "        path: \"{{ project_directory }}/{{ '{{ item }}' }}\""
+        - "        dest: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        format: gz"
         - "        owner: root"
         - "        group: root"
         - "        mode: '0640'"
         - "      with_items:"
-        - "        - nextcloud"
-        - "        - nextcloud_db"
+        - "        - nextcloud_application"
+        - "        - nextcloud_database"
         - "   "
         - "    - name: Retrieve GCS Token"
         - "      uri:"
@@ -434,15 +438,15 @@
         - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        timeout: 720"
         - "        method: POST"
-        - "        src: \"/opt/{{ '{{ item }}' }}_backup.tar.gz\""
+        - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        remote_src: yes"
         - "        return_content: yes "
         - "        headers: "
         - "          Authorization: \"Bearer {{ '{{ gcs_token_resp.json.access_token }}' }}\""
         - "          Content-Type: application/gzip"
         - "      with_items: "
-        - "        - nextcloud "
-        - "        - nextcloud_db "
+        - "        - nextcloud_application "
+        - "        - nextcloud_database "
 
     - name: nextcloud backup systemd timer
       blockinfile:
@@ -472,7 +476,7 @@
           Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           After=network.target
           [Service]
-          ExecStart=/usr/local/bin/ansible-playbook /opt/nextcloud-backup.yml
+          ExecStart=/usr/local/bin/ansible-playbook {{ project_directory }}/nextcloud-backup.yml
           Type=simple
           Restart=no
           [Install]

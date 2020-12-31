@@ -121,3 +121,15 @@ variable "docker_db" {
   type                     = string
   description              = "db container ip"
 }
+
+variable "project_directory" {
+  type                     = string
+  description              = "Location to install/run project"
+  default                  = "/opt"
+}
+
+variable "web_port" {
+  type                     = string
+  description              = "Port to run web proxy"
+  default                  = "443"
+}

@@ -1,0 +1,260 @@
+---
+- name: nextcloud
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+  become_user: root
+  tasks:
+
+    - name: add docker apt key
+      apt_key:
+        url: https://download.docker.com/linux/raspbian/gpg
+        state: present
+
+    - name: add docker apt repo
+      apt_repository:
+        repo: deb [arch=armhf] https://download.docker.com/linux/raspbian buster stable
+        state: present
+
+    - name: required packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - docker-ce
+          - libcap2-bin
+          - python3-pip
+          - raspberrypi-kernel-headers
+          - ssl-cert
+        state: latest
+        update_cache: yes
+
+    - name: ansible docker system python
+      pip:
+        name:
+          - ansible
+          - docker
+        executable: /usr/bin/pip3
+        state: latest
+
+    - name: IP Forwarding enable/persist
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+        sysctl_set: yes
+        sysctl_file: /etc/sysctl.conf
+
+    - name: docker service started/enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: True
+
+    - name: db user
+      user:
+        name: nextclouddb
+        shell: /bin/bash
+        create_home: False
+      register: db_user
+
+    - name: set ip fact for webproxy
+      set_fact:
+        instance_public_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: web_port if not defined
+      set_fact:
+        web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
+
+    - name: various container directories - application
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: www-data
+        mode: '0750'
+      with_items:
+        - "{{ project_directory }}/nextcloud_application"
+        - "{{ project_directory }}/nextcloud_application/var"
+        - "{{ project_directory }}/nextcloud_application/var/www"
+        - "{{ project_directory }}/nextcloud_application/var/www/html"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/custom_apps"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/config"
+        - "{{ project_directory }}/nextcloud_application/var/www/html/data"
+
+    - name: various container directories - webproxy
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0750'
+      with_items:
+        - "{{ project_directory }}/nextcloud_webproxy"
+
+    - name: various container directories - db
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ db_user.name }}"
+        group: "{{ db_user.group }}"
+        mode: '0750'
+      with_items:
+        - "{{ project_directory }}/nextcloud_database"
+
+    - name: secure web proxy
+      template:
+        src: "{{ item }}"
+        dest: "{{ project_directory }}/nextcloud_webproxy/{{ item }}"
+        owner: root
+        group: root
+        mode: 0444
+      with_items:
+        - httpd-ssl.conf
+        - httpd.conf
+
+    - name: Determine ncadmin_password file exists
+      stat:
+        path: "{{ project_directory }}/nextcloud_application/ncadmin_password"
+      register: ncadmin_password_file
+
+    - name: Generate ncadmin_password if not exists
+      set_fact:
+        ncadmin_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+      when: ncadmin_password_file.stat.exists|bool == False
+      no_log: True
+
+    - name: Set ncadmin_password if not exists
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/ncadmin_password"
+        create: yes
+        owner: root
+        group: root
+        mode: '0600'
+        line: "{{ ncadmin_password }}"
+      when: ncadmin_password_file.stat.exists|bool == False
+
+    - name: Determine ncdb_password file exists
+      stat:
+        path: "{{ project_directory }}/nextcloud_application/ncdb_password"
+      register: ncdb_password_file
+
+    - name: Generate ncdb_password if not exists
+      set_fact:
+        ncdb_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+      when: ncdb_password_file.stat.exists|bool == False
+      no_log: True
+
+    - name: Set ncdb_password if not exists
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/ncdb_password"
+        create: yes
+        owner: root
+        group: root
+        mode: '0600'
+        line: "{{ ncdb_password }}"
+      when: ncdb_password_file.stat.exists|bool == False
+
+    - name: Get ncadmin_password if exists
+      slurp:
+        src: "{{ project_directory }}/nextcloud_application/ncadmin_password"
+      register: ncadmin_password_content
+      when: ncadmin_password_file.stat.exists|bool == True
+
+    - name: Get ncdb_password if exists
+      slurp:
+        src: "{{ project_directory }}/nextcloud_application/ncdb_password"
+      register: ncdb_password_content
+      when: ncdb_password_file.stat.exists|bool == True
+
+    - name: Register ncadmin_password if exists
+      set_fact:
+        ncadmin_password: "{{ ncadmin_password_content['content'] | b64decode | trim }}"
+      when: ncadmin_password_file.stat.exists|bool == True
+
+    - name: Register ncdb_password if exists
+      set_fact:
+        ncdb_password: "{{ ncdb_password_content['content'] | b64decode | trim }}"
+      when: ncdb_password_file.stat.exists|bool == True
+
+    - name: docker network
+      docker_network:
+        name: nextcloud
+        driver: bridge
+        ipam_config:
+          - subnet: "{{ docker_network }}/24"
+            gateway: "{{ docker_gw }}"
+
+    - name: db container
+      docker_container:
+        name: nextcloud_database
+        hostname: nextclouddb
+        image: linuxserver/mariadb:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_db }}"
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ ncadmin_password }}"
+          MYSQL_PASSWORD: "{{ ncdb_password }}"
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: nextcloud
+          PUID: "{{ db_user.uid }}"
+          PGID: "{{ db_user.group }}"
+        volumes:
+          - "{{ project_directory }}/nextcloud_database:/config:rw"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "compatibility"
+
+    - name: nextcloud container
+      docker_container:
+        name: nextcloud_application
+        hostname: nextcloudapp
+        image: nextcloud:latest
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_nextcloud }}"
+        env:
+          NEXTCLOUD_ADMIN_PASSWORD: "{{ ncadmin_password }}"
+          NEXTCLOUD_ADMIN_USER: ncadmin
+          NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
+          TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
+          OVERWRITEHOST: "{{ instance_public_ip }}:{{ web_port }}"
+          OVERWRITEPROTOCOL: https
+          MYSQL_PASSWORD: "{{ ncdb_password }}"
+          MYSQL_DATABASE: nextcloud
+          MYSQL_USER: nextcloud
+          MYSQL_HOST: "{{ docker_db }}"
+        volumes:
+          - "{{ project_directory }}/nextcloud_application/var/www/html:/var/www/html:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/custom_apps:/var/www/html/custom_apps:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/config:/var/www/html/config:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/data:/var/www/html/data:rw"
+          - "{{ project_directory }}/nextcloud_application/var/www/html/themes:/var/www/html/themes:rw"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "compatibility"
+
+    - name: web proxy container
+      docker_container:
+        name: nextcloud_webproxy
+        hostname: nextcloudweb
+        image: httpd:2.4
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_webproxy }}"
+        ports:
+          - "{{ web_port }}:{{ web_port }}"
+        volumes:
+          - "{{ project_directory }}/nextcloud_webproxy/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf:ro"
+          - "{{ project_directory }}/nextcloud_webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro"
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/usr/local/apache2/conf/server.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "compatibility"

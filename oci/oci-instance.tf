@@ -26,6 +26,8 @@ data "template_file" "nc-user-data" {
     oci_storage_bucketname = "${var.nc_prefix}-bucket"
     oci_region = var.oci_region
     oci_root_compartment = var.oci_root_compartment
+    web_port = var.web_port
+    project_directory = var.project_directory
   }
 }
 

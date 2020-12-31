@@ -112,7 +112,7 @@ resource "aws_ssm_association" "nc-ssm-assoc" {
     s3_key_prefix           = "ssm"
   }
   parameters              = {
-    ExtraVariables          = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} instance_public_ip=${aws_eip.nc-eip.public_ip}"
+    ExtraVariables          = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} instance_public_ip=${aws_eip.nc-eip.public_ip} web_port=${var.web_port} project_directory=${var.project_directory}"
     PlaybookFile            = "nextcloud_aws.yml"
     SourceInfo              = "{\"path\":\"https://s3.${var.aws_region}.amazonaws.com/${aws_s3_bucket.nc-bucket.id}/playbook/\"}"
     SourceType              = "S3"
