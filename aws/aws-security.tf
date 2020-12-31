@@ -23,8 +23,8 @@ resource "aws_security_group_rule" "nc-pubsg-mgmt-https-in" {
   security_group_id       = aws_security_group.nc-pubsg.id
   type                    = "ingress"
   description             = "IN FROM WORLD - HTTPS"
-  from_port               = "443"
-  to_port                 = "443"
+  from_port               = var.web_port
+  to_port                 = var.web_port
   protocol                = "tcp"
   cidr_blocks             = ["0.0.0.0/0"]
 }

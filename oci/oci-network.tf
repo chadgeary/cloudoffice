@@ -58,8 +58,8 @@ resource "oci_core_default_security_list" "nc-security-list" {
     protocol                     = 6
     source                       = "0.0.0.0/0"
     tcp_options {
-      max                          = "443"
-      min                          = "443"
+      max                          = var.web_port
+      min                          = var.web_port
     }
   }
 }

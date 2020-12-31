@@ -20,6 +20,6 @@ resource "google_compute_firewall" "nc-firewall-mgmt" {
   source_ranges                     = [var.mgmt_cidr]
   allow {
     protocol                          = "tcp"
-    ports                             = ["22","443"]
+    ports                             = ["22",var.web_port]
   }
 }

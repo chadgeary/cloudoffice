@@ -55,7 +55,7 @@ resource "azurerm_network_security_rule" "nc-net-rule-https" {
   access                       = "Allow"
   protocol                     = "Tcp"
   source_port_range            = "*"
-  destination_port_range       = "443"
+  destination_port_range       = var.web_port
   source_address_prefix        = var.mgmt_cidr
   destination_address_prefixes = [var.az_subnet_cidr]
 }
