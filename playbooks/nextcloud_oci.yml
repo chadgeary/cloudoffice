@@ -391,7 +391,7 @@
           Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           [Timer]
           OnUnitActiveSec=12h
-          Unit=nextcloud-to-cloudstorage.service
+          Unit=nextcloud-backup.service
           [Install]
           WantedBy=multi-user.target
 
