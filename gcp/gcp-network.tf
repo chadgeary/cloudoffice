@@ -2,6 +2,7 @@ resource "google_compute_network" "nc-network" {
   name                              = "${var.nc_prefix}-network"
   project                           = google_project.nc-project.project_id
   auto_create_subnetworks           = false
+  mtu                               = 1500
   depends_on                        = [google_project_service.nc-project-compute-service]
 }
 
