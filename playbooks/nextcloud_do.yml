@@ -267,8 +267,7 @@
             ipv4_address: "{{ docker_collabora }}"
         env:
           extra_params: "--o:ssl.enable=false"
-          server_name: "{{ instance_public_ip }}
-          
+          server_name: "{{ instance_public_ip }}"
 
     - name: nextcloud storage (clear)
       file:
