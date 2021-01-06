@@ -132,7 +132,7 @@
 
     - name: Determine nextcloud state
       stat:
-        path: "{{ project_directory }}/nextcloud/var/www/html/data/ncadmin"
+        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
       register: nextcloud_state
 
     - name: unarchive backup if dir not exists
