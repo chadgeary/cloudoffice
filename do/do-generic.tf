@@ -8,9 +8,25 @@ terraform {
 
 provider "digitalocean" {
   token                    = var.do_token
+  spaces_access_id         = var.do_storageaccessid
+  spaces_secret_key        = var.do_storagesecretkey
+}
+
+resource "random_string" "nc-random" {
+  length                            = 5
+  upper                             = false
+  special                           = false
 }
 
 variable "do_token" {
+  type                     = string
+}
+
+variable "do_storageaccessid" {
+  type                     = string
+}
+
+variable "do_storagesecretkey" {
   type                     = string
 }
 

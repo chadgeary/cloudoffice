@@ -1,11 +1,11 @@
 resource "digitalocean_vpc" "nc-network" {
-  name                              = "${var.nc_prefix}-network"
+  name                              = "${var.nc_prefix}-network-${random_string.nc-random.result}"
   region                            = var.do_region
   ip_range                          = var.do_cidr
 }
 
 resource "digitalocean_firewall" "nc-firewall" {
-  name                              = "${var.nc_prefix}-firewall"
+  name                              = "${var.nc_prefix}-firewall-${random_string.nc-random.result}"
   droplet_ids                       = [digitalocean_droplet.nc-droplet.id]
   inbound_rule {
     protocol                          = "tcp"

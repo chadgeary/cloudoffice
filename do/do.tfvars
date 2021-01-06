@@ -5,6 +5,8 @@ ssh_key = "ssh-rsa AAAAB3replace_me_replace_me_replace_me"
 mgmt_cidr = "1.2.3.4/32"
 
 do_token = "changeme3"
+do_storageaccessid = "changeme4"
+do_storagesecretkey = "changeme5"
 
 ## UNCOMMON ##
 do_region = "nyc3"
