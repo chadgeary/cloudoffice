@@ -266,8 +266,24 @@
           - name: nextcloud
             ipv4_address: "{{ docker_collabora }}"
         env:
-          extra_params: "--o:ssl.enable=false"
           server_name: "{{ instance_public_ip }}"
+          username: "ncadmin"
+          password: "{{ admin_password }}"
+          domain: ""
+        privileged: yes
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "no_defaults"
+        auto_remove: no
+        detach: yes
+        init: no
+        interactive: no
+        memory: "0"
+        paused: no
+        read_only: no
+        tty: no
+
 
     - name: nextcloud storage (clear)
       file:

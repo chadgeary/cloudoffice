@@ -15,7 +15,7 @@ resource "digitalocean_firewall" "nc-firewall" {
   inbound_rule {
     protocol                          = "tcp"
     port_range                        = var.web_port
-    source_addresses                  = [var.mgmt_cidr]
+    source_addresses                  = [var.mgmt_cidr, digitalocean_floating_ip.nc-ip.ip_address]
   }
   outbound_rule {
     protocol                          = "tcp"
