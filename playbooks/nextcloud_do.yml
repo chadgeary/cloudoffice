@@ -129,7 +129,7 @@
 
     - name: get backup from bucket if exists
       aws_s3:
-        s3_url: "{{ do_region }}.digitaloceanspaces.com"
+        s3_url: "https://{{ do_region }}.digitaloceanspaces.com"
         mode: get
         bucket: "{{ nc_prefix }}-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_application_backup.tar.gz"
@@ -153,7 +153,7 @@
 
     - name: get db backup from bucket if exists
       aws_s3:
-        s3_url: "{{ do_region }}.digitaloceanspaces.com"
+        s3_url: "https://{{ do_region }}.digitaloceanspaces.com"
         mode: get
         bucket: "{{ nc_prefix }}-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_database_backup.tar.gz"
