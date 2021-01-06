@@ -129,6 +129,7 @@
 
     - name: get backup from bucket if exists
       aws_s3:
+        s3_url: "{{ do_region }}.digitaloceanspaces.com"
         mode: get
         bucket: "{{ nc_prefix }}-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_application_backup.tar.gz"
@@ -152,6 +153,7 @@
 
     - name: get db backup from bucket if exists
       aws_s3:
+        s3_url: "{{ do_region }}.digitaloceanspaces.com"
         mode: get
         bucket: "{{ nc_prefix }}-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_database_backup.tar.gz"
@@ -280,7 +282,7 @@
         - "if [ $? -ne 0 ]"
         - "then"
         - "  echo 'Creating cloud storage in Nextcloud'"
-        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ nc_prefix }}-bucket-data-{{ nc_suffix }} -c hostname=digitaloceanspaces.com -c region={{ do_region }} -c use_ssl=true -c use_path_style=true  -c key={{ do_storageaccessid }} -c secret={{ do_storagesecretkey }} cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ nc_prefix }}-bucket-data-{{ nc_suffix }} -c hostname={{ do_region }}.digitaloceanspaces.com -c region={{ do_region }} -c use_ssl=true -c use_path_style=true  -c key={{ do_storageaccessid }} -c secret={{ do_storagesecretkey }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
@@ -338,6 +340,7 @@
         - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
+        - "        s3_url: \"{{ do_region }}.digitaloceanspaces.com\""
         - "        bucket: \"{{ nc_prefix }}-bucket-{{ nc_suffix }}\""
         - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""

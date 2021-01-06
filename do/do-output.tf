@@ -23,6 +23,6 @@ output "cloudblock-output" {
 
   # Re-apply Ansible playbook with custom variables
   cd playbooks/
-  ansible-playbook nextcloud_do.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} nc_prefix=${var.nc_prefix} nc_suffix=${random_string.nc-random.result} do_storageaccessid=${var.do_storageaccessid} do_storagesecretkey=${var.do_storagesecretkey} instance_public_ip=${digitalocean_floating_ip.nc-ip.ip_address} web_port=${var.web_port} project_directory=${var.project_directory}'
+  ansible-playbook nextcloud_do.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} nc_prefix=${var.nc_prefix} nc_suffix=${random_string.nc-random.result} do_storageaccessid=${var.do_storageaccessid} do_storagesecretkey=${var.do_storagesecretkey} do_region=${var.do_region} instance_public_ip=${digitalocean_floating_ip.nc-ip.ip_address} web_port=${var.web_port} project_directory=${var.project_directory} admin_password=${var.admin_password} db_password=${var.db_password}'
   OUTPUT
 }
