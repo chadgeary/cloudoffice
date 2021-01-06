@@ -17,6 +17,11 @@ resource "digitalocean_firewall" "nc-firewall" {
     port_range                        = var.web_port
     source_addresses                  = [var.mgmt_cidr, digitalocean_floating_ip.nc-ip.ip_address]
   }
+  inbound_rule {
+    protocol                          = "tcp"
+    port_range                        = "9980"
+    source_addresses                  = [digitalocean_floating_ip.nc-ip.ip_address]
+  }
   outbound_rule {
     protocol                          = "tcp"
     port_range                        = "1-65535"

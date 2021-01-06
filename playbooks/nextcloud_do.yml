@@ -112,6 +112,25 @@
       with_items:
         - "{{ project_directory }}/nextcloud_database"
 
+    - name: various container directories - onlyoffice
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: '104'
+        group: '107'
+        mode: '0750'
+      with_items:
+        - "{{ project_directory }}/nextcloud_onlyoffice"
+        - "{{ project_directory }}/nextcloud_onlyoffice/certs"
+
+    - name: ubuntu ssh key from root key
+      copy:
+        src: /root/.ssh/authorized_keys
+        dest: /home/ubuntu/.ssh/authorized_keys
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
     - name: web_port if not defined
       set_fact:
         web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
@@ -127,7 +146,12 @@
         - httpd-ssl.conf
         - httpd.conf
 
-    - name: get backup from bucket if exists
+    - name: determine nextcloud state
+      stat:
+        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
+      register: nextcloud_state
+
+    - name: get nextcloud backup from bucket if exists and state not exists
       aws_s3:
         s3_url: "https://{{ do_region }}.digitaloceanspaces.com"
         mode: get
@@ -136,12 +160,8 @@
         dest: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         aws_access_key: "{{ do_storageaccessid }}"
         aws_secret_key: "{{ do_storagesecretkey }}"
+      when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
-
-    - name: Determine nextcloud state
-      stat:
-        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
-      register: nextcloud_state
 
     - name: unarchive backup if dir not exists
       unarchive:
@@ -150,6 +170,11 @@
         remote_src: yes
       when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
+
+    - name: determine nextcloud db state
+      stat:
+        path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
+      register: nextcloud_db_state
 
     - name: get db backup from bucket if exists
       aws_s3:
@@ -160,12 +185,8 @@
         dest: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         aws_access_key: "{{ do_storageaccessid }}"
         aws_secret_key: "{{ do_storagesecretkey }}"
+      when: nextcloud_db_state.stat.exists|bool == False
       ignore_errors: True
-
-    - name: Determine nextcloud db state
-      stat:
-        path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
-      register: nextcloud_db_state
 
     - name: unarchive db backup if dir not exists
       unarchive:
@@ -257,20 +278,22 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
-    - name: collabora container
+    - name: onlyoffice container
       docker_container:
-        name: nextcloud_collabora
-        hostname: nextcloudcollabora
-        image: collabora/code
+        name: nextcloud_onlyoffice
+        hostname: nextcloudonlyoffice
+        image: onlyoffice/documentserver
         networks:
           - name: nextcloud
-            ipv4_address: "{{ docker_collabora }}"
+            ipv4_address: "{{ docker_onlyoffice }}"
         env:
-          server_name: "{{ instance_public_ip }}"
           username: "ncadmin"
           password: "{{ admin_password }}"
           domain: ""
-        privileged: yes
+        volumes:
+          - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -282,8 +305,7 @@
         memory: "0"
         paused: no
         read_only: no
-        tty: no
-
+        tty: yes
 
     - name: nextcloud storage (clear)
       file:
@@ -318,12 +340,11 @@
         - "fi"
         - "# install spreed (talk)"
         - "docker exec --user www-data nextcloud_application php occ app:install spreed"
-        - "# install richdocuments (collabora)"
-        - "docker exec --user www-data nextcloud_application php occ app:install richdocuments"
-        - "# set richdocuments url to container"
-        - "docker exec --user www-data nextcloud_application php occ config:app:set richdocuments wopi_url --value=https://{{ docker_collabora }}:9980/"
-        - "# disable ssl verification for container collabora"
-        - "docker exec --user www-data nextcloud_application php occ config:app:set richdocuments disable_certificate_verification --value='yes'"
+        - "# install onlyoffice connector"
+        - "docker exec --user www-data nextcloud_application php occ app:install onlyoffice"
+        - "# set onlyoffice urls"
+        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ docker_onlyoffice }}/'"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
 
     - name: wait for nextcloud 200OK
       uri:
@@ -394,11 +415,11 @@
         block: |
           [Unit]
           Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
-          
+
           [Timer]
           OnUnitActiveSec=12h
           Unit=nextcloud-backup.service
-          
+
           [Install]
           WantedBy=multi-user.target
 
@@ -413,13 +434,13 @@
           [Unit]
           Description=Archives and copies nextcloud_application and nextcloud_database containers to cloud storage
           After=network.target
-          
+
           [Service]
           ExecStart=/usr/local/bin/ansible-playbook {{ project_directory }}/nextcloud-backup.yml
           Type=simple
           Restart=no
           EnvironmentFile=/root/.nextcloudstoragecredentials
-          
+
           [Install]
           WantedBy=multi-user.target
 

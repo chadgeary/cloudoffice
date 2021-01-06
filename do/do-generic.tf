@@ -104,7 +104,7 @@ variable "docker_webproxy" {
   description              = "https web proxy container ip"
 }
 
-variable "docker_collabora" {
+variable "docker_onlyoffice" {
   type                     = string
   description              = "minio storage gw container ip"
 }
