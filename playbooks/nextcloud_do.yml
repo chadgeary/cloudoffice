@@ -257,12 +257,25 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
+    - name: collabora container
+      docker_container:
+        name: nextcloud_collabora
+        hostname: nextcloudcollabora
+        image: collabora/code
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_collabora }}"
+        env:
+          extra_params: "--o:ssl.enable=false"
+          server_name: "{{ instance_public_ip }}
+          
+
     - name: nextcloud storage (clear)
       file:
         path: "{{ project_directory }}/nextcloud-storage.sh"
         state: absent
 
-    - name: nextcloud storage (set)
+    - name: nextcloud storage talk and collabora (set)
       lineinfile:
         path: "{{ project_directory }}/nextcloud-storage.sh"
         create: yes
@@ -288,6 +301,14 @@
         - "else"
         - "  echo 'cloud storage exists, skipping.'"
         - "fi"
+        - "# install spreed (talk)"
+        - "docker exec --user www-data nextcloud_application php occ app:install spreed"
+        - "# install richdocuments (collabora)"
+        - "docker exec --user www-data nextcloud_application php occ app:install richdocuments"
+        - "# set richdocuments url to container"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set richdocuments wopi_url --value=https://{{ docker_collabora }}:9980/"
+        - "# disable ssl verification for container collabora"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set richdocuments disable_certificate_verification --value='yes'"
 
     - name: wait for nextcloud 200OK
       uri:
