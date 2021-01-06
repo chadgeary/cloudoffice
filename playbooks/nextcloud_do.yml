@@ -361,7 +361,7 @@
         - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
-        - "        s3_url: \"{{ do_region }}.digitaloceanspaces.com\""
+        - "        s3_url: \"https://{{ do_region }}.digitaloceanspaces.com\""
         - "        bucket: \"{{ nc_prefix }}-bucket-{{ nc_suffix }}\""
         - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
