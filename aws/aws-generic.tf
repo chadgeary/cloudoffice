@@ -44,6 +44,11 @@ variable "db_password" {
   description              = "application db password"
 }
 
+variable "oo_password" {
+  type                     = string
+  description              = "application onlyoffice password"
+}
+
 variable "instance_type" {
   type                     = string
   description              = "The type of EC2 instance to deploy"
@@ -122,6 +127,11 @@ variable "docker_db" {
   description              = "db container ip"
 }
 
+variable "docker_onlyoffice" {
+  type                     = string
+  description              = "onlyoffice container ip"
+}
+
 variable "project_directory" {
   type                     = string
   description              = "Location to install/run project"
@@ -132,4 +142,10 @@ variable "web_port" {
   type                     = string
   description              = "Port to run web proxy"
   default                  = "443"
+}
+
+variable "oo_port" {
+  type                     = string
+  description              = "Port to run onlyoffice"
+  default                  = "8443"
 }

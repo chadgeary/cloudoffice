@@ -13,6 +13,13 @@ resource "aws_ssm_parameter" "nc-ssm-param-db-pass" {
   value                   = var.db_password
 }
 
+resource "aws_ssm_parameter" "nc-ssm-param-oo-pass" {
+  name                    = "${var.name_prefix}-oo-password-${random_string.nc-random.result}"
+  type                    = "SecureString"
+  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
+  value                   = var.db_password
+}
+
 # document to install deps and run playbook
 resource "aws_ssm_document" "nc-ssm-doc" {
   name                    = "${var.name_prefix}-ssm-doc-${random_string.nc-random.result}"
@@ -112,7 +119,7 @@ resource "aws_ssm_association" "nc-ssm-assoc" {
     s3_key_prefix           = "ssm"
   }
   parameters              = {
-    ExtraVariables          = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} instance_public_ip=${aws_eip.nc-eip.public_ip} web_port=${var.web_port} project_directory=${var.project_directory}"
+    ExtraVariables          = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_onlyoffice=${var.docker_onlyoffice} instance_public_ip=${aws_eip.nc-eip.public_ip} web_port=${var.web_port} oo_port=${var.oo_port} project_directory=${var.project_directory}"
     PlaybookFile            = "nextcloud_aws.yml"
     SourceInfo              = "{\"path\":\"https://s3.${var.aws_region}.amazonaws.com/${aws_s3_bucket.nc-bucket.id}/playbook/\"}"
     SourceType              = "S3"

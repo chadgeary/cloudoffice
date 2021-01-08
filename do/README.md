@@ -129,6 +129,9 @@ Edit the vars file (do.tfvars) to customize the deployment, especially:
 # db_password
 # password used by nextcloud application to read/write to databases
 
+# oo_password
+# password used by nextcloud application to read/write to onlyoffice
+
 # ssh_key
 # A public SSH key for access to the compute instance via SSH, with user ubuntu.
 # cat ~/.ssh/id_rsa.pub

@@ -7,7 +7,7 @@ data "aws_iam_policy" "nc-instance-policy-ssm" {
 resource "aws_iam_policy" "nc-instance-policy-ssmparameter" {
   name                    = "nc-instance-policy-${random_string.nc-random.result}-ssmparameter"
   path                    = "/"
-  description             = "Provides ph instances access to ssm parameter(s)"
+  description             = "Provides instance access to the ssm parameter(s)"
   policy                  = <<EOF
 {
   "Version": "2012-10-17",
@@ -18,7 +18,7 @@ resource "aws_iam_policy" "nc-instance-policy-ssmparameter" {
       "Action": [
         "ssm:GetParameters"
       ],
-      "Resource": ["${aws_ssm_parameter.nc-ssm-param-admin-pass.arn}","${aws_ssm_parameter.nc-ssm-param-db-pass.arn}"]
+      "Resource": ["${aws_ssm_parameter.nc-ssm-param-admin-pass.arn}","${aws_ssm_parameter.nc-ssm-param-db-pass.arn}","${aws_ssm_parameter.nc-ssm-param-oo-pass.arn}"]
     },
     {
       "Sid": "DecryptSSMwithCMK",
@@ -35,7 +35,7 @@ EOF
 resource "aws_iam_policy" "nc-instance-policy-s3" {
   name                    = "nc-instance-policy-${random_string.nc-random.result}-s3"
   path                    = "/"
-  description             = "Provides ph instances access to s3 objects/bucket"
+  description             = "Provides instance access to s3 objects/bucket"
   policy                  = <<EOF
 {
   "Version": "2012-10-17",
@@ -86,7 +86,7 @@ EOF
 resource "aws_iam_policy" "nc-instance-policy-s3-data" {
   name                    = "nc-instance-policy-${random_string.nc-random.result}-s3-data"
   path                    = "/"
-  description             = "Provides ph instances access to s3 objects/bucket"
+  description             = "Provides instance access to data s3 objects/bucket"
   policy                  = <<EOF
 {
   "Version": "2012-10-17",

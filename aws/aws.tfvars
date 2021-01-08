@@ -1,7 +1,8 @@
 ## COMMON ##
 # the nextcloud admin password
-admin_password = "changeme"
+admin_password = "changeme1"
 db_password = "changeme2"
+oo_password = "changeme3"
 
 # public ssh key for instance access
 ssh_key = "ssh-rsa AAAAB3NzaC1ychange_me_change_me_change_me="
@@ -11,7 +12,7 @@ mgmt_cidr = "a.b.c.d/32"
 kms_manager = "some_username"
 
 ## UNCOMMON ##
-# aws region / instance size
+# aws region / instance size - strongly recommend 1GB+ of memory
 aws_region = "us-east-1"
 instance_type = "t3a.micro"
 
@@ -25,6 +26,8 @@ vendor_ami_account_number = "099720109477"
 aws_profile = "default"
 name_prefix = "nextcloud"
 instance_vol_size = 30
+web_port = "443"
+oo_port = "8443"
 
 # Change if ip settings would interfere with existing networks
 vpc_cidr = "10.10.13.0/24"
@@ -35,3 +38,4 @@ docker_gw = "172.18.1.1"
 docker_nextcloud = "172.18.1.2"
 docker_db = "172.18.1.3"
 docker_webproxy = "172.18.1.4"
+docker_onlyoffice = "172.18.1.6"
