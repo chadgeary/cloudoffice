@@ -22,11 +22,11 @@ resource "aws_security_group_rule" "nc-pubsg-mgmt-ssh-in" {
 resource "aws_security_group_rule" "nc-pubsg-mgmt-web-in" {
   security_group_id       = aws_security_group.nc-pubsg.id
   type                    = "ingress"
-  description             = "IN FROM MGMT - WEB"
+  description             = "IN FROM MGMT AND SELF - WEB"
   from_port               = var.web_port
   to_port                 = var.web_port
   protocol                = "tcp"
-  cidr_blocks             = [var.mgmt_cidr]
+  cidr_blocks             = [var.mgmt_cidr, "${aws_eip.nc-eip.public_ip}/32"]
 }
 
 resource "aws_security_group_rule" "nc-pubsg-mgmt-oo-in" {
