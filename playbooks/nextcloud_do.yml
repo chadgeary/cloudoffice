@@ -263,6 +263,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+      no_log: True
 
     - name: nextcloud container
       docker_container:
@@ -293,6 +294,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+      no_log: True
 
     - name: web proxy container
       docker_container:
@@ -345,6 +347,7 @@
         paused: no
         read_only: no
         tty: yes
+      no_log: True
 
     - name: nextcloud onlyoffice storage talk and talk (clear)
       file:
@@ -363,6 +366,7 @@
         group: root
         mode: '0500'
         line: "{{ item }}"
+      no_log: True
       with_items:
         - "#!/bin/bash"
         - "# install and configure onlyoffice connector"
