@@ -59,6 +59,11 @@ variable "db_password" {
   description              = "Password for nextcloud application to read/write to database"
 }
 
+variable "oo_password" {
+  type                     = string
+  description              = "Password for nextcloud application to talk with onlyoffice"
+}
+
 variable "project_url" {
   type                     = string
   description              = "The github project URL of the playbook to run."
@@ -119,4 +124,10 @@ variable "web_port" {
   type                     = string
   description              = "Port to run web proxy"
   default                  = "443"
+}
+
+variable "oo_port" {
+  type                     = string
+  description              = "Port to run web proxy"
+  default                  = "8443"
 }

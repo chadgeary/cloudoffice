@@ -1,6 +1,7 @@
 ## COMMON ##
 admin_password = "changeme1"
 db_password = "changeme2"
+oo_password = "changeme3"
 ssh_key = "ssh-rsa AAAAB3replace_me_replace_me_replace_me"
 mgmt_cidr = "1.2.3.4/32"
 

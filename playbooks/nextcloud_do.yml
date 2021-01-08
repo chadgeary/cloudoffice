@@ -287,13 +287,16 @@
           - name: nextcloud
             ipv4_address: "{{ docker_onlyoffice }}"
         env:
-          username: "ncadmin"
-          password: "{{ admin_password }}"
-          domain: ""
+          ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
+          USE_UNAUTHORIZED_STORAGE: "true"
+          JWT_ENABLED: "true"
+          JWT_SECRET: "{{ oo_password }}"
         volumes:
           - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
           - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
           - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
+        ports:
+          - "{{ oo_port }}:443"
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -307,14 +310,36 @@
         read_only: no
         tty: yes
 
-    - name: nextcloud storage (clear)
+    - name: nextcloud onlyoffice storage talk and talk (clear)
       file:
-        path: "{{ project_directory }}/nextcloud-storage.sh"
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
         state: absent
+      with_items:
+        - onlyoffice
+        - storage
+        - talk
 
-    - name: nextcloud storage talk and collabora (set)
+    - name: nextcloud onlyoffice (set)
       lineinfile:
-        path: "{{ project_directory }}/nextcloud-storage.sh"
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-onlyoffice.sh"
+        create: yes
+        owner: root
+        group: root
+        mode: '0500'
+        line: "{{ item }}"
+      with_items:
+        - "#!/bin/bash"
+        - "# install and configure onlyoffice connector"
+        - "docker exec --user www-data nextcloud_application php occ app:install onlyoffice"
+        - "docker exec --user www-data nextcloud_application php occ app:enable onlyoffice"
+        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ instance_public_ip }}:{{ oo_port }}/'"
+        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice jwt_secret --value {{ oo_password }}"
+
+    - name: nextcloud storage (set)
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-storage.sh"
         create: yes
         owner: root
         group: root
@@ -323,28 +348,33 @@
       with_items:
         - "#!/bin/bash"
         - "# ensure files_external is enabled"
+        - "docker exec --user www-data nextcloud_application php occ app:install files_external"
         - "docker exec --user www-data nextcloud_application php occ app:enable files_external"
-        - " "
         - "# check bucket against existing storage"
         - "docker exec --user www-data nextcloud_application php occ files_external:list | grep --quiet 'cloud-storage'"
-        - "  "
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  echo 'Creating cloud storage in Nextcloud'"
         - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ nc_prefix }}-bucket-data-{{ nc_suffix }} -c hostname={{ do_region }}.digitaloceanspaces.com -c region={{ do_region }} -c use_ssl=true -c use_path_style=true  -c key={{ do_storageaccessid }} -c secret={{ do_storagesecretkey }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
         - "  echo 'cloud storage exists, skipping.'"
         - "fi"
+
+    - name: nextcloud talk (set)
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-talk.sh"
+        create: yes
+        owner: root
+        group: root
+        mode: '0500'
+        line: "{{ item }}"
+      with_items:
+        - "#!/bin/bash"
         - "# install spreed (talk)"
         - "docker exec --user www-data nextcloud_application php occ app:install spreed"
-        - "# install onlyoffice connector"
-        - "docker exec --user www-data nextcloud_application php occ app:install onlyoffice"
-        - "# set onlyoffice urls"
-        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ docker_onlyoffice }}/'"
-        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
+        - "docker exec --user www-data nextcloud_application php occ app:enable spreed"
 
     - name: wait for nextcloud 200OK
       uri:
@@ -356,11 +386,15 @@
       retries: 180
       delay: 1
 
-    - name: nextcloud storage (execute)
+    - name: nextcloud onlyoffice storage and talk (execute)
       shell:
-        cmd: "{{ project_directory }}/nextcloud-storage.sh"
+        cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
       args:
         executable: /bin/bash
+      with_items:
+        - onlyoffice
+        - storage
+        - talk
 
     - name: nextcloud backup playbook (clear)
       file:
