@@ -53,8 +53,8 @@ sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(l
 # Install terraform and git
 sudo apt-get update && sudo apt-get -y install terraform git
  
-# Clone the nextcloud project
-git clone https://github.com/chadgeary/nextcloud
+# Clone the cloudoffice project
+git clone https://github.com/chadgeary/cloudoffice
 
 # Create SSH key pair (RETURN for defaults)
 ssh-keygen
@@ -92,11 +92,11 @@ pip3 install --user --upgrade awscli
 Customize the deployment - See variables section below
 ```
 # Change to the project's aws directory in powershell
-cd ~/nextcloud/aws/
+cd ~/cloudoffice/aws/
 
 # Open File Explorer in a separate window
 # Navigate to aws project directory - change \chad\ to your WSL username
-%HOMEPATH%\ubuntu-1804\rootfs\home\chad\nextcloud\aws
+%HOMEPATH%\ubuntu-1804\rootfs\home\chad\cloudoffice\aws
 
 # Edit the aws.tfvars file using notepad and save
 ```
@@ -104,7 +104,7 @@ cd ~/nextcloud/aws/
 Deploy
 ```
 # In powershell's WSL window, change to the project's aws directory
-cd ~/nextcloud/aws/
+cd ~/cloudoffice/aws/
 
 # Initialize terraform and apply the terraform state
 terraform init
@@ -133,7 +133,10 @@ Edit the vars file (aws.tfvars) to customize the deployment, especially:
 # password to access the webui (and db root user), user is ncadmin
 
 # db_password
-# password set on database for nextcloud application
+# password for nextcloud to read/write to database
+
+# oo_password
+# password for nextcloud to read/write to onlyoffice
 
 # ssh_key
 # a public SSH key for SSH access to the instance via user `ubuntu`.
@@ -147,21 +150,24 @@ Edit the vars file (aws.tfvars) to customize the deployment, especially:
 # The AWS username (not root) granted access to read the Wireguard VPN configuration files in S3.
 ```
 
-# Post-Deployment
+# Post-Deployment and FAQs
 - Wait for Ansible Playbook, watch [AWS State Manager](https://console.aws.amazon.com/systems-manager/state-manager)
 - See terraform output for WebUI address.
 
-- Using an ISP with a dynamic IP (DHCP) and the IP address changed? Pihole webUI and SSH access will be blocked until the mgmt_cidr is updated.
+- Using an ISP with a dynamic IP (DHCP) and the IP address changed? WebUI and SSH access will be blocked until the mgmt_cidr is updated.
   - Follow the steps below to quickly update the cloud firewall using terraform:
 ```
 # Open Powershell and start WSL
 wsl
 
 # Change to the project directory
-cd ~/nextcloud/aws/
+cd ~/cloudoffice/aws/
 
 # Update the mgmt_cidr variable - be sure to replace change_me with your public IP address
 sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" aws.tfvars
+
+# Alternatively, open access to world:
+sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"0.0.0.0/0\"#" aws.tfvars
 
 # Rerun terraform apply, terraform will update the cloud firewall rules
 terraform apply -var-file="aws.tfvars"
@@ -173,7 +179,7 @@ terraform apply -var-file="aws.tfvars"
 sudo apt update && sudo apt-get install --only-upgrade terraform
 
 # Be in the aws subdirectory
-cd ~/nextcloud/aws/
+cd ~/cloudoffice/aws/
 
 # Move vars file to be untracked by git, if not already done.
 if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv aws.tfvars pvars.tfvars; fi
