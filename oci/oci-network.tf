@@ -56,10 +56,34 @@ resource "oci_core_default_security_list" "nc-security-list" {
   }
   ingress_security_rules {
     protocol                     = 6
-    source                       = "0.0.0.0/0"
+    source                       = var.mgmt_cidr
     tcp_options {
       max                          = var.web_port
       min                          = var.web_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = var.mgmt_cidr
+    tcp_options {
+      max                          = var.oo_port
+      min                          = var.oo_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = "${oci_core_instance.nc-instance.public_ip}/32"
+    tcp_options {
+      max                          = var.web_port
+      min                          = var.web_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = "${oci_core_instance.nc-instance.public_ip}/32"
+    tcp_options {
+      max                          = var.oo_port
+      min                          = var.oo_port
     }
   }
 }
