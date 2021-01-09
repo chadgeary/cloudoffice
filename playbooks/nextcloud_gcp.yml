@@ -474,7 +474,7 @@
 
     - name: nextcloud storage (set)
       lineinfile:
-        path: "{{ project_directory }}/nextcloud-storage.sh"
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-storage.sh"
         create: yes
         owner: root
         group: root
