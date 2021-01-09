@@ -64,7 +64,7 @@ resource "azurerm_network_security_rule" "nc-net-rule-httpsoo" {
   name                         = "${var.nc_prefix}-net-rule-httpsoo"
   resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
   network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
-  priority                     = 101
+  priority                     = 102
   direction                    = "Inbound"
   access                       = "Allow"
   protocol                     = "Tcp"
@@ -78,7 +78,7 @@ resource "azurerm_network_security_rule" "nc-net-rule-selfhttps" {
   name                         = "${var.nc_prefix}-net-rule-selfhttps"
   resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
   network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
-  priority                     = 102
+  priority                     = 103
   direction                    = "Inbound"
   access                       = "Allow"
   protocol                     = "Tcp"
@@ -92,7 +92,7 @@ resource "azurerm_network_security_rule" "nc-net-rule-selfhttpsoo" {
   name                         = "${var.nc_prefix}-net-rule-selfhttpsoo"
   resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
   network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
-  priority                     = 103
+  priority                     = 104
   direction                    = "Inbound"
   access                       = "Allow"
   protocol                     = "Tcp"

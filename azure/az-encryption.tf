@@ -11,7 +11,7 @@ resource "azurerm_key_vault" "nc-vault-disk" {
 }
 
 resource "azurerm_key_vault" "nc-vault-storage" {
-  name                    = "${var.nc_prefix}-storage-${random_string.nc-random.result}"
+  name                    = "${var.nc_prefix}-store-${random_string.nc-random.result}"
   location                = azurerm_resource_group.nc-resourcegroup.location
   resource_group_name     = azurerm_resource_group.nc-resourcegroup.name
   tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id

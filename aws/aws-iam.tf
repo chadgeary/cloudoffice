@@ -118,6 +118,14 @@ resource "aws_iam_policy" "nc-instance-policy-s3-data" {
       "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}/*"]
     },
     {
+      "Sid": "DeleteObjectsinBucketPrefix",
+      "Effect": "Allow",
+      "Action": [
+        "s3:DeleteObject"
+      ],
+      "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}/*"]
+    },
+    {
       "Sid": "EncryptDecryptS3withCMK",
       "Effect": "Allow",
       "Action": [
