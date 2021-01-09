@@ -472,7 +472,7 @@
         - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ instance_public_ip }}:{{ oo_port }}/'"
         - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
         - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
-        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice jwt_secret --value {{ storagegw_secret.json.payload.data | b64decode }}"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice jwt_secret --value {{ oo_secret.json.payload.data | b64decode }}"
 
     - name: nextcloud storage (set)
       lineinfile:
