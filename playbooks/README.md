@@ -1,5 +1,5 @@
 # Local Deployments
-`nextcloud_raspbian.yml` supports standalone deployments.
+`cloudoffice_raspbian.yml` supports standalone deployments.
 
 # Raspbian Deployment
 - Raspbian 10 (Buster)
@@ -20,15 +20,17 @@ source ~/.bashrc
 sudo reboot
 
 # Clone the project and change to playbooks directory
-git clone https://github.com/chadgeary/nextcloud && cd nextcloud/playbooks/
+git clone https://github.com/chadgeary/cloudoffice && cd cloudoffice/playbooks/
 
 # Set Variables
 web_port=443
+oo_port=8443
 docker_network=172.18.1.0
 docker_gw=172.18.1.1
 docker_nextcloud=172.18.1.2
 docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
+docker_onlyoffice=172.18.1.6
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud
@@ -40,7 +42,7 @@ sudo chmod 600 /opt/nextcloud/db_password
 sudo chmod 600 /opt/nextcloud/oo_password
 
 # Execute playbook via ansible
-ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy"
+ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice"
 
 # See Playbook Summary output for WebUI URL
 ```
@@ -53,8 +55,8 @@ ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port docker_
   - Re-apply ansible playbook
 
 ```
-# Be in the nextcloud/playbooks directory
-cd ~/nextcloud/playbooks
+# Be in the cloudoffice/playbooks directory
+cd ~/cloudoffice/playbooks
 
 # Pull code updates
 git pull
@@ -73,5 +75,5 @@ docker_onlyoffice=172.18.1.6
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
 
 # Rerun ansible-playbook
-ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port oo_port=$oo_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice"
+ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port oo_port=$oo_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice"
 ```
