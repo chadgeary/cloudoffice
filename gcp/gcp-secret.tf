@@ -36,6 +36,25 @@ resource "google_secret_manager_secret_version" "nc-secret-db-password-version" 
   secret_data                       = var.db_password
 }
 
+# onlyoffice
+resource "google_secret_manager_secret" "nc-secret-oo-password" {
+  project                           = google_project.nc-project.project_id
+  secret_id                         = "${var.nc_prefix}-oo-password"
+  replication {
+    user_managed {
+      replicas {
+        location                          = var.gcp_region
+      }
+    }
+  }
+  depends_on                        = [google_project_service.nc-project-services]
+}
+
+resource "google_secret_manager_secret_version" "nc-secret-oo-password-version" {
+  secret                            = google_secret_manager_secret.nc-secret-oo-password.id
+  secret_data                       = var.oo_password
+}
+
 # storage (credentials)
 resource "google_secret_manager_secret" "nc-secret-storage-key" {
   project                           = google_project.nc-project.project_id
@@ -97,6 +116,12 @@ resource "google_secret_manager_secret_iam_policy" "nc-service-account-admin-sec
 resource "google_secret_manager_secret_iam_policy" "nc-service-account-db-secret-iam-policy" {
   project                           = google_project.nc-project.project_id
   secret_id                         = google_secret_manager_secret.nc-secret-db-password.secret_id
+  policy_data                       = data.google_iam_policy.nc-service-account-secret-data.policy_data
+}
+
+resource "google_secret_manager_secret_iam_policy" "nc-service-account-oo-secret-iam-policy" {
+  project                           = google_project.nc-project.project_id
+  secret_id                         = google_secret_manager_secret.nc-secret-oo-password.secret_id
   policy_data                       = data.google_iam_policy.nc-service-account-secret-data.policy_data
 }
 

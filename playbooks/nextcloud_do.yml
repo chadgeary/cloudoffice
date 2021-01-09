@@ -385,6 +385,7 @@
         group: root
         mode: '0500'
         line: "{{ item }}"
+        no_log: True
       with_items:
         - "#!/bin/bash"
         - "# ensure files_external is enabled"

@@ -1,9 +1,50 @@
 ---
-- name: nextcloud - google cloud variant
+- name: nextcloud for gcp
   hosts: localhost
   gather_facts: true
   become: true
   tasks:
+
+    - name: check swap file exists
+      stat:
+        path: /opt/swap.file
+      register: swap_file
+
+    - name: create swap file if not exists
+      shell: |
+        dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
+        mkswap /opt/swap.file
+      when:
+       - swap_file.stat.exists|bool == false
+       - ansible_swaptotal_mb < 1
+
+    - name: set swap file permissions
+      file:
+        path: /opt/swap.file
+        state: file
+        owner: root
+        group: root
+        mode: '0600'
+      when:
+        - ansible_swaptotal_mb < 1
+
+    - name: set swap mount
+      mount:
+        src: /opt/swap.file
+        path: none
+        fstype: swap
+        opts: sw
+        passno: '0'
+        dump: '0'
+        state: present
+      when:
+        - ansible_swaptotal_mb < 1
+
+    - name: mount swap now
+      shell: |
+        swapon /opt/swap.file
+      when:
+        - ansible_swaptotal_mb < 1
 
     - name: required packages
       apt:
@@ -96,6 +137,17 @@
       with_items:
         - "{{ project_directory }}/nextcloud_database"
 
+    - name: various container directories - onlyoffice
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: '104'
+        group: '107'
+        mode: '0750'
+      with_items:
+        - "{{ project_directory }}/nextcloud_onlyoffice"
+        - "{{ project_directory }}/nextcloud_onlyoffice/certs"
+
     - name: web_port if not defined
       set_fact:
         web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
@@ -144,6 +196,18 @@
           x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
       register: db_secret
 
+    - name: Get oo secret from google secret manager
+      uri:
+        url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-oo-password/versions/latest:access
+        method: GET
+        remote_src: yes
+        return_content: yes
+        headers:
+          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
+          Content-Type: application/json
+          x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
+      register: oo_secret
+
     - name: Get storage secret from google secret manager
       uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-storage-key/versions/latest:access
@@ -188,6 +252,11 @@
         regexp: "'"
         replace: '"'
 
+    - name: Determine nextcloud state
+      stat:
+        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
+      register: nextcloud_state
+
     - name: Get nextcloud backup from storage if exists
       get_url:
         url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_application_backup.tar.gz
@@ -199,12 +268,8 @@
         dest: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
+      when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
-
-    - name: Determine nextcloud state
-      stat:
-        path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
-      register: nextcloud_state
 
     - name: unarchive backup if dir not exists
       unarchive:
@@ -213,6 +278,11 @@
         remote_src: yes
       when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
+
+    - name: Determine nextcloud db state
+      stat:
+        path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
+      register: nextcloud_db_state
 
     - name: Get nextcloud backup db from storage if exists
       get_url:
@@ -225,12 +295,8 @@
         dest: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
+      when: nextcloud_db_state.stat.exists|bool == False
       ignore_errors: True
-
-    - name: Determine nextcloud db state
-      stat:
-        path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
-      register: nextcloud_db_state
 
     - name: unarchive db backup if dir not exists
       unarchive:
@@ -271,6 +337,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+      no_log: True
 
     - name: nextcloud container
       docker_container:
@@ -301,6 +368,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+      no_log: True
 
     - name: web proxy container
       docker_container:
@@ -341,11 +409,68 @@
         purge_networks: yes
         restart_policy: always
         container_default_behavior: "compatibility"
+      no_log: True
 
-    - name: nextcloud storage (clear)
+    - name: onlyoffice container
+      docker_container:
+        name: nextcloud_onlyoffice
+        hostname: nextcloudonlyoffice
+        image: onlyoffice/documentserver
+        networks:
+          - name: nextcloud
+            ipv4_address: "{{ docker_onlyoffice }}"
+        env:
+          ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
+          USE_UNAUTHORIZED_STORAGE: "true"
+          JWT_ENABLED: "true"
+          JWT_SECRET: "{{ oo_secret.json.payload.data | b64decode }}"
+        volumes:
+          - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
+        ports:
+          - "{{ oo_port }}:443"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "no_defaults"
+        auto_remove: no
+        detach: yes
+        init: no
+        interactive: no
+        memory: "0"
+        paused: no
+        read_only: no
+        tty: yes
+      no_log: True
+
+    - name: nextcloud onlyoffice storage talk and talk (clear)
       file:
-        path: "{{ project_directory }}/nextcloud-storage.sh"
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
         state: absent
+      with_items:
+        - onlyoffice
+        - storage
+        - talk
+
+    - name: nextcloud onlyoffice (set)
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-onlyoffice.sh"
+        create: yes
+        owner: root
+        group: root
+        mode: '0500'
+        line: "{{ item }}"
+      no_log: True
+      with_items:
+        - "#!/bin/bash"
+        - "# install and configure onlyoffice connector"
+        - "docker exec --user www-data nextcloud_application php occ app:install onlyoffice"
+        - "docker exec --user www-data nextcloud_application php occ app:enable onlyoffice"
+        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ instance_public_ip }}:{{ oo_port }}/'"
+        - "docker exec --user www-data nextcloud_application php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
+        - "docker exec --user www-data nextcloud_application php occ config:app:set onlyoffice jwt_secret --value {{ storagegw_secret.json.payload.data | b64decode }}"
 
     - name: nextcloud storage (set)
       lineinfile:
@@ -355,24 +480,37 @@
         group: root
         mode: '0500'
         line: "{{ item }}"
+      no_log: True
       with_items:
         - "#!/bin/bash"
         - "# ensure files_external is enabled"
+        - "docker exec --user www-data nextcloud_application php occ app:install files_external"
         - "docker exec --user www-data nextcloud_application php occ app:enable files_external"
-        - " "
         - "# check bucket against existing storage"
         - "docker exec --user www-data nextcloud_application php occ files_external:list | grep --quiet 'cloud-storage'"
-        - "  "
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  echo 'Creating cloud storage in Nextcloud'"
         - "  docker exec --user www-data nextcloud_application php occ files_external:create -c bucket={{ gcp_project_prefix }}-bucket-data-{{ gcp_project_suffix }} -c hostname={{ docker_storagegw }} -c port=9000 -c use_ssl=false -c use_path_style=true -c key=storagegw -c secret={{ storagegw_secret.json.payload.data | b64decode }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data nextcloud_application php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data nextcloud_application php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
         - "  echo 'cloud storage exists, skipping.'"
         - "fi"
+
+    - name: nextcloud talk (set)
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/nextcloud-talk.sh"
+        create: yes
+        owner: root
+        group: root
+        mode: '0500'
+        line: "{{ item }}"
+      with_items:
+        - "#!/bin/bash"
+        - "# install spreed (talk)"
+        - "docker exec --user www-data nextcloud_application php occ app:install spreed"
+        - "docker exec --user www-data nextcloud_application php occ app:enable spreed"
 
     - name: wait for nextcloud 200OK
       uri:
@@ -384,11 +522,15 @@
       retries: 180
       delay: 1
 
-    - name: nextcloud storage (execute)
+    - name: nextcloud onlyoffice storage and talk (execute)
       shell:
-        cmd: "{{ project_directory }}/nextcloud-storage.sh"
+        cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
       args:
         executable: /bin/bash
+      with_items:
+        - onlyoffice
+        - storage
+        - talk
 
     - name: nextcloud backup playbook (clear)
       file:

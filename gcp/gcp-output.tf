@@ -23,6 +23,6 @@ output "cloudblock-output" {
 
   # Re-apply Ansible playbook with custom variables
   cd playbooks/
-  ansible-playbook nextcloud_gcp.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} gcp_project_prefix=${var.nc_prefix} gcp_project_suffix=${random_string.nc-random.result} instance_public_ip=${google_compute_address.nc-public-ip.address} project_directory=${var.project_directory} web_port=${var.web_port}'
+  ansible-playbook nextcloud_gcp.yml --extra-vars 'docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_webproxy=${var.docker_webproxy} docker_storagegw=${var.docker_storagegw} docker_onlyoffice=${var.docker_onlyoffice} gcp_project_prefix=${var.nc_prefix} gcp_project_suffix=${random_string.nc-random.result} instance_public_ip=${google_compute_address.nc-public-ip.address} project_directory=${var.project_directory} web_port=${var.web_port} oo_port=${var.oo_port}'
   OUTPUT
 }

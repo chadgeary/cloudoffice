@@ -55,6 +55,11 @@ variable "db_password" {
   description              = "Password for nextcloud application to read/write to database"
 }
 
+variable "oo_password" {
+  type                     = string
+  description              = "Password for nextcloud application to read/write to onlyoffice"
+}
+
 variable "project_url" {
   type                     = string
   description              = "The github project URL of the playbook to run."
@@ -120,6 +125,11 @@ variable "docker_storagegw" {
   description              = "minio storage gw container ip"
 }
 
+variable "docker_onlyoffice" {
+  type                     = string
+  description              = "onlyoffice container ip"
+}
+
 variable "project_directory" {
   type                     = string
   description              = "Location to install/run project"
@@ -130,4 +140,10 @@ variable "web_port" {
   type                     = string
   description              = "Port to run web proxy"
   default                  = "443"
+}
+
+variable "oo_port" {
+  type                     = string
+  description              = "Port to run onlyoffice"
+  default                  = "8443"
 }
