@@ -16,8 +16,10 @@ data "template_file" "nc-user-data" {
     docker_nextcloud = var.docker_nextcloud
     docker_db = var.docker_db
     docker_webproxy = var.docker_webproxy
+    docker_onlyoffice = var.docker_onlyoffice
     admin_password_cipher = oci_kms_encrypted_data.nc-kms-nc-admin-secret.ciphertext
     db_password_cipher = oci_kms_encrypted_data.nc-kms-nc-db-secret.ciphertext
+    oo_password_cipher = oci_kms_encrypted_data.nc-kms-nc-oo-secret.ciphertext
     bucket_user_key_cipher = oci_kms_encrypted_data.nc-kms-bucket-user-key-secret.ciphertext
     bucket_user_id = oci_identity_customer_secret_key.nc-bucker-user-key.id
     oci_kms_endpoint = oci_kms_vault.nc-kms-storage-vault.crypto_endpoint
@@ -27,6 +29,7 @@ data "template_file" "nc-user-data" {
     oci_region = var.oci_region
     oci_root_compartment = var.oci_root_compartment
     web_port = var.web_port
+    oo_port = var.oo_port
     project_directory = var.project_directory
   }
 }

@@ -408,6 +408,7 @@
         cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
       args:
         executable: /bin/bash
+      no_log: True
       with_items:
         - onlyoffice
         - storage

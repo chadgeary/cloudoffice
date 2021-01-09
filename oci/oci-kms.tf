@@ -27,6 +27,12 @@ resource "oci_kms_encrypted_data" "nc-kms-nc-db-secret" {
   plaintext               = base64encode(var.db_password)
 }
 
+resource "oci_kms_encrypted_data" "nc-kms-nc-oo-secret" {
+  crypto_endpoint         = oci_kms_vault.nc-kms-storage-vault.crypto_endpoint
+  key_id                  = oci_kms_key.nc-kms-storage-key.id
+  plaintext               = base64encode(var.oo_password)
+}
+
 resource "oci_kms_encrypted_data" "nc-kms-bucket-user-key-secret" {
   crypto_endpoint         = oci_kms_vault.nc-kms-storage-vault.crypto_endpoint
   key_id                  = oci_kms_key.nc-kms-storage-key.id
