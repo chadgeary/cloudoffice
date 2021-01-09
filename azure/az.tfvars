@@ -1,6 +1,7 @@
 ## COMMON ##
 admin_password = "changeme1"
 db_password = "changeme2"
+oo_password = "changeme3"
 ssh_key = "ssh-rsa AAAAchangeme_changeme_changeme_changemexUL5UY4ko4tynCSp7zgVpot/OppqdHl5J+DYhNubm8ess6cugTustUZoDmJdo2ANQENeBUNkBPXUnMO1iulfNb6GnwWJ0Z5TRRLGSu1gya2wMLeo1rBJFcb6ZgVLMVHiKgwBy/svUQreR8R+fpVW+Q4rx6RSAltLROUONn0SF2BvvJUueqxpAIaA2rU4MSI69P"
 mgmt_cidr = "1.2.3.4/32"
 
@@ -27,10 +28,13 @@ ssh_user = "ubuntu"
 # Change if using a cloned / separate git project or ip settings would interfere with existing networks
 project_url = "https://github.com/chadgeary/nextcloud"
 
-# Change if ip settings would interfere with existing networks, should all be within a /24
+# Change if ip/port settings would interfere with existing networks, should all be within a /24
+web_port = "443"
+oo_port = "8443"
 docker_network = "172.18.1.0"
 docker_gw = "172.18.1.1"
 docker_nextcloud = "172.18.1.2"
 docker_db = "172.18.1.3"
 docker_webproxy = "172.18.1.4"
 docker_storagegw = "172.18.1.5"
+docker_onlyoffice = "172.18.1.6"

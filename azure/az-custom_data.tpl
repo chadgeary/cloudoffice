@@ -1,12 +1,12 @@
 #!/bin/bash
 # Create systemd service unit file
-tee /etc/systemd/system/nextcloud-ansible-state.service << EOM
+tee /etc/systemd/system/cloudoffice-ansible-state.service << EOM
 [Unit]
-Description=nextcloud-ansible-state
+Description=cloudoffice-ansible-state
 After=network.target
 
 [Service]
-ExecStart=/opt/nextcloud-ansible-state.sh
+ExecStart=/opt/cloudoffice-ansible-state.sh
 Type=simple
 Restart=on-failure   
 RestartSec=30
@@ -16,20 +16,20 @@ WantedBy=multi-user.target
 EOM
 
 # Create systemd timer unit file
-tee /etc/systemd/system/nextcloud-ansible-state.timer << EOM
+tee /etc/systemd/system/cloudoffice-ansible-state.timer << EOM
 [Unit]
-Description=Starts nextcloud ansible state playbook 1min after boot
+Description=Starts cloudoffice ansible state playbook 1min after boot
 
 [Timer]
 OnBootSec=1min
-Unit=nextcloud-ansible-state.service
+Unit=cloudoffice-ansible-state.service
 
 [Install]
 WantedBy=multi-user.target
 EOM
 
-# Create nextcloud-ansible-state script
-tee /opt/nextcloud-ansible-state.sh << EOM
+# Create cloudoffice-ansible-state script
+tee /opt/cloudoffice-ansible-state.sh << EOM
 #!/bin/bash
 # Update package list
 apt-get update
@@ -45,23 +45,23 @@ wget https://raw.githubusercontent.com/ansible-collections/azure/dev/requirement
 # Install the requirements
 pip3 install -r requirements-azure.txt
 # Make the project directory
-mkdir -p /opt/git/nextcloud
+mkdir -p /opt/git/cloudoffice
 # Clone project into project directory
-git clone ${project_url} /opt/git/nextcloud
+git clone ${project_url} /opt/git/cloudoffice
 # Change to directory
-cd /opt/git/nextcloud
+cd /opt/git/cloudoffice
 # Ensure up-to-date
 git pull
 # Change to playbooks directory
 cd playbooks/
 # Execute playbook
-ansible-playbook nextcloud_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip} az_storage_account_name=${az_storage_account_name} web_port=${web_port} project_directory=${project_directory}' >> /var/log/nextcloud.log
+ansible-playbook cloudoffice_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} docker_onlyoffice=${docker_onlyoffice} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip} az_storage_account_name=${az_storage_account_name} web_port=${web_port} oo_port=${oo_port} project_directory=${project_directory}' >> /var/log/cloudoffice.log
 EOM
 
-# Start / Enable nextcloud-ansible-state
-chmod +x /opt/nextcloud-ansible-state.sh
+# Start / Enable cloudoffice-ansible-state
+chmod +x /opt/cloudoffice-ansible-state.sh
 systemctl daemon-reload
-systemctl start nextcloud-ansible-state.timer
-systemctl start nextcloud-ansible-state.service
-systemctl enable nextcloud-ansible-state.timer
-systemctl enable nextcloud-ansible-state.service
+systemctl start cloudoffice-ansible-state.timer
+systemctl start cloudoffice-ansible-state.service
+systemctl enable cloudoffice-ansible-state.timer
+systemctl enable cloudoffice-ansible-state.service

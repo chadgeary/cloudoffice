@@ -80,7 +80,12 @@ variable "admin_password" {
 
 variable "db_password" {
   type                     = string
-  description              = "Password for database application user"
+  description              = "Password for nextcloud to read/write to database"
+}
+
+variable "oo_password" {
+  type                     = string
+  description              = "Password for nextcloud to read/write to onlyoffice"
 }
 
 variable "project_url" {
@@ -118,6 +123,11 @@ variable "docker_storagegw" {
   description              = "minio storage gateway container ip"
 }
 
+variable "docker_onlyoffice" {
+  type                     = string
+  description              = "onlyoffice container ip"
+}
+
 variable "project_directory" {
   type                     = string
   description              = "Location to install/run project"
@@ -128,4 +138,9 @@ variable "web_port" {
   type                     = string
   description              = "Port to run web proxy"
   default                  = "443"
+}
+
+variable "oo_port" {
+  type                     = string
+  description              = "Port to run onlyoffice"
 }

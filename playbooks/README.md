@@ -30,12 +30,14 @@ docker_nextcloud=172.18.1.2
 docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
 
-# Want to set your own ncadmin and ncdb passwords instead of something randomly generated?
+# Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud
-echo "somepassword1" | sudo tee /opt/nextcloud/ncadmin_password
-echo "somepassword2" | sudo tee /opt/nextcloud/ncdb_password
-sudo chmod 600 /opt/nextcloud/ncadmin_password
-sudo chmod 600 /opt/nextcloud/ncdb_password
+echo "somepassword1" | sudo tee /opt/nextcloud/admin_password
+echo "somepassword2" | sudo tee /opt/nextcloud/db_password
+echo "somepassword3" | sudo tee /opt/nextcloud/oo_password
+sudo chmod 600 /opt/nextcloud/admin_password
+sudo chmod 600 /opt/nextcloud/db_password
+sudo chmod 600 /opt/nextcloud/oo_password
 
 # Execute playbook via ansible
 ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy"
@@ -59,15 +61,17 @@ git pull
 
 # Set customized variables
 web_port=443
+oo_port=8443
 docker_network=172.18.1.0
 docker_gw=172.18.1.1
 docker_nextcloud=172.18.1.2
 docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
+docker_onlyoffice=172.18.1.6
 
 # Remove old containers (service is down until Ansible completes)
-sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy
+sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
 
 # Rerun ansible-playbook
-ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy"
+ansible-playbook nextcloud_raspbian.yml --extra-vars="web_port=$web_port oo_port=$oo_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice"
 ```

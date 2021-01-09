@@ -121,6 +121,13 @@ resource "azurerm_key_vault_secret" "nc-db-secret" {
   depends_on              = [time_sleep.wait_for_vaults]
 }
 
+resource "azurerm_key_vault_secret" "nc-oo-secret" {
+  name                    = "${var.nc_prefix}-oo-secret"
+  value                   = var.oo_password
+  key_vault_id            = azurerm_key_vault.nc-vault-secret.id
+  depends_on              = [time_sleep.wait_for_vaults]
+}
+
 resource "azurerm_key_vault_secret" "nc-storage-secret" {
   name                    = "${var.nc_prefix}-storage-secret"
   value                   = azurerm_storage_account.nc-storage-account.primary_access_key

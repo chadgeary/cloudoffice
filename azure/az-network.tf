@@ -59,3 +59,45 @@ resource "azurerm_network_security_rule" "nc-net-rule-https" {
   source_address_prefix        = var.mgmt_cidr
   destination_address_prefixes = [var.az_subnet_cidr]
 }
+
+resource "azurerm_network_security_rule" "nc-net-rule-httpsoo" {
+  name                         = "${var.nc_prefix}-net-rule-httpsoo"
+  resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
+  network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
+  priority                     = 101
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = var.oo_port
+  source_address_prefix        = var.mgmt_cidr
+  destination_address_prefixes = [var.az_subnet_cidr]
+}
+
+resource "azurerm_network_security_rule" "nc-net-rule-selfhttps" {
+  name                         = "${var.nc_prefix}-net-rule-selfhttps"
+  resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
+  network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
+  priority                     = 102
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = var.web_port
+  source_address_prefix        = "${azurerm_public_ip.nc-public-ip.ip_address}/32"
+  destination_address_prefixes = [var.az_subnet_cidr]
+}
+
+resource "azurerm_network_security_rule" "nc-net-rule-selfhttpsoo" {
+  name                         = "${var.nc_prefix}-net-rule-selfhttpsoo"
+  resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
+  network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
+  priority                     = 103
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = var.oo_port
+  source_address_prefix        = "${azurerm_public_ip.nc-public-ip.ip_address}/32"
+  destination_address_prefixes = [var.az_subnet_cidr]
+}
