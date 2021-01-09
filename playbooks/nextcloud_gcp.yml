@@ -245,12 +245,14 @@
         mode: '0440'
         create: yes
         line: "{{ storage_key.json.payload.data | b64decode | b64decode }}"
+      no_log: True
 
     - name: storage secret json (format)
       replace:
         path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         regexp: "'"
         replace: '"'
+      no_log: True
 
     - name: Determine nextcloud state
       stat:
