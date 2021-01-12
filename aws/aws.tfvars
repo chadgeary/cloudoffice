@@ -6,7 +6,7 @@ oo_password = "changeme3"
 
 # public ssh key for instance access
 ssh_key = "ssh-rsa AAAAB3NzaC1ychange_me_change_me_change_me="
-# ip range permitted access to instance SSH
+# ip range permitted access to instance SSH and WebUI
 mgmt_cidr = "a.b.c.d/32"
 # an AWS IAM username (not root), creates/manages/owns encryption
 kms_manager = "some_username"
