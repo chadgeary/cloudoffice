@@ -76,7 +76,7 @@ POLICY
 
 # s3 block all public access to bucket
 resource "aws_s3_bucket_public_access_block" "nc-bucket-pubaccessblock-data" {
-  bucket                  = aws_s3_bucket.nc-bucket.id
+  bucket                  = aws_s3_bucket.nc-bucket-data.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
