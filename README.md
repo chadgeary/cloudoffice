@@ -9,7 +9,7 @@ Available for AWS, Azure, Digital Ocean, GCP (Google), and OCI (Oracle) - plus s
 Several deployment options are available, see the README of each subdirectory for platform-specific guides. For standalone deployments, see the playbooks/ directory.
 
 # Videos
-### PLACEHOLDER ###
+- [Prerequisites](https://youtu.be/pAndsjN6BbA) - Windows users watch this first
 
 # Discussion
 [Discord Room](https://discord.gg/zmu6GVnPnj)
