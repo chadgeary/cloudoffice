@@ -504,12 +504,15 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: nextcloud backup systemd start/enable
+    - name: nextcloud backup service enable
       systemd:
-        name: "nextcloud-backup.{{ item }}"
+        name: nextcloud-backup.service
+        daemon_reload: yes
+        enabled: yes
+
+    - name: nextcloud backup timer enable and start
+      systemd:
+        name: nextcloud-backup.timer
         daemon_reload: yes
         state: started
         enabled: yes
-      with_items:
-        - service
-        - timer
