@@ -72,7 +72,13 @@ wsl
 # Change to home directory
 cd ~
 
-# Install digital ocean via snap
+# WSL Install digital ocean via github release
+cd ~
+wget https://github.com/digitalocean/doctl/releases/download/v1.54.0/doctl-1.54.0-linux-amd64.tar.gz
+tar xf ~/doctl-1.54.0-linux-amd64.tar.gz
+sudo mv ~/doctl /usr/local/bin
+
+# or, *non-WSL* Install digital ocean via snap
 sudo snap install doctl
 
 # Create PAT (Personal Access Token) and Spaces id/secret
