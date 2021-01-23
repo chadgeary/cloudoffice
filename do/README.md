@@ -81,13 +81,14 @@ sudo mv ~/doctl /usr/local/bin
 # or, *non-WSL* Install digital ocean via snap
 sudo snap install doctl
 
-# Create PAT (Personal Access Token) and Spaces id/secret
+# Create PAT (Personal Access Token)
+# and Spaces ID+Secret
 # https://cloud.digitalocean.com/account/api/tokens
 
 # Set default account context
 doctl auth init --context default
 
-# Add PAT and Spaces id/key to do.tfvars in the customization steps.
+# Add PAT and Spaces id/key to do.tfvars in the customization steps below.
 ```
 
 Customize the deployment - See variables section below
