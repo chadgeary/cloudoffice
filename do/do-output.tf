@@ -88,7 +88,7 @@ output "cloudblock-output" {
   ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address}
   
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
-  sudo docker rm -f cloudoffice_application cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
+  sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
   
   # Update project
   cd /opt/git/nextcloud/
