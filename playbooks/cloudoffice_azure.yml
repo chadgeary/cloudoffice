@@ -316,6 +316,39 @@
         restart_policy: "always"
         container_default_behavior: "compatibility"
 
+    - name: onlyoffice container
+      docker_container:
+        name: cloudoffice_onlyoffice
+        hostname: cloudofficeonlyoffice
+        image: onlyoffice/documentserver
+        networks:
+          - name: cloudoffice
+            ipv4_address: "{{ docker_onlyoffice }}"
+        env:
+          ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
+          USE_UNAUTHORIZED_STORAGE: "true"
+          JWT_ENABLED: "true"
+          JWT_SECRET: "{{ oo_password.secrets[0].secret }}"
+        volumes:
+          - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
+        ports:
+          - "{{ oo_port }}:443"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "no_defaults"
+        auto_remove: no
+        detach: yes
+        init: no
+        interactive: no
+        memory: "0"
+        paused: no
+        read_only: no
+        tty: yes
+      no_log: True
+
     - name: minio storage gateway container
       docker_container:
         name: cloudoffice_storagegateway
