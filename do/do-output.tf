@@ -80,7 +80,7 @@ output "cloudblock-output" {
   ## Ansible Service Setup ##
   ## ##################### ##
   scp ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address}:~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh
-  ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address} "chmod +x ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh && ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
+  ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address} "chmod +x ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh && ~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
   
   ## ################################################ ##
   ## Update Containers and Ansible Rerun Instructions ##
