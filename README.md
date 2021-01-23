@@ -11,6 +11,7 @@ Several deployment options are available, see the README of each subdirectory fo
 # Videos
 - [Prerequisites](https://youtu.be/pAndsjN6BbA) - Watch this first if deploying in the cloud.
 - [AWS](https://youtu.be/DI9QxKWVZKQ)
+- [Azure](https://youtu.be/LH32unkEUUs)
 
 # Discussion
 [Discord Room](https://discord.gg/zmu6GVnPnj)
