@@ -1,6 +1,35 @@
 resource "local_file" "do_setup" {
   filename                          = "${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
   content                           = <<FILECONTENT
+# Create systemd service unit file
+sudo tee /etc/systemd/system/cloudoffice-ansible-state.service << EOM
+[Unit]
+Description=cloudoffice-ansible-state
+After=network.target
+
+[Service]
+ExecStart=/opt/cloudoffice-ansible-state.sh
+Type=simple
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+EOM
+
+# Create systemd timer unit file
+sudo tee /etc/systemd/system/cloudoffice-ansible-state.timer << EOM
+[Unit]
+Description=Starts cloudoffice ansible state playbook 1min after boot
+
+[Timer]
+OnBootSec=1mi
+nUnit=cloudoffice-ansible-state.service
+
+[Install]
+WantedBy=multi-user.target
+EOM
+
 # Create cloudoffice-ansible-state script
 sudo tee /opt/cloudoffice-ansible-state.sh << EOM
 #!/bin/bash
