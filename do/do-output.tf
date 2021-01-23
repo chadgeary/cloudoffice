@@ -106,7 +106,7 @@ output "cloudblock-output" {
   pip3 install --user --upgrade awscli
   # Set credentials
   aws configure set aws_access_key_id ${var.do_storageaccessid}
-  aws configure set aws_access_secret_key ${var.do_storagesecretkey}
+  aws configure set aws_secret_access_key ${var.do_storagesecretkey}
   # Remove objects
   aws s3 rm --recursive s3://${var.nc_prefix}-bucket-${random_string.nc-random.result}/ --endpoint https://${var.do_region}.digitaloceanspaces.com
   aws s3 rm --recursive s3://${var.nc_prefix}-bucket-data-${random_string.nc-random.result}/ --endpoint https://${var.do_region}.digitaloceanspaces.com
