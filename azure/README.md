@@ -55,7 +55,7 @@ sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(l
 sudo apt-get update && sudo apt-get -y install terraform git
 
 # Clone the project
-git clone https://github.com/chadgeary/nextcloud
+git clone https://github.com/chadgeary/cloudoffice
 
 # Create SSH key pair (RETURN for defaults)
 ssh-keygen
@@ -82,11 +82,11 @@ az login
 Customize the deployment - See variables section below
 ```
 # Change to the project's azure directory in powershell
-cd ~/nextcloud/azure/
+cd ~/cloudoffice/azure/
 
 # Open File Explorer in a separate window
 # Navigate to oci project directory - change \chad\ to your WSL username
-%HOMEPATH%\ubuntu-1804\rootfs\home\chad\nextcloud\azure
+%HOMEPATH%\ubuntu-1804\rootfs\home\chad\cloudoffice\azure
 
 # Edit the az.tfvars file using notepad and save
 ```
@@ -94,7 +94,7 @@ cd ~/nextcloud/azure/
 Deploy
 ```
 # In powershell's WSL window, change to the project's azure directory
-cd ~/nextcloud/azure/
+cd ~/cloudoffice/azure/
 
 # Initialize terraform and the apply the terraform state
 terraform init
@@ -110,8 +110,8 @@ Want to watch Ansible setup the virtual machine? SSH to the cloud instance - see
 # Connect to the virtual machine via ssh
 ssh ubuntu@<some ip address terraform told us about>
 
-# Tail the nextcloud log file
-tail -F /var/log/nextcloud.log
+# Tail the log file
+tail -F /var/log/cloudoffice.log
 ```
 
 # Variables
@@ -145,7 +145,7 @@ Edit the vars file (az.tfvars) to customize the deployment, especially:
 wsl
 
 # Change to the project directory
-cd ~/nextcloud/azure/
+cd ~/cloudoffice/azure/
 
 # Update the mgmt_cidr variable - be sure to replace change_me with your public IP address
 sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" az.tfvars
@@ -160,7 +160,7 @@ terraform apply -var-file="az.tfvars"
 sudo apt update && sudo apt-get install --only-upgrade terraform
 
 # Be in the azure subdirectory
-cd ~/nextcloud/azure/
+cd ~/cloudoffice/azure/
 
 # Move vars file to be untracked by git, if not already done.
 if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv az.tfvars pvars.tfvars; fi
