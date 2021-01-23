@@ -144,7 +144,7 @@ Edit the vars file (do.tfvars) to customize the deployment, especially:
 # cat ~/.ssh/id_rsa.pub
 
 # mgmt_cidr
-# an IP range granted webUI, instance SSH access. Also permitted PiHole DNS if dns_novpn = 1 (default).
+# an IP range granted webUI, instance SSH access.
 # deploying from home? This should be your public IP address with a /32 suffix.
 
 # do_token
