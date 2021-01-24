@@ -15,7 +15,7 @@ output "cloudblock-output" {
   ssh ubuntu@${google_compute_address.nc-public-ip.address}
 
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
-  sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy nextcloud_storagegw
+  sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_storagegw cloudoffice_onlyoffice
 
   # Re-apply Ansible playbook with custom variables
   sudo systemctl start cloudoffice-ansible-state.service
