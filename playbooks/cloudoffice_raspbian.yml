@@ -64,6 +64,10 @@
       set_fact:
         oo_port: "{% if oo_port is not defined %}8443{% else %}{{ oo_port }}{% endif %}"
 
+    - name: project_directory if not defined
+      set_fact:
+        project_directory: "{% if project_directory is not defined %}/opt{% else %}{{ project_directory }}{% endif %}"
+
     - name: various container directories - application
       file:
         path: "{{ item }}"

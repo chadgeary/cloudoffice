@@ -31,6 +31,7 @@ docker_nextcloud=172.18.1.2
 docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
 docker_onlyoffice=172.18.1.6
+project_directory=/opt
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud
@@ -42,7 +43,7 @@ sudo chmod 600 /opt/nextcloud/db_password
 sudo chmod 600 /opt/nextcloud/oo_password
 
 # Execute playbook via ansible
-ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice"
+ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice project_directory=/opt"
 
 # See Playbook Summary output for WebUI URL
 ```
