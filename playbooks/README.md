@@ -43,7 +43,7 @@ sudo chmod 600 /opt/nextcloud/db_password
 sudo chmod 600 /opt/nextcloud/oo_password
 
 # Execute playbook via ansible
-ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice project_directory=/opt"
+ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice project_directory=$project_directory"
 
 # See Playbook Summary output for WebUI URL
 ```
