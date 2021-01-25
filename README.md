@@ -14,6 +14,7 @@ Several deployment options are available, see the README of each subdirectory fo
 - [Azure](https://youtu.be/xS80EdVuJhU)
 - [DigitalOcean](https://youtu.be/Npgenw8It6c)
 - [Google Cloud](https://youtu.be/Sr3kA9GJrU0)
+- [Oracle Cloud](https://youtu.be/5Qaj6E2_mIY)
 
 # Discussion
 [Discord Room](https://discord.gg/zmu6GVnPnj)
