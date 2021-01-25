@@ -34,7 +34,7 @@ docker_onlyoffice=172.18.1.6
 project_directory=/opt
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
-sudo mkdir -p /opt/nextcloud
+sudo mkdir -p /opt/nextcloud_application
 echo "somepassword1" | sudo tee /opt/nextcloud_application/admin_password
 echo "somepassword2" | sudo tee /opt/nextcloud_application/db_password
 echo "somepassword3" | sudo tee /opt/nextcloud_application/oo_password
