@@ -151,6 +151,8 @@ Edit the vars file (gcp.tfvars) to customize the deployment, especially:
 
 # mgmt_cidr
 # IP range granted SSH and WebUI access to cloud instance.
+# Deploying from home and only want to access it while at home? Set to your public IP address with a /32 suffix.
+# Want worldwide access? Set to 0.0.0.0/0
 
 # gcp_billing_account
 # The billing ID for the google cloud account

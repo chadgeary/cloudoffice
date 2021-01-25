@@ -145,7 +145,8 @@ Edit the vars file (do.tfvars) to customize the deployment, especially:
 
 # mgmt_cidr
 # an IP range granted webUI, instance SSH access.
-# deploying from home? This should be your public IP address with a /32 suffix.
+# Deploying from home and only want to access it while at home? Set to your public IP address with a /32 suffix.
+# Want worldwide access? Set to 0.0.0.0/0
 
 # do_token
 # The digital ocean PAT (personal access token) generated earlier.
