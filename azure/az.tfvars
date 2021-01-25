@@ -26,7 +26,7 @@ ssh_user = "ubuntu"
 
 ## VERY UNCOMMON ##
 # Change if using a cloned / separate git project or ip settings would interfere with existing networks
-project_url = "https://github.com/chadgeary/nextcloud"
+project_url = "https://github.com/chadgeary/cloudoffice"
 
 # Change if ip/port settings would interfere with existing networks, should all be within a /24
 web_port = "443"
