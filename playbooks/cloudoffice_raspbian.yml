@@ -156,6 +156,27 @@
         line: "{{ db_password }}"
       when: db_password_file.stat.exists|bool == False
 
+    - name: Determine oo_password file exists
+      stat:
+        path: "{{ project_directory }}/nextcloud_application/oo_password"
+      register: oo_password_file
+
+    - name: Generate oo_password if not exists
+      set_fact:
+        oo_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+      when: oo_password_file.stat.exists|bool == False
+      no_log: True
+
+    - name: Set oo_password if not exists
+      lineinfile:
+        path: "{{ project_directory }}/nextcloud_application/oo_password"
+        create: yes
+        owner: root
+        group: root
+        mode: '0600'
+        line: "{{ oo_password }}"
+      when: oo_password_file.stat.exists|bool == False
+
     - name: Get admin_password if exists
       slurp:
         src: "{{ project_directory }}/nextcloud_application/admin_password"
@@ -168,6 +189,12 @@
       register: db_password_content
       when: db_password_file.stat.exists|bool == True
 
+    - name: Get oo_password if exists
+      slurp:
+        src: "{{ project_directory }}/nextcloud_application/oo_password"
+      register: oo_password_content
+      when: oo_password_file.stat.exists|bool == True
+
     - name: Register admin_password if exists
       set_fact:
         admin_password: "{{ admin_password_content['content'] | b64decode | trim }}"
@@ -177,6 +204,11 @@
       set_fact:
         db_password: "{{ db_password_content['content'] | b64decode | trim }}"
       when: db_password_file.stat.exists|bool == True
+
+    - name: Register oo_password if exists
+      set_fact:
+        oo_password: "{{ oo_password_content['content'] | b64decode | trim }}"
+      when: oo_password_file.stat.exists|bool == True
 
     - name: docker network
       docker_network:

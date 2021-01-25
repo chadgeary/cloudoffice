@@ -35,12 +35,12 @@ project_directory=/opt
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud
-echo "somepassword1" | sudo tee /opt/nextcloud/admin_password
-echo "somepassword2" | sudo tee /opt/nextcloud/db_password
-echo "somepassword3" | sudo tee /opt/nextcloud/oo_password
-sudo chmod 600 /opt/nextcloud/admin_password
-sudo chmod 600 /opt/nextcloud/db_password
-sudo chmod 600 /opt/nextcloud/oo_password
+echo "somepassword1" | sudo tee /opt/nextcloud_application/admin_password
+echo "somepassword2" | sudo tee /opt/nextcloud_application/db_password
+echo "somepassword3" | sudo tee /opt/nextcloud_application/oo_password
+sudo chmod 600 /opt/nextcloud_application/admin_password
+sudo chmod 600 /opt/nextcloud_application/db_password
+sudo chmod 600 /opt/nextcloud_application/oo_password
 
 # Execute playbook via ansible
 ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice project_directory=$project_directory"
