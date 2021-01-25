@@ -374,7 +374,7 @@
       retries: 180
       delay: 1
 
-    - name: nextcloud onlyoffice storage and talk (execute)
+    - name: nextcloud onlyoffice and talk (execute)
       shell:
         cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
       args:
@@ -383,3 +383,9 @@
       with_items:
         - onlyoffice
         - talk
+
+    - name: Playbook Summary
+      debug:
+        msg:
+          - "CloudOffice completed installation!"
+          - "Nextcloud WebUI: https://{{ ansible_default_ipv4.address }}:{{ web_port }}"
