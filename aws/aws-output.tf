@@ -20,7 +20,7 @@ output "cloudblock-output" {
 
   # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
   ssh ubuntu@${aws_eip.nc-eip.public_ip}
-  sudo docker rm -f nextcloud_application nextcloud_database nextcloud_webproxy nextcloud_onlyoffice
+  sudo docker rm -f cloudblock_application cloudblock_database cloudblock_webproxy cloudblock_onlyoffice
   exit
   
   # Re-run terraform apply with your pvars file
