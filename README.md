@@ -13,6 +13,7 @@ Several deployment options are available, see the README of each subdirectory fo
 - [AWS](https://youtu.be/Y1kUaYYDMvc)
 - [Azure](https://youtu.be/xS80EdVuJhU)
 - [DigitalOcean](https://youtu.be/Npgenw8It6c)
+- [Google Cloud](https://youtu.be/Sr3kA9GJrU0)
 
 # Discussion
 [Discord Room](https://discord.gg/zmu6GVnPnj)
