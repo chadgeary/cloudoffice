@@ -10,7 +10,7 @@ Several deployment options are available, see the README of each subdirectory fo
 
 # Videos
 Cloud deployments:
-- [Prerequisites](https://youtu.be/d5EneasOVws) - Watch this first if deploying in the cloud.
+- [Prerequisites](https://youtu.be/SJ0hrXPbMNo) - Watch this first if deploying in the cloud.
 - [AWS](https://youtu.be/Y1kUaYYDMvc)
 - [Azure](https://youtu.be/xS80EdVuJhU)
 - [DigitalOcean](https://youtu.be/Npgenw8It6c)
