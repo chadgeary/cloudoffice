@@ -118,8 +118,10 @@ cd ~/cloudoffice/gcp/
 terraform init
 terraform apply -var-file="gcp.tfvars"
 
-# Note the outputs from terraform after the apply completes
+# If permissions errors appear, fix with the below command and re-run the terraform apply.
+sudo chown $USER gcp.tfvars && chmod 600 gcp.tfvars
 
+# Note the outputs from terraform after the apply completes
 # Wait for the virtual machine to become ready (Ansible will setup the services for us)
 ```
 
