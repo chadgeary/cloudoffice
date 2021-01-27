@@ -10,6 +10,8 @@ do_storageaccessid = "changeme4"
 do_storagesecretkey = "changeme5"
 
 ## UNCOMMON ##
+# Note only sfo2, sfo3, nyc3, fra1, and ams3 currently support object storage
+# See: https://cloud.digitalocean.com/spaces/new
 do_region = "nyc3"
 do_image = "ubuntu-18-04-x64"
 
