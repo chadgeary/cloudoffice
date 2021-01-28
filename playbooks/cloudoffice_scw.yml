@@ -160,13 +160,15 @@
 
     - name: get nextcloud backup from bucket if exists and state not exists
       aws_s3:
-        s3_url: "s3.{{scw_region }}.scw.cloud"
+        s3_url: "s3.{{ scw_region }}.scw.cloud"
+        region: "{{ scw_region }}"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_application_backup.tar.gz"
         dest: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         aws_access_key: "{{ scw_accesskey }}"
         aws_secret_key: "{{ scw_secretkey }}"
+        encrypt: "no"
       when: nextcloud_state.stat.exists|bool == False
       ignore_errors: True
 
@@ -185,13 +187,15 @@
 
     - name: get db backup from bucket if exists
       aws_s3:
-        s3_url: "s3.{{scw_region }}.scw.cloud"
+        s3_url: "s3.{{ scw_region }}.scw.cloud"
+        region: "{{ scw_region }}"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_database_backup.tar.gz"
         dest: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         aws_access_key: "{{ scw_accesskey }}"
         aws_secret_key: "{{ scw_secretkey }}"
+        encrypt: "no"
       when: nextcloud_db_state.stat.exists|bool == False
       ignore_errors: True
 
@@ -443,10 +447,14 @@
         - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
-        - "        s3_url: \"s3.{{scw_region }}.scw.cloud\""
+        - "        s3_url: \"s3.{{ scw_region }}.scw.cloud\""
+        - "        region: \"{{ scw_region }}\""
         - "        bucket: \"{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}\""
         - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
+        - "        aws_access_key: \"{{ lookup('env', 'AWS_ACCESS_KEY') }}\""
+        - "        aws_secret_key: \"{{ lookup('env', 'AWS_SECRET_KEY') }}\""
+        - "        encrypt: no"
         - "      with_items: "
         - "        - nextcloud_application "
         - "        - nextcloud_database "
