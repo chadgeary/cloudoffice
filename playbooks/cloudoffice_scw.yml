@@ -160,7 +160,7 @@
 
     - name: get nextcloud backup from bucket if exists and state not exists
       aws_s3:
-        s3_url: "{{ backup_endpoint }}"
+        s3_url: "s3.{{scw_region }}.scw.cloud"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_application_backup.tar.gz"
@@ -185,7 +185,7 @@
 
     - name: get db backup from bucket if exists
       aws_s3:
-        s3_url: "{{ backup_endpoint }}"
+        s3_url: "s3.{{scw_region }}.scw.cloud"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
         object: "/nextcloud/nextcloud_database_backup.tar.gz"
@@ -367,7 +367,7 @@
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ nc_prefix }}-data-bucket-{{ nc_suffix }} -c hostname={{ data_endpoint }} -c region={{ do_region }} -c use_ssl=true -c use_path_style=true  -c key={{ scw_accesskey }} -c secret={{ scw_secretkey }} cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ nc_prefix }}-data-bucket-{{ nc_suffix }} -c hostname=s3.{{scw_region }}.scw.cloud -c region={{ scw_region }} -c use_ssl=true -c use_path_style=true  -c key={{ scw_accesskey }} -c secret={{ scw_secretkey }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
@@ -443,7 +443,7 @@
         - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
-        - "        s3_url: \"{{ backup_endpoint }}\""
+        - "        s3_url: \"s3.{{scw_region }}.scw.cloud\""
         - "        bucket: \"{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}\""
         - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
