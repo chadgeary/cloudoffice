@@ -77,6 +77,7 @@ sudo curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/rel
 sudo chmod +x /usr/local/bin/scw
 
 # Generate an API key @ https://console.scaleway.com/project/credentials
+# Save the access key and secret key, they're used in the next step and further down under Deploy section.
 
 # Add key to scw when prompted
 scw init
