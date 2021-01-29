@@ -61,7 +61,7 @@ git clone https://github.com/chadgeary/cloudoffice
 ssh-keygen
 ```
 
-Install the Digital Ocean CLI and authenticate/generate token+key. A [Digital Ocean account](https://cloud.digitalocean.com/registrations/new) is required to continue.
+Install the Scaleway CLI and authenticate/generate token+key. A [Scaleway Account](https://console.scaleway.com/register) is required to continue.
 ```
 #############################
 ##         Scaleway        ##
