@@ -27,5 +27,21 @@ sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webprox
 # Re-apply Ansible playbook via systemd service
 sudo systemctl start cloudoffice-ansible-state.service
 
+## ########## ##
+## Destroying ##
+################
+# Before terraform destroy, delete all objects from buckets using the aws CLI - this action is irreversible.
+# Install awscli via pip3
+sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y install python3-pip
+pip3 install --user --upgrade awscli
+
+# Set credentials
+aws configure set aws_access_key_id ${var.scw_accesskey}
+aws configure set aws_secret_access_key ${var.scw_secretkey}
+
+# Remove objects
+aws s3 rm --recursive s3://${var.nc_prefix}-backup-bucket-${random_string.nc-random.result}/ --endpoint https://s3.${var.scw_region}.scw.cloud --region ${var.scw_region}
+aws s3 rm --recursive s3://${var.nc_prefix}-data-bucket-${random_string.nc-random.result}/ --endpoint https://s3.${var.scw_region}.scw.cloud --region ${var.scw_region}
+
 OUTPUT
 }

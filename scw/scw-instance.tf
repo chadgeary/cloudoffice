@@ -8,6 +8,6 @@ resource "scaleway_instance_server" "nc-instance" {
   ip_id                             = scaleway_instance_ip.nc-ip.id
   security_group_id                 = scaleway_instance_security_group.nc-securitygroup.id
   user_data = {
-    cloud-init                        = file("${path.module}/${local_file.nc_init.filename}")
+    cloud-init                        = file(local_file.nc_init.filename)
   }
 }
