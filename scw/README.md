@@ -96,7 +96,7 @@ cd ~/cloudoffice/scw/
 
 Deploy
 ```
-# In powershell's WSL window, change to the project's do directory
+# In powershell's WSL window, change to the project's scw directory
 cd ~/cloudoffice/scw/
 
 # Initialize terraform and the apply the terraform state
@@ -141,14 +141,11 @@ Edit the vars file (scw.tfvars) to customize the deployment, especially:
 # Deploying from home and only want to access it while at home? Set to your public IP address with a /32 suffix.
 # Want worldwide access? Set to 0.0.0.0/0
 
-# do_token
-# The digital ocean PAT (personal access token) generated earlier.
+# scw_accesskey
+# The scaleway access key, used by nextcloud to talk with scaleway's object storage (username)
 
-# do_storageaccessid
-# The digital ocean spaces access id (all caps, shorter than secret)
-
-# do_storagesecretkey
-# The digital ocean spaces storage key (mixed upper/lower case, longer than access id)
+# scw_secretkey
+# The scaleway secret key, used by nextcloud to talk with scaleway's object storage (password)
 ```
 
 # Post-Deployment and FAQs
@@ -164,29 +161,30 @@ Edit the vars file (scw.tfvars) to customize the deployment, especially:
 wsl
 
 # Change to the project directory
-cd ~/cloudoffice/do/
+cd ~/cloudoffice/scw/
 
 # Update the mgmt_cidr variable - be sure to replace change_me with your public IP address
-sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" do.tfvars
+sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" scw.tfvars
 # Alternatively, open access to world:
-sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"0.0.0.0/0\"#" do.tfvars
+sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"0.0.0.0/0\"#" scw.tfvars
 
 # Rerun terraform apply, terraform will update the cloud firewall rules
-terraform apply -var-file="do.tfvars"
+terraform apply -var-file="scw.tfvars"
 ```
 
 - How do I update cloudoffice and the other docker containers?
   - The terraform output provides the steps to perform updates.
   - Keep this repository up-to-date too.
+
 ```
 # Ensure terraform is up-to-date
 sudo apt update && sudo apt-get install --only-upgrade terraform
 
 # Be in the do subdirectory
-cd ~/cloudoffice/do/
+cd ~/cloudoffice/scw/
 
 # Move vars file to be untracked by git, if not already done.
-if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv do.tfvars pvars.tfvars; fi
+if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv scw.tfvars pvars.tfvars; fi
 
 # Pull updates
 git pull
