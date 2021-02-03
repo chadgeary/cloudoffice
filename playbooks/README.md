@@ -24,6 +24,7 @@ git clone https://github.com/chadgeary/cloudoffice && cd cloudoffice/playbooks/
 
 # Set Variables
 web_port=443
+instance_public_ip=CHANGEME
 docker_network=172.18.1.0
 docker_gw=172.18.1.1
 docker_nextcloud=172.18.1.2
@@ -67,6 +68,7 @@ git clone https://github.com/chadgeary/cloudoffice && cd cloudoffice/playbooks/
 # Set Variables
 web_port=443
 oo_port=8443
+instance_public_ip=CHANGEME
 docker_network=172.18.1.0
 docker_gw=172.18.1.1
 docker_nextcloud=172.18.1.2
@@ -103,6 +105,7 @@ cd ~/cloudoffice/playbooks
 # Set customized variables (use the variables you saved previously, raspberry pis dont have oo_port or docker_onlyoffice)
 web_port=443
 oo_port=8443
+instance_public_ip=CHANGEME
 docker_network=172.18.1.0
 docker_gw=172.18.1.1
 docker_nextcloud=172.18.1.2
