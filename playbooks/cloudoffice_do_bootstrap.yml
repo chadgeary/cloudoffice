@@ -28,6 +28,11 @@
         group: ubuntu
         mode: '0644'
 
+    - name: remove root's ssh pubkey
+      file:
+        path: /root/.ssh/authorized_keys
+        state: absent
+
     - name: ubuntu gets sudo nopasswd
       lineinfile:
         dest: /etc/sudoers

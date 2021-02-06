@@ -160,7 +160,7 @@
 
     - name: get nextcloud backup from bucket if exists and state not exists
       aws_s3:
-        s3_url: "s3.{{ scw_region }}.scw.cloud"
+        s3_url: "https://s3.{{ scw_region }}.scw.cloud"
         region: "{{ scw_region }}"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
@@ -187,7 +187,7 @@
 
     - name: get db backup from bucket if exists
       aws_s3:
-        s3_url: "s3.{{ scw_region }}.scw.cloud"
+        s3_url: "https://s3.{{ scw_region }}.scw.cloud"
         region: "{{ scw_region }}"
         mode: get
         bucket: "{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}"
@@ -447,7 +447,7 @@
         - "    - name: upload nextcloud archive to cloud storage"
         - "      aws_s3:"
         - "        mode: put"
-        - "        s3_url: \"s3.{{ scw_region }}.scw.cloud\""
+        - "        s3_url: \"https://s3.{{ scw_region }}.scw.cloud\""
         - "        region: \"{{ scw_region }}\""
         - "        bucket: \"{{ nc_prefix }}-backup-bucket-{{ nc_suffix }}\""
         - "        object: \"nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
