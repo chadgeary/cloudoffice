@@ -82,65 +82,6 @@ resource "aws_iam_policy" "nc-instance-policy-s3" {
 EOF
 }
 
-# Instance Policy S3 data
-resource "aws_iam_policy" "nc-instance-policy-s3-data" {
-  name                    = "nc-instance-policy-${random_string.nc-random.result}-s3-data"
-  path                    = "/"
-  description             = "Provides instance access to data s3 objects/bucket"
-  policy                  = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "ListObjectsinBucket",
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListBucket"
-      ],
-      "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}"]
-    },
-    {
-      "Sid": "GetObjectsinBucketPrefix",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion"
-      ],
-      "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}/*"]
-    },
-    {
-      "Sid": "PutObjectsinBucketPrefix",
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:PutObjectAcl"
-      ],
-      "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}/*"]
-    },
-    {
-      "Sid": "DeleteObjectsinBucketPrefix",
-      "Effect": "Allow",
-      "Action": [
-        "s3:DeleteObject"
-      ],
-      "Resource": ["${aws_s3_bucket.nc-bucket-data.arn}/*"]
-    },
-    {
-      "Sid": "EncryptDecryptS3withCMK",
-      "Effect": "Allow",
-      "Action": [
-        "kms:Encrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-      ],
-      "Resource": ["${aws_kms_key.nc-kmscmk-s3.arn}"]
-    }
-  ]
-}
-EOF
-}
-
 # Instance Role
 resource "aws_iam_role" "nc-instance-iam-role" {
   name                    = "nc-instance-profile-${random_string.nc-random.result}-role"
@@ -176,11 +117,6 @@ resource "aws_iam_role_policy_attachment" "nc-iam-attach-ssmparameter" {
 resource "aws_iam_role_policy_attachment" "nc-iam-attach-s3" {
   role                    = aws_iam_role.nc-instance-iam-role.name
   policy_arn              = aws_iam_policy.nc-instance-policy-s3.arn
-}
-
-resource "aws_iam_role_policy_attachment" "nc-iam-attach-s3-data" {
-  role                    = aws_iam_role.nc-instance-iam-role.name
-  policy_arn              = aws_iam_policy.nc-instance-policy-s3-data.arn
 }
 
 # Instance Profile

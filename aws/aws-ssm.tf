@@ -17,7 +17,21 @@ resource "aws_ssm_parameter" "nc-ssm-param-oo-pass" {
   name                    = "${var.name_prefix}-oo-password-${random_string.nc-random.result}"
   type                    = "SecureString"
   key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = var.db_password
+  value                   = var.oo_password
+}
+
+resource "aws_ssm_parameter" "nc-ssm-param-s3-access" {
+  name                    = "${var.name_prefix}-s3-access-${random_string.nc-random.result}"
+  type                    = "SecureString"
+  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
+  value                   = aws_iam_access_key.nc-data-user-key.id
+}
+
+resource "aws_ssm_parameter" "nc-ssm-param-s3-secret" {
+  name                    = "${var.name_prefix}-s3-secret-${random_string.nc-random.result}"
+  type                    = "SecureString"
+  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
+  value                   = aws_iam_access_key.nc-data-user-key.secret
 }
 
 # document to install deps and run playbook

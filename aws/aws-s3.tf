@@ -3,7 +3,7 @@ resource "aws_s3_bucket" "nc-bucket" {
   bucket                  = "${var.name_prefix}-${random_string.nc-random.result}"
   acl                     = "private"
   versioning {
-    enabled = true
+    enabled = false
   }
   server_side_encryption_configuration {
     rule {

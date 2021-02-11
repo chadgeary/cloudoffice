@@ -3,12 +3,12 @@ resource "aws_s3_bucket" "nc-bucket-data" {
   bucket                  = "${var.name_prefix}-${random_string.nc-random.result}-data"
   acl                     = "private"
   versioning {
-    enabled = true
+    enabled = false
   }
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.nc-kmscmk-s3.arn
+        kms_master_key_id = aws_kms_key.nc-kmscmk-s3-data.arn
         sse_algorithm     = "aws:kms"
       }
     }
@@ -33,10 +33,10 @@ resource "aws_s3_bucket" "nc-bucket-data" {
       ]
     },
     {
-      "Sid": "Instance List",
+      "Sid": "Iam user bucket",
       "Effect": "Allow",
       "Principal": {
-        "AWS": ["${aws_iam_role.nc-instance-iam-role.arn}"]
+        "AWS": ["${aws_iam_user.nc-data-user.arn}"]
       },
       "Action": [
         "s3:ListBucket"
@@ -44,30 +44,19 @@ resource "aws_s3_bucket" "nc-bucket-data" {
       "Resource": ["arn:aws:s3:::${var.name_prefix}-${random_string.nc-random.result}-data"]
     },
     {
-      "Sid": "Instance Get",
+      "Sid": "Iam user objects",
       "Effect": "Allow",
       "Principal": {
-        "AWS": ["${aws_iam_role.nc-instance-iam-role.arn}"]
+        "AWS": ["${aws_iam_user.nc-data-user.arn}"]
       },
       "Action": [
         "s3:GetObject",
-        "s3:GetObjectVersion"
+        "s3:GetObjectVersion",
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:DeleteObject"
       ],
       "Resource": ["arn:aws:s3:::${var.name_prefix}-${random_string.nc-random.result}-data/*"]
-    },
-    {
-      "Sid": "Instance Put",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": ["${aws_iam_role.nc-instance-iam-role.arn}"]
-      },
-      "Action": [
-        "s3:PutObject",
-        "s3:PutObjectAcl"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${var.name_prefix}-${random_string.nc-random.result}-data/*"
-      ]
     }
   ]
 }
