@@ -165,6 +165,16 @@
         oo_password: "{{ lookup('aws_ssm', name_prefix + '-oo-password-' + name_suffix, decrypt=True, region=aws_region) }}"
       no_log: True
 
+    - name: Get SSM parameter s3_access
+      set_fact:
+        s3_access: "{{ lookup('aws_ssm', name_prefix + '-s3-access-' + name_suffix, decrypt=True, region=aws_region) }}"
+      no_log: True
+
+    - name: Get SSM parameter s3_secret
+      set_fact:
+        s3_secret: "{{ lookup('aws_ssm', name_prefix + '-s3-secret-' + name_suffix, decrypt=True, region=aws_region) }}"
+      no_log: True
+
     - name: Determine nextcloud state
       stat:
         path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
@@ -372,7 +382,7 @@
         - "# if doesn't exist, create"
         - "if [ $? -ne 0 ]"
         - "then"
-        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true cloud-storage amazons3 amazons3::accesskey"
+        - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:create -c bucket={{ s3_bucket }}-data -c hostname=s3.{{ aws_region }}.amazonaws.com -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true -c key={{ s3_access }} -c secret={{ s3_secret }} cloud-storage amazons3 amazons3::accesskey"
         - "  STORAGE_ID=$(docker exec --user www-data cloudoffice_nextcloud php occ files_external:list | awk '/cloud-storage/ {a=$2}END{print a}')"
         - "  docker exec --user www-data cloudoffice_nextcloud php occ files_external:option $STORAGE_ID enable_sharing true"
         - "else"
