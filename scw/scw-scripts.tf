@@ -5,7 +5,7 @@ resource "local_file" "nc_init" {
 runcmd:
   - [ bash, -c, "apt-get update" ]
   - [ bash, -c, "DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git" ]
-  - [ bash, -c, "pip3 install --upgrade ansible" ]
+  - [ bash, -c, "pip3 install --upgrade pip && pip3 install --upgrade ansible" ]
   - [ bash, -c, "mkdir -p /opt/git/cloudoffice && git clone ${var.project_url} /opt/git/cloudoffice; cd /opt/git/cloudoffice; git pull" ]
   - [ bash, -c, "cd /opt/git/cloudoffice/playbooks/ && ansible-playbook cloudoffice_do_bootstrap.yml >> /var/log/cloudoffice-bootstrap.log" ]
 FILECONTENT
@@ -50,6 +50,8 @@ sudo tee /opt/cloudoffice-ansible-state.sh << EOM
 apt-get update
 # Install pip3 and git
 DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git
+# pip update pip
+pip3 install --upgrade pip
 # Install ansible
 pip3 install --upgrade ansible
 # Make the project directory

@@ -35,6 +35,7 @@ tee /opt/cloudoffice-ansible-state.sh << EOM
 apt-get update
 # Install pip3 and git
 DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git
+pip3 install --upgrade pip
 # Install azure for ansible
 pip3 install ansible[azure]
 # And the collection

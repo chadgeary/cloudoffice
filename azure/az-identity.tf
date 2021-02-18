@@ -4,8 +4,12 @@ resource "azurerm_user_assigned_identity" "nc-instance-id" {
   resource_group_name     = azurerm_resource_group.nc-resourcegroup.name
 }
 
+resource "random_uuid" "nc-instance-role-uuid" {
+}
+
 resource "azurerm_role_definition" "nc-instance-role" {
   name                    = "${var.nc_prefix}-instance-role-${random_string.nc-random.result}"
+  role_definition_id      = random_uuid.nc-instance-role-uuid.result
   scope                   = data.azurerm_subscription.nc-subscription.id
   assignable_scopes       = [data.azurerm_subscription.nc-subscription.id]
   permissions {

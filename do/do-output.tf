@@ -98,6 +98,7 @@ output "cloudblock-output" {
   # Before terraform destroy, delete all objects from buckets using the aws CLI - this action is irreversible.
   # Install awscli via pip3
   sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y install python3-pip
+  pip3 install --upgrade pip
   pip3 install --user --upgrade awscli
   # Set credentials
   aws configure set aws_access_key_id ${var.do_storageaccessid}

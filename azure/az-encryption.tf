@@ -5,9 +5,12 @@ resource "azurerm_key_vault" "nc-vault-disk" {
   tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
   sku_name                = "standard"
   enabled_for_disk_encryption = true
-  soft_delete_enabled         = true
-  soft_delete_retention_days  = 7
   purge_protection_enabled    = true
+  access_policy {
+    tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
+    object_id               = data.azurerm_client_config.nc-client-conf.object_id
+    key_permissions         = ["get", "create", "delete", "list", "restore", "recover", "unwrapkey", "wrapkey", "purge", "encrypt", "decrypt", "sign", "verify"]
+  }
 }
 
 resource "azurerm_key_vault" "nc-vault-storage" {
@@ -16,9 +19,17 @@ resource "azurerm_key_vault" "nc-vault-storage" {
   resource_group_name     = azurerm_resource_group.nc-resourcegroup.name
   tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
   sku_name                = "standard"
-  soft_delete_enabled         = true
-  soft_delete_retention_days  = 7
   purge_protection_enabled    = true
+  access_policy {
+    tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
+    object_id               = data.azurerm_client_config.nc-client-conf.object_id
+    key_permissions         = ["get", "create", "delete", "list", "restore", "recover", "unwrapkey", "wrapkey", "purge", "encrypt", "decrypt", "sign", "verify"]
+  }
+  access_policy {
+    tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
+    object_id               = azurerm_storage_account.nc-storage-account.identity.0.principal_id
+    key_permissions         = ["get", "create", "list", "restore", "recover", "unwrapkey", "wrapkey", "encrypt", "decrypt", "sign", "verify"]
+  }
 }
 
 resource "azurerm_key_vault" "nc-vault-secret" {
@@ -27,30 +38,17 @@ resource "azurerm_key_vault" "nc-vault-secret" {
   resource_group_name     = azurerm_resource_group.nc-resourcegroup.name
   tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
   sku_name                = "standard"
-  soft_delete_enabled         = true
-  soft_delete_retention_days  = 7
   purge_protection_enabled    = true
-}
-
-resource "azurerm_key_vault_access_policy" "nc-vault-disk-access-admin" {
-  key_vault_id            = azurerm_key_vault.nc-vault-disk.id
-  tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
-  object_id               = data.azurerm_client_config.nc-client-conf.object_id
-  key_permissions         = ["get", "create", "delete", "list", "restore", "recover", "unwrapkey", "wrapkey", "purge", "encrypt", "decrypt", "sign", "verify"]
-}
-
-resource "azurerm_key_vault_access_policy" "nc-vault-storage-access-admin" {
-  key_vault_id            = azurerm_key_vault.nc-vault-storage.id
-  tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
-  object_id               = data.azurerm_client_config.nc-client-conf.object_id
-  key_permissions         = ["get", "create", "delete", "list", "restore", "recover", "unwrapkey", "wrapkey", "purge", "encrypt", "decrypt", "sign", "verify"]
-}
-
-resource "azurerm_key_vault_access_policy" "nc-vault-secret-access-admin" {
-  key_vault_id            = azurerm_key_vault.nc-vault-secret.id
-  tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
-  object_id               = data.azurerm_client_config.nc-client-conf.object_id
-  secret_permissions      = ["set","get","delete","list","purge","recover","restore"]
+  access_policy {
+    tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
+    object_id               = data.azurerm_client_config.nc-client-conf.object_id
+    secret_permissions      = ["set","get","delete","list","purge","recover","restore"]
+  }
+  access_policy {
+    tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
+    object_id               = azurerm_user_assigned_identity.nc-instance-id.principal_id
+    secret_permissions      = ["get","list"]
+  }
 }
 
 resource "azurerm_disk_encryption_set" "nc-disk-encrypt" {
@@ -70,23 +68,9 @@ resource "azurerm_key_vault_access_policy" "nc-vault-disk-access-disk" {
   key_permissions         = ["get","decrypt","encrypt","sign","unwrapKey","verify","wrapKey","unwrapKey"]
 }
 
-resource "azurerm_key_vault_access_policy" "nc-vault-storage-access-storage" {
-  key_vault_id            = azurerm_key_vault.nc-vault-storage.id
-  tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
-  object_id               = azurerm_storage_account.nc-storage-account.identity.0.principal_id
-  key_permissions         = ["get", "create", "list", "restore", "recover", "unwrapkey", "wrapkey", "encrypt", "decrypt", "sign", "verify"]
-}
-
-resource "azurerm_key_vault_access_policy" "nc-vault-secret-access-instance" {
-  key_vault_id            = azurerm_key_vault.nc-vault-secret.id
-  tenant_id               = data.azurerm_client_config.nc-client-conf.tenant_id
-  object_id               = azurerm_user_assigned_identity.nc-instance-id.principal_id
-  secret_permissions      = ["get","list"]
-}
-
 resource "time_sleep" "wait_for_vaults" {
   create_duration         = "30s"
-  depends_on              = [azurerm_key_vault_access_policy.nc-vault-disk-access-admin,azurerm_key_vault_access_policy.nc-vault-storage-access-admin,azurerm_key_vault_access_policy.nc-vault-storage-access-storage,azurerm_key_vault_access_policy.nc-vault-secret-access-admin]
+  depends_on              = [azurerm_key_vault.nc-vault-disk]
 }
 
 resource "azurerm_key_vault_key" "nc-disk-key" {

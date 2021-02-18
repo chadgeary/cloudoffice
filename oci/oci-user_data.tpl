@@ -35,6 +35,8 @@ tee /opt/cloudoffice-ansible-state.sh << EOM
 apt-get update
 # Install pip3 and git
 DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git
+# Pip update pip
+pip3 install --upgrade pip
 # Install ansible and oci libraries
 pip3 install --upgrade ansible oci
 # And the collection
