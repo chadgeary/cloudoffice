@@ -131,14 +131,6 @@
         - "{{ project_directory }}/nextcloud_onlyoffice"
         - "{{ project_directory }}/nextcloud_onlyoffice/certs"
 
-    - name: ubuntu ssh key from root key
-      copy:
-        src: /root/.ssh/authorized_keys
-        dest: /home/ubuntu/.ssh/authorized_keys
-        owner: ubuntu
-        group: ubuntu
-        mode: '0644'
-
     - name: web_port if not defined
       set_fact:
         web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
