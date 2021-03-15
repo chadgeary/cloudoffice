@@ -36,7 +36,7 @@ oci_imageid = "ocid1.image.oc1.iad.aaaaaaaascyqvxuxse7kgqtu4go2fazlxqjhq4p4p2rro
 #  }
 
 oci_region = "us-ashburn-1"
-oci_adnumber = 2
+oci_adnumber = 1
 oci_instance_shape = "VM.Standard.E2.1.Micro"
 
 ## VERY UNCOMMON - Change if git project is cloned or deploying into an existing OCI environment where IP/Port schema might overlap ##
