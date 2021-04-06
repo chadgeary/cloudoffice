@@ -18,4 +18,4 @@ Cloud deployments:
 - [Oracle Cloud](https://youtu.be/5Qaj6E2_mIY)
 
 # Discussion
-[Discord Room](https://discord.gg/zmu6GVnPnj)
+[Discord Room](https://discord.gg/TT8vrcnw6x)
