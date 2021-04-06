@@ -1,4 +1,5 @@
 ## COMMON ##
+# nextcloud passwords, admin username is ncadmin
 admin_password = "changeme1"
 db_password = "changeme2"
 oo_password = "changeme3"
