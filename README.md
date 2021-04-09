@@ -17,5 +17,8 @@ Cloud deployments:
 - [Google Cloud](https://youtu.be/Sr3kA9GJrU0)
 - [Oracle Cloud](https://youtu.be/5Qaj6E2_mIY)
 
+Standalone:
+- [Ubuntu](https://youtu.be/5uWyZl7ZpC4)
+
 # Discussion
 [Discord Room](https://discord.gg/TT8vrcnw6x)
