@@ -270,7 +270,6 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
-        container_default_behavior: "compatibility"
       no_log: True
 
     - name: web proxy container
@@ -291,8 +290,8 @@
         restart: yes
         pull: yes
         purge_networks: yes
+        networks_cli_compatible: no
         restart_policy: "always"
-        container_default_behavior: "compatibility"
 
     - name: wait for db container
       wait_for:
@@ -328,7 +327,6 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
-        container_default_behavior: "compatibility"
       no_log: True
 
     - name: onlyoffice container
@@ -353,7 +351,6 @@
         pull: yes
         purge_networks: yes
         restart_policy: "always"
-        container_default_behavior: "no_defaults"
         auto_remove: no
         detach: yes
         init: no
