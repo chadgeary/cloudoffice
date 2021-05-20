@@ -6,6 +6,28 @@ Nextcloud deployed automatically via Terraform+Ansible in Digital Ocean (DO) clo
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
 
 # Step-by-Step
+Mac Users install (home)brew, then terraform, git, doctl cli.
+```
+#########
+## Mac ##
+#########
+# Launch terminal
+
+# Install brew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)”
+
+# Ensure brew up-to-date
+brew update
+
+# Install terraform git and cli
+brew install terraform git doctl
+
+# Verify the three are installed
+which terraform git doctl
+
+# Skip down to 'git clone' below
+```
+
 Windows users install WSL (Windows Subsystem Linux)
 ```
 #############################

@@ -6,6 +6,28 @@ Nextcloud deployed automatically via Terraform+Ansible in Azure (Microsoft) clou
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
 
 # Step-by-Step
+Mac Users install (home)brew, then terraform, git, az cli.
+```
+#########
+## Mac ##
+#########
+# Launch terminal
+
+# Install brew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)”
+
+# Ensure brew up-to-date
+brew update
+
+# Install terraform and git
+brew install terraform git azure-cli
+
+# Verify the three are installed
+which terraform git az
+
+# Skip down to 'git clone' below
+```
+
 Windows users install WSL (Windows Subsystem Linux)
 ```
 #############################
