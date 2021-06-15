@@ -40,6 +40,16 @@ oci_region = "us-ashburn-1"
 oci_adnumber = 1
 oci_instance_shape = "VM.Standard.E2.1.Micro"
 
+# Disk
+# Always Free up to 200
+oci_instance_diskgb = 100
+
+# Memory and OCPUs
+# Always Free VM.Standard.E2.1.Micro up to 1 OCPU and 1 MemGB
+# Always Free VM.Standard.A1.Flex up to 4 OCPU and 24 MemGB but OnlyOffice is not compatible
+oci_instance_ocpus = 1
+oci_instance_memgb = 1
+
 ## VERY UNCOMMON - Change if git project is cloned or deploying into an existing OCI environment where IP/Port schema might overlap ##
 vcn_cidr = "10.10.12.0/24"
 nc_prefix = "nextcloud"

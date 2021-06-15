@@ -46,10 +46,15 @@ resource "oci_core_instance" "nc-instance" {
     display_name            = "${var.nc_prefix}-nic"
     subnet_id               = oci_core_subnet.nc-subnet.id
   }
+  shape_config {
+    memory_in_gbs           = var.oci_instance_memgb
+    ocpus                   = var.oci_instance_ocpus
+  }
   source_details {
     source_id               = data.oci_core_image.nc-image.id
     source_type             = "image"
     kms_key_id              = oci_kms_key.nc-kms-disk-key.id
+    boot_volume_size_in_gbs = var.oci_instance_diskgb
   }
   metadata = {
     ssh_authorized_keys       = var.ssh_key

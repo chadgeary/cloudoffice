@@ -368,6 +368,7 @@
         paused: no
         read_only: no
         tty: yes
+      when: ansible_architecture != "aarch64"
       no_log: True
 
     - name: iptables accept HTTPS
@@ -478,9 +479,17 @@
       args:
         executable: /bin/bash
       with_items:
-        - onlyoffice
         - storage
         - talk
+
+    - name: nextcloud onlyoffice storage and talk (execute)
+      shell:
+        cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
+      args:
+        executable: /bin/bash
+      with_items:
+        - onlyoffice
+      when: ansible_architecture != "aarch64"
 
     - name: nextcloud backup playbook (clear)
       file:
