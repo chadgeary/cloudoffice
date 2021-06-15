@@ -9,10 +9,12 @@ mgmt_cidr = "1.2.3.4/32"
 oci_config_profile = "/home/chad/.oci/config"
 oci_root_compartment = "ocid1.tenancy.oc1..changme"
 
-# OCI's managed Ubuntu 18.04 Minimal image, might need to be changed in the future as images are updated periodically
-# See https://docs.cloud.oracle.com/en-us/iaas/images/ubuntu-1804/
-# Find Canonical-Ubuntu-18.04-Minimal, click it then use the OCID of the image in your region
-oci_imageid = "ocid1.image.oc1.iad.aaaaaaaascyqvxuxse7kgqtu4go2fazlxqjhq4p4p2rromclajqglaqfyhlq"
+# Use a recent version of OCI's managed Ubuntu 20.04 image - specific to your region.
+# For the latest Ubuntu image ids in your region, run:
+# OCI_TENANCY_OCID=$(oci iam compartment list --all --compartment-id-in-subtree true --access-level ACCESSIBLE --include-root --raw-output --query "data[?contains(\"id\",'tenancy')].id | [0]") && oci compute image list --compartment-id $OCI_TENANCY_OCID --all --lifecycle-state 'AVAILABLE' --operating-system "Canonical Ubuntu" --operating-system-version "20.04" --sort-by "TIMECREATED" | grep 'display-name\|ocid'
+
+# For ARM instances, choose the AARCH64 ocid in the command above
+oci_imageid = "ocid1.image.oc1.iad.aaaaaaaatw7xix4fave3xik3ukrgvwl7eihmrfqczj5la6uvji3te56fo5bq"
 
 ## FREE TIER USERS ##
 # Oracle configured your account for two free virtual machines in a specific cloud REGION + AD (Availability Domain), terraform needs to know these.
