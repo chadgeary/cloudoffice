@@ -17,7 +17,7 @@ oci_root_compartment = "ocid1.tenancy.oc1..changme"
 oci_imageid = "ocid1.image.oc1.iad.aaaaaaaatw7xix4fave3xik3ukrgvwl7eihmrfqczj5la6uvji3te56fo5bq"
 
 ## FREE TIER USERS ##
-# Oracle configured your account for two free virtual machines in a specific cloud REGION + AD (Availability Domain), terraform needs to know these.
+# Oracle configured your account for two free AMD64 virtual machines (and ARM now!) in a specific cloud REGION + AD (Availability Domain), terraform needs to know these.
 # See which REGION + AD oracle assigned to your account with the following two commands (without the #):
 
 # OCI_TENANCY_OCID=$(oci iam compartment list --all --compartment-id-in-subtree true --access-level ACCESSIBLE --include-root --raw-output --query "data[?contains(\"id\",'tenancy')].id | [0]")
@@ -40,6 +40,8 @@ oci_imageid = "ocid1.image.oc1.iad.aaaaaaaatw7xix4fave3xik3ukrgvwl7eihmrfqczj5la
 
 oci_region = "us-ashburn-1"
 oci_adnumber = 1
+
+# For ARM, use VM.Standard.A1.Flex
 oci_instance_shape = "VM.Standard.E2.1.Micro"
 
 # Disk
