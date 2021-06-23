@@ -502,15 +502,69 @@
           AWS_SECRET_KEY={{ do_storagesecretkey }}
       no_log: True
 
-    - name: nextcloud backup service enable
+    - name: nextcloud backup service
       systemd:
         name: nextcloud-backup.service
         daemon_reload: yes
-        enabled: yes
 
-    - name: nextcloud backup timer enable and start
+    - name: nextcloud backup timer
       systemd:
         name: nextcloud-backup.timer
         daemon_reload: yes
+
+    - name: clear service and timer files
+      file:
+        path: "/etc/systemd/system/nextcloudcron.{{ item }}"
+        state: absent
+      with_items:
+        - service
+        - timer
+
+    - name: nextcloud background jobs systemd service
+      lineinfile:
+        path: /etc/systemd/system/nextcloudcron.service
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        line: "{{ item }}"
+      with_items:
+        - "[Unit]"
+        - "Description=Nextcloud cron.php service"
+        - " "
+        - "[Service]"
+        - "User=root"
+        - "ExecStart=/usr/bin/docker exec -u www-data cloudoffice_nextcloud /bin/bash -c '/usr/local/bin/php -f /var/www/html/cron.php'"
+        - "  "
+        - "[Install]"
+        - "WantedBy=basic.target"
+
+    - name: nextcloud background jobs systemd timer
+      lineinfile:
+        path: /etc/systemd/system/nextcloudcron.timer
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        line: "{{ item }}"
+      with_items:
+        - "[Unit]"
+        - "Description=Nextcloud cron.php via Timer"
+        - " "
+        - "[Timer]"
+        - "OnBootSec=5min"
+        - "OnUnitActiveSec=5min"
+        - "Unit=nextcloudcron.service"
+        - "  "
+        - "[Install]"
+        - "WantedBy=timers.target"
+
+    - name: nextcloud background jobs start/enable
+      systemd:
+        name: "{{ item }}"
         state: started
         enabled: yes
+        daemon_reload: yes
+      with_items:
+        - nextcloudcron.timer
+        - nextcloudcron.service
