@@ -1,7 +1,7 @@
 # Overview
 Nextcloud built in the cloud automatically using Terraform with Ansible.
 
-Available for AWS, Azure, Digital Ocean, GCP (Google), OCI (Oracle), Scaleway (scw) - plus standalone deployment options.
+Available for several major cloud providers, including: AWS, Azure, Digital Ocean, GCP (Google), OCI (Oracle), Scaleway (scw) + standalone Raspberry Pi/Ubuntu Server deployment options.
 
 ![Diagram](cloudofficediagram.png)
 
