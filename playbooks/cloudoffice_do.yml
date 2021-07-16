@@ -254,7 +254,7 @@
           NEXTCLOUD_ADMIN_USER: ncadmin
           NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }} {{ duckdns_domain }}"
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }} {{ duckdns_domain }}"
-          OVERWRITEHOST: "{% if duckdns_domain != "" %}{{ duckdns_domain }}:{{ web_port }}{% else %}{{ instance_public_ip }}:{{ web_port }}{% endif %}"
+          OVERWRITEHOST: "{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}{% else %}{{ instance_public_ip }}:{{ web_port }}{% endif %}"
           OVERWRITEPROTOCOL: https
           MYSQL_PASSWORD: "{{ db_password }}"
           MYSQL_DATABASE: nextcloud
