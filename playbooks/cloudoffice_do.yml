@@ -401,7 +401,7 @@
 
     - name: wait for onlyoffice 200OK
       uri:
-        url: "https://127.0.0.1:{{ oo_port }}/login"
+        url: "https://127.0.0.1:{{ oo_port }}/"
         status_code: 200
         validate_certs: no
       register: oo_wait_result
