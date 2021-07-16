@@ -524,6 +524,16 @@
       retries: 180
       delay: 1
 
+    - name: wait for onlyoffice 200OK
+      uri:
+        url: "https://127.0.0.1:{{ oo_port }}/"
+        status_code: 200
+        validate_certs: no
+      register: oo_wait_result
+      until: oo_wait_result.status == 200
+      retries: 180
+      delay: 1
+
     - name: nextcloud onlyoffice storage and talk (execute)
       shell:
         cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
