@@ -207,3 +207,6 @@ sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" aws.tfvars
 # Rerun terraform apply, terraform will update the cloud firewall rules
 terraform apply -var-file="aws.tfvars"
 ```
+
+- Using Firefox and OnlyOffice not loading when attempting to edit/view documents?
+  - Visit https://your-cloudoffice-server-ip:your-oo-port (default 8443) and accept the certificate.

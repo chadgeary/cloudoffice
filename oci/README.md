@@ -237,3 +237,6 @@ git pull
 terraform init
 terraform apply -var-file="pvars.tfvars"
 ```
+
+- Using Firefox and OnlyOffice not loading when attempting to edit/view documents?
+  - Visit https://your-cloudoffice-server-ip:your-oo-port (default 8443) and accept the certificate.

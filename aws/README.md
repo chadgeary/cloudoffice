@@ -219,3 +219,6 @@ git pull
 # Re-run terraform apply with your pvars file, see the update instructions in terraform's output
 terraform apply -var-file="pvars.tfvars"
 ```
+
+- Using Firefox and OnlyOffice not loading when attempting to edit/view documents?
+  - Visit https://your-cloudoffice-server-ip:your-oo-port (default 8443) and accept the certificate.

@@ -131,3 +131,6 @@ ansible-playbook cloudoffice_raspbian.yml --extra-vars="web_port=$web_port docke
 # Rerun ansible-playbook, ubuntu
 ansible-playbook cloudoffice_ubuntu.yml --extra-vars="web_port=$web_port oo_port=$oo_port docker_network=$docker_network docker_gw=$docker_gw docker_nextcloud=$docker_nextcloud docker_db=$docker_db docker_webproxy=$docker_webproxy docker_onlyoffice=$docker_onlyoffice project_directory=$project_directory instance_public_ip=$instance_public_ip"
 ```
+
+- Using Firefox and OnlyOffice not loading when attempting to edit/view documents?
+  - Visit https://your-cloudoffice-server-ip:your-oo-port (default 8443) and accept the certificate.
