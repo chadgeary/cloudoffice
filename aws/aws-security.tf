@@ -58,3 +58,14 @@ resource "aws_security_group_rule" "nc-pubsg-out-udp" {
   protocol                = "udp"
   cidr_blocks             = ["0.0.0.0/0"]
 }
+
+resource "aws_security_group_rule" "nc-pubsg-mgmt-80duckdns-in" {
+  count                             = var.enable_duckdns == 1 ? 1 : 0
+  security_group_id       = aws_security_group.nc-pubsg.id
+  type                    = "ingress"
+  description             = "IN FROM WORLD - 80 FOR DUCKDNS"
+  from_port               = "80"
+  to_port                 = "80"
+  protocol                = "tcp"
+  cidr_blocks             = ["0.0.0.0/0"]
+}

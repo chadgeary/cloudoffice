@@ -101,3 +101,18 @@ resource "azurerm_network_security_rule" "nc-net-rule-selfhttpsoo" {
   source_address_prefix        = "${azurerm_public_ip.nc-public-ip.ip_address}/32"
   destination_address_prefixes = [var.az_subnet_cidr]
 }
+
+resource "azurerm_network_security_rule" "nc-net-rule-httpduckdns" {
+  count                        = var.enable_duckdns == 1 ? 1 : 0
+  name                         = "${var.nc_prefix}-net-rule-httpduckdns"
+  resource_group_name          = azurerm_resource_group.nc-resourcegroup.name
+  network_security_group_name  = azurerm_network_security_group.nc-net-sec.name
+  priority                     = 105
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "80"
+  source_address_prefix        = "0.0.0.0/0"
+  destination_address_prefixes = [var.az_subnet_cidr]
+}

@@ -144,3 +144,19 @@ variable "oo_port" {
   type                     = string
   description              = "Port to run onlyoffice"
 }
+
+variable "enable_duckdns" {
+  type                    = number
+}
+
+variable "duckdns_domain" {
+  type                    = string
+}
+
+variable "duckdns_token" {
+  type                    = string
+}
+
+variable "letsencrypt_email" {
+  type                    = string
+}

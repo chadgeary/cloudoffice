@@ -40,6 +40,7 @@ resource "oci_core_network_security_group" "nc-network-security-group" {
 }
 
 resource "oci_core_default_security_list" "nc-security-list" {
+  count                        = var.enable_duckdns == 0 ? 1 : 0
   manage_default_resource_id   = oci_core_vcn.nc-vcn.default_security_list_id
   display_name                 = "${var.nc_prefix}-security"
   egress_security_rules {
@@ -84,6 +85,64 @@ resource "oci_core_default_security_list" "nc-security-list" {
     tcp_options {
       max                          = var.oo_port
       min                          = var.oo_port
+    }
+  }
+}
+
+resource "oci_core_default_security_list" "nc-security-list-duckdns" {
+  count                        = var.enable_duckdns == 1 ? 1 : 0
+  manage_default_resource_id   = oci_core_vcn.nc-vcn.default_security_list_id
+  display_name                 = "${var.nc_prefix}-security"
+  egress_security_rules {
+    protocol                     = "all"
+    destination                  = "0.0.0.0/0"
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = var.mgmt_cidr
+    tcp_options {
+      max                          = "22"
+      min                          = "22"
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = var.mgmt_cidr
+    tcp_options {
+      max                          = var.web_port
+      min                          = var.web_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = var.mgmt_cidr
+    tcp_options {
+      max                          = var.oo_port
+      min                          = var.oo_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = "${oci_core_instance.nc-instance.public_ip}/32"
+    tcp_options {
+      max                          = var.web_port
+      min                          = var.web_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = "${oci_core_instance.nc-instance.public_ip}/32"
+    tcp_options {
+      max                          = var.oo_port
+      min                          = var.oo_port
+    }
+  }
+  ingress_security_rules {
+    protocol                     = 6
+    source                       = "0.0.0.0/0"
+    tcp_options {
+      max                          = "80"
+      min                          = "80"
     }
   }
 }
