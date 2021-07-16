@@ -29,6 +29,10 @@ data "template_file" "nc-custom-data" {
     web_port = var.web_port
     oo_port = var.oo_port
     project_directory = var.project_directory
+    enable_duckdns = var.enable_duckdns
+    duckdns_domain = var.duckdns_domain
+    duckdns_token = var.duckdns_token
+    letsencrypt_email = var.letsencrypt_email
   }
 }
 

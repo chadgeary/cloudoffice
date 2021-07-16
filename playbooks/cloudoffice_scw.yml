@@ -108,6 +108,8 @@
         mode: '0750'
       with_items:
         - "{{ project_directory }}/nextcloud_webproxy"
+        - "{{ project_directory }}/nextcloud_webproxy/nginx"
+        - "{{ project_directory }}/nextcloud_webproxy/nginx/proxy-confs"
 
     - name: various container directories - db
       file:
@@ -152,6 +154,8 @@
       with_items:
         - httpd-ssl.conf
         - httpd.conf
+        - nginx/nginx.conf
+        - nginx/proxy-confs/nextcloud.conf
 
     - name: determine nextcloud state
       stat:
@@ -251,9 +255,9 @@
         env:
           NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_password }}"
           NEXTCLOUD_ADMIN_USER: ncadmin
-          NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }}"
-          TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }}"
-          OVERWRITEHOST: "{{ instance_public_ip }}:{{ web_port }}"
+          NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }} {{ duckdns_domain }}"
+          TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }} {{ duckdns_domain }}"
+          OVERWRITEHOST: "{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}{% else %}{{ instance_public_ip }}:{{ web_port }}{% endif %}"
           OVERWRITEPROTOCOL: https
           MYSQL_PASSWORD: "{{ db_password }}"
           MYSQL_DATABASE: nextcloud
@@ -290,6 +294,34 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+      when: duckdns_domain == ""
+
+    - name: duckdns web proxy container
+      docker_container:
+        name: cloudoffice_webproxy
+        hostname: "{{ duckdns_domain }}"
+        image: ghcr.io/linuxserver/swag
+        networks:
+          - name: cloudoffice
+            ipv4_address: "{{ docker_webproxy }}"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: "UTC"
+          URL: "{{ duckdns_domain }}"
+          VALIDATION: "http"
+          DUCKDNSTOKEN: "{{ duckdns_token }}"
+          EMAIL: "{{ letsencrypt_email }}"
+          VALIDATION: "duckdns"
+        ports:
+          - "{{ web_port }}:{{ web_port }}"
+          - "80:80"
+        volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "compatibility"
+      when: duckdns_domain != ""
 
     - name: onlyoffice container
       docker_container:
