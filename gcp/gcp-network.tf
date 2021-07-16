@@ -15,6 +15,7 @@ resource "google_compute_subnetwork" "nc-subnetwork" {
 }
 
 resource "google_compute_firewall" "nc-firewall-mgmt" {
+  count                        = var.enable_duckdns == 0 ? 1 : 0
   name                              = "${var.nc_prefix}-firewall-mgmt"
   project                           = google_project.nc-project.project_id
   network                           = google_compute_network.nc-network.self_link
