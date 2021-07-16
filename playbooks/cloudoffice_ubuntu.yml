@@ -316,7 +316,7 @@
           EMAIL: "{{ letsencrypt_email }}"
           VALIDATION: "duckdns"
         ports:
-          - "{{ web_port }}:{{ web_port }}"
+          - "{{ web_port }}:443"
           - "80:80"
         volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
         pull: yes
