@@ -137,6 +137,7 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
+      ignore_errors: True
 
     - name: web_port if not defined
       set_fact:
