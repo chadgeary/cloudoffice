@@ -1,5 +1,5 @@
 # Overview
-Nextcloud built in the cloud automatically using Terraform with Ansible.
+Nextcloud built in the cloud automatically using Terraform with Ansible. Now with optional duckdns.org/letsencrypt support!
 
 Available for several major cloud providers, including: AWS (EC2 or Lightsail), Azure, Digital Ocean, GCP (Google), OCI (Oracle), Scaleway (scw) + standalone Raspberry Pi/Ubuntu Server deployment options.
 
