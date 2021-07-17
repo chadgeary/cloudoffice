@@ -9,9 +9,11 @@ value = <<OUTPUT
 ssh ubuntu@${aws_lightsail_static_ip.nc-staticip.ip_address}
 
 ## WebUI ##
-https://${aws_lightsail_static_ip.nc-staticip.ip_address}:${var.web_port}/
+https://${var.enable_duckdns == 1 ? var.duckdns_domain : aws_lightsail_static_ip.nc-staticip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
-## Update / Ansible Rerun ##
+## ################### ##
+## Update Instructions ##
+## ################### ##
 # Move vars file to be untracked by git (one time command)
 if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv aws.tfvars pvars.tfvars; fi
 
