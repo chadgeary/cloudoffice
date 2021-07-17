@@ -56,7 +56,7 @@ git pull
 # Change to playbooks directory
 cd playbooks/
 # Execute playbook
-ansible-playbook cloudoffice_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} docker_onlyoffice=${docker_onlyoffice} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip} az_storage_account_name=${az_storage_account_name} web_port=${web_port} oo_port=${oo_port} project_directory=${project_directory} enable_duckdns=${enable_duckdns} duckdns_domain=${duckdns_domain} duckdns_token=${duckdns_token} letsencrypt_email=${letsencrypt_email}' >> /var/log/cloudoffice.log
+ansible-playbook cloudoffice_azure.yml --extra-vars 'docker_network=${docker_network} docker_gw=${docker_gw} docker_nextcloud=${docker_nextcloud} docker_db=${docker_db} docker_webproxy=${docker_webproxy} docker_storagegw=${docker_storagegw} docker_onlyoffice=${docker_onlyoffice} nc_prefix=${nc_prefix} nc_suffix=${nc_suffix} instance_public_ip=${instance_public_ip} az_storage_account_name=${az_storage_account_name} web_port=${web_port} oo_port=${oo_port} project_directory=${project_directory} enable_duckdns=${enable_duckdns} duckdns_domain=${duckdns_domain} duckdns_token=${duckdns_token} letsencrypt_email=${letsencrypt_email} docker_duckdnsupdater=${docker_duckdnsupdater}' >> /var/log/cloudoffice.log
 EOM
 
 # Start / Enable cloudoffice-ansible-state

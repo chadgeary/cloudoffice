@@ -17,6 +17,7 @@ data "template_file" "nc-user-data" {
     docker_db = var.docker_db
     docker_webproxy = var.docker_webproxy
     docker_onlyoffice = var.docker_onlyoffice
+    docker_duckdnsupdater = var.docker_duckdnsupdater
     admin_password_cipher = oci_kms_encrypted_data.nc-kms-nc-admin-secret.ciphertext
     db_password_cipher = oci_kms_encrypted_data.nc-kms-nc-db-secret.ciphertext
     oo_password_cipher = oci_kms_encrypted_data.nc-kms-nc-oo-secret.ciphertext

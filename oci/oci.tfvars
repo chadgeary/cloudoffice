@@ -66,6 +66,7 @@ docker_nextcloud = "172.18.1.2"
 docker_webproxy = "172.18.1.3"
 docker_db = "172.18.1.4"
 docker_onlyoffice = "172.18.1.6"
+docker_duckdnsupdater = "172.18.1.7"
 
 # if using duckdns, set to 1 and fill in the complete domain, e.g.: duckdns_domain = "chadcloudoffice.duckdns.org", duckdns_token, and your email address (for letsencrypt notices)
 enable_duckdns = 0

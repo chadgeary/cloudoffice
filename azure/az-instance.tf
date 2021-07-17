@@ -24,6 +24,7 @@ data "template_file" "nc-custom-data" {
     docker_webproxy = var.docker_webproxy
     docker_storagegw = var.docker_storagegw
     docker_onlyoffice = var.docker_onlyoffice
+    docker_duckdnsupdater = var.docker_duckdnsupdater
     instance_public_ip = azurerm_public_ip.nc-public-ip.ip_address
     az_storage_account_name = azurerm_storage_account.nc-storage-account.name
     web_port = var.web_port

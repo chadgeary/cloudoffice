@@ -114,6 +114,11 @@ variable "docker_onlyoffice" {
   description              = "minio storage gw container ip"
 }
 
+variable "docker_duckdnsupdater" {
+  type                     = string
+  description              = "duckdns dynamic dns update container ip"
+}
+
 variable "project_directory" {
   type                     = string
   description              = "Location to install/run project"

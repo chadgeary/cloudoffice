@@ -342,6 +342,26 @@
       no_log: True
       when: duckdns_domain == ""
 
+    - name: duckdnsupdater container
+      docker_container:
+        name: cloudoffice_duckdnsupdater
+        hostname: cloudoffice_duckdnsupdater
+        image: ghcr.io/linuxserver/duckdns
+        networks:
+          - name: cloudoffice
+            ipv4_address: "{{ docker_duckdnsupdater }}"
+        env:
+          PUID: "1000"
+          PGID: "1000"
+          TZ: "UTC"
+          SUBDOMAINS: "{{ duckdns_domain.split('.')[0] }}"
+          TOKEN: "{{ duckdns_token }}"
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        container_default_behavior: "compatibility"
+      when: duckdns_domain != ""
+
     - name: duckdns web proxy container
       docker_container:
         name: cloudoffice_webproxy
@@ -497,7 +517,7 @@
 
     - name: wait for nextcloud 200OK
       uri:
-        url: "https://127.0.0.1:{{ web_port }}/login"
+        url: "{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}/login{% else %}https://127.0.0.1:{{ web_port }}/login{% endif %}"
         status_code: 200
         validate_certs: no
       register: nc_wait_result
