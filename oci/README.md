@@ -1,9 +1,10 @@
 # Reference
-Nextcloud deployed automatically via Terraform+Ansible in Oracle (OCI) cloud.
+Nextcloud + OnlyOffice deployed automatically via Terraform+Ansible in Oracle (OCI) cloud with object storage.
 
 # Requirements
 - An Oracle cloud account.
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+- *NEW* Optionally setup a duckdns.org domain, this is suggested for all new installations!
 
 # Step-by-Step
 Mac Users install (home)brew, then terraform, git, cloud cli.

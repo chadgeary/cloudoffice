@@ -1,5 +1,5 @@
 # Local Deployments
-`cloudoffice_raspbian.yml` and `cloudoffice_ubuntu.yml` support standalone deployments though OnlyOffice is not available on ARM (yet).
+`cloudoffice_raspbian.yml` and `cloudoffice_ubuntu.yml` support standalone deployments. Note OnlyOffice is not available on ARM (yet).
 
 # Raspbian Deployment
 - Raspbian 10 (Buster)

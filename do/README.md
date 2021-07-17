@@ -1,9 +1,10 @@
 # Reference
-Nextcloud deployed automatically via Terraform+Ansible in Digital Ocean (DO) cloud.
+Nextcloud + OnlyOffice deployed automatically via Terraform+Ansible in DigitalOcean (DO) cloud with object storage.
 
 # Requirements
 - A Digital Ocean cloud account.
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+- *NEW* Optionally setup a duckdns.org domain, this is suggested for all new installations!
 
 # Step-by-Step
 Mac Users install (home)brew, then terraform, git, doctl cli.

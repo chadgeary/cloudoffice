@@ -1,9 +1,10 @@
 # Reference
-Nextcloud deployed automatically via Terraform+Ansible in Google (GCP) cloud.
+Nextcloud + OnlyOffice deployed automatically via Terraform+Ansible in Google (GCP) cloud with object storage.
 
 # Requirements
 - A Google cloud account
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+- *NEW* Optionally setup a duckdns.org domain, this is suggested for all new installations!
 
 # Step-by-Step 
 Mac Users install (home)brew, then terraform, git, cloud cli.

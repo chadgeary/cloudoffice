@@ -1,9 +1,10 @@
 # Reference
-Nextcloud and OnlyOffice deployed automatically via Terraform+Ansible in Scaleway (scw) cloud, for our friends in the EU.
+Nextcloud + OnlyOffice deployed automatically via Terraform+Ansible in Scaleway (scw) cloud with object storage. Not familiar with Scaleway? They are a cloud provider headquartered in Europe.
 
 # Requirements
 - A Scaleway cloud account, billing enabled (at least test-level).
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+- *NEW* Optionally setup a duckdns.org domain, this is suggested for all new installations!
 
 # Step-by-Step
 Mac Users install (home)brew, then terraform, git, cloud cli.

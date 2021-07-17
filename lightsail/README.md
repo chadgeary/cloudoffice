@@ -1,11 +1,12 @@
 # Reference
-End-to-end DNS encryption with DNS-based ad-blocking. Combines wireguard (DNS VPN), pihole (adblock), and cloudflared (DNS over HTTPS). Built in AWS with a lightsail instance using Terraform, Ansible, and Docker.
+Nextcloud + OnlyOffice deployed automatically via Terraform and Ansible in AWS Lightsail with object storage.
 
 ![Diagram](../diagram.png)
 
 # Requirements
 - An AWS account
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+- *NEW* Optionally setup a duckdns.org domain, this is suggested for all new installations!
 
 # Step-by-Step 
 Mac Users install (home)brew, then terraform, git, awscli.
@@ -82,8 +83,8 @@ sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(l
 # Install terraform and git
 sudo apt-get update && sudo apt-get -y install terraform git
  
-# Clone the cloudblock project
-git clone https://github.com/chadgeary/cloudblock
+# Clone the cloudoffice project
+git clone https://github.com/chadgeary/cloudoffice
 
 # Create SSH key pair (RETURN for defaults)
 ssh-keygen
@@ -121,11 +122,11 @@ pip3 install --user --upgrade awscli
 Customize the deployment - See variables section below
 ```
 # Change to the project's lightsail directory in powershell
-cd ~/cloudblock/lightsail/
+cd ~/cloudoffice/lightsail/
 
 # Open File Explorer in a separate window
 # Navigate to aws project directory - change \chad\ to your WSL username
-%HOMEPATH%\ubuntu-1804\rootfs\home\chad\cloudblock\aws
+%HOMEPATH%\ubuntu-1804\rootfs\home\chad\cloudoffice\aws
 
 # Edit the aws.tfvars file using notepad and save
 ```
@@ -133,7 +134,7 @@ cd ~/cloudblock/lightsail/
 Deploy
 ```
 # In powershell's WSL window, change to the project's aws directory
-cd ~/cloudblock/lightsail/
+cd ~/cloudoffice/lightsail/
 
 # Initialize terraform and apply the terraform state
 terraform init
@@ -182,15 +183,8 @@ Edit the vars file (aws.tfvars) to customize the deployment, especially:
 
 # Updates
 - See the notes from `terraform output` for aws-specific update instructions.
-- Important note, if you are familiar with a traditional pihole deployment keep in mind cloudblock uses the docker container which does not follow the same
-update path. Cloudblock follows the official pihole (and wireguard) container update instructions:
-  - [Pihole](https://github.com/pi-hole/docker-pi-hole#upgrading-persistence-and-customizations)
-  - [Wireguard](https://github.com/linuxserver/docker-wireguard)
 
 # FAQs
-- Want to reach the PiHole webUI while away?
-  - Connect to the Wireguard VPN and browse to Pihole VPN IP in the terraform output ( by default, its https://172.18.0.5/admin/ - for older installations its http://172.18.0.3/admin/ ).
-
 - Using an ISP with a dynamic IP (DHCP) and the IP address changed? Pihole webUI and SSH access will be blocked until the mgmt_cidr is updated.
   - Follow the steps below to quickly update the cloud firewall using terraform.
 
@@ -199,7 +193,7 @@ update path. Cloudblock follows the official pihole (and wireguard) container up
 wsl
 
 # Change to the project directory
-cd ~/cloudblock/lightsail/
+cd ~/cloudoffice/lightsail/
 
 # Update the mgmt_cidr variable - be sure to replace change_me with your public IP address
 sed -i -e "s#^mgmt_cidr = .*#mgmt_cidr = \"change_me/32\"#" aws.tfvars
