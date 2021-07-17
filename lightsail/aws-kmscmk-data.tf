@@ -1,12 +1,12 @@
 resource "aws_kms_key" "nc-kmscmk-s3-data" {
-  description             = "S3 Key"
-  key_usage               = "ENCRYPT_DECRYPT"
+  description              = "S3 Key"
+  key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  enable_key_rotation     = "true"
-  tags                    = {
-    Name                  = "nc-kmscmk-s3-data"
+  enable_key_rotation      = "true"
+  tags = {
+    Name = "nc-kmscmk-s3-data"
   }
-  policy                  = <<EOF
+  policy = <<EOF
 {
   "Id": "nc-kmskeypolicy-s3",
   "Version": "2012-10-17",
@@ -46,6 +46,6 @@ EOF
 }
 
 resource "aws_kms_alias" "nc-kmscmk-s3-data-alias" {
-  name                    = "alias/${random_string.nc-random.result}-nc-ksmcmk-s3-data"
-  target_key_id           = aws_kms_key.nc-kmscmk-s3.key_id
+  name          = "alias/${random_string.nc-random.result}-nc-ksmcmk-s3-data"
+  target_key_id = aws_kms_key.nc-kmscmk-s3.key_id
 }

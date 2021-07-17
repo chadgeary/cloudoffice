@@ -1,5 +1,5 @@
 output "cloudoffice-output" {
-value = <<OUTPUT
+  value = <<OUTPUT
 
 #############
 ## OUTPUTS ##

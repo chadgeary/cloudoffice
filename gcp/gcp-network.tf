@@ -1,38 +1,38 @@
 resource "google_compute_network" "nc-network" {
-  name                              = "${var.nc_prefix}-network"
-  project                           = google_project.nc-project.project_id
-  auto_create_subnetworks           = false
-  mtu                               = 1500
-  depends_on                        = [google_project_service.nc-project-compute-service]
+  name                    = "${var.nc_prefix}-network"
+  project                 = google_project.nc-project.project_id
+  auto_create_subnetworks = false
+  mtu                     = 1500
+  depends_on              = [google_project_service.nc-project-compute-service]
 }
 
 resource "google_compute_subnetwork" "nc-subnetwork" {
-  name                              = "${var.nc_prefix}-subnetwork"
-  project                           = google_project.nc-project.project_id
-  network                           = google_compute_network.nc-network.id
-  ip_cidr_range                     = var.gcp_cidr
-  region                            = var.gcp_region
+  name          = "${var.nc_prefix}-subnetwork"
+  project       = google_project.nc-project.project_id
+  network       = google_compute_network.nc-network.id
+  ip_cidr_range = var.gcp_cidr
+  region        = var.gcp_region
 }
 
 resource "google_compute_firewall" "nc-firewall-mgmt" {
-  name                              = "${var.nc_prefix}-firewall-mgmt"
-  project                           = google_project.nc-project.project_id
-  network                           = google_compute_network.nc-network.self_link
-  source_ranges                     = [var.mgmt_cidr, google_compute_address.nc-public-ip.address]
+  name          = "${var.nc_prefix}-firewall-mgmt"
+  project       = google_project.nc-project.project_id
+  network       = google_compute_network.nc-network.self_link
+  source_ranges = [var.mgmt_cidr, google_compute_address.nc-public-ip.address]
   allow {
-    protocol                          = "tcp"
-    ports                             = ["22",var.web_port,var.oo_port]
+    protocol = "tcp"
+    ports    = ["22", var.web_port, var.oo_port]
   }
 }
 
 resource "google_compute_firewall" "nc-firewall-mgmt-duckdns" {
-  count                        = var.enable_duckdns == 1 ? 1 : 0
-  name                              = "${var.nc_prefix}-firewall-mgmt-duckdns"
-  project                           = google_project.nc-project.project_id
-  network                           = google_compute_network.nc-network.self_link
-  source_ranges                     = ["0.0.0.0/0"]
+  count         = var.enable_duckdns == 1 ? 1 : 0
+  name          = "${var.nc_prefix}-firewall-mgmt-duckdns"
+  project       = google_project.nc-project.project_id
+  network       = google_compute_network.nc-network.self_link
+  source_ranges = ["0.0.0.0/0"]
   allow {
-    protocol                          = "tcp"
-    ports                             = ["80"]
+    protocol = "tcp"
+    ports    = ["80"]
   }
 }

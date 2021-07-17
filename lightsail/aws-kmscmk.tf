@@ -1,12 +1,12 @@
 resource "aws_kms_key" "nc-kmscmk-s3" {
-  description             = "S3 Key"
-  key_usage               = "ENCRYPT_DECRYPT"
+  description              = "S3 Key"
+  key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  enable_key_rotation     = "true"
-  tags                    = {
-    Name                  = "nc-kmscmk-s3"
+  enable_key_rotation      = "true"
+  tags = {
+    Name = "nc-kmscmk-s3"
   }
-  policy                  = <<EOF
+  policy = <<EOF
 {
   "Id": "nc-kmskeypolicy-s3",
   "Version": "2012-10-17",
@@ -67,19 +67,19 @@ EOF
 }
 
 resource "aws_kms_alias" "nc-kmscmk-s3-alias" {
-  name                    = "alias/${random_string.nc-random.result}-nc-ksmcmk-s3"
-  target_key_id           = aws_kms_key.nc-kmscmk-s3.key_id
+  name          = "alias/${random_string.nc-random.result}-nc-ksmcmk-s3"
+  target_key_id = aws_kms_key.nc-kmscmk-s3.key_id
 }
 
 resource "aws_kms_key" "nc-kmscmk-ssm" {
-  description             = "Key for ssm"
-  key_usage               = "ENCRYPT_DECRYPT"
+  description              = "Key for ssm"
+  key_usage                = "ENCRYPT_DECRYPT"
   customer_master_key_spec = "SYMMETRIC_DEFAULT"
-  enable_key_rotation     = "true"
-  tags                    = {
-    Name                  = "nc-kmscmk-ssm"
+  enable_key_rotation      = "true"
+  tags = {
+    Name = "nc-kmscmk-ssm"
   }
-  policy                  = <<EOF
+  policy = <<EOF
 {
   "Id": "nc-kmskeypolicy-ssm",
   "Version": "2012-10-17",
@@ -114,6 +114,6 @@ EOF
 }
 
 resource "aws_kms_alias" "nc-kmscmk-ssm-alias" {
-  name                    = "alias/${random_string.nc-random.result}-nc-ksmcmk-ssm"
-  target_key_id           = aws_kms_key.nc-kmscmk-ssm.key_id
+  name          = "alias/${random_string.nc-random.result}-nc-ksmcmk-ssm"
+  target_key_id = aws_kms_key.nc-kmscmk-ssm.key_id
 }

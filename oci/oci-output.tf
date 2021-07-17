@@ -1,5 +1,5 @@
 output "nc-output" {
-value = <<OUTPUT
+  value = <<OUTPUT
 
 #############
 ## OUTPUTS ##

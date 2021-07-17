@@ -1,14 +1,14 @@
 # SSM Managed Policy
 data "aws_iam_policy" "nc-instance-policy-ssm" {
-  arn                     = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # Instance Policy SSM Parameter
 resource "aws_iam_policy" "nc-instance-policy-ssmparameter" {
-  name                    = "nc-instance-policy-${random_string.nc-random.result}-ssmparameter"
-  path                    = "/"
-  description             = "Provides instance access to the ssm parameter(s)"
-  policy                  = <<EOF
+  name        = "nc-instance-policy-${random_string.nc-random.result}-ssmparameter"
+  path        = "/"
+  description = "Provides instance access to the ssm parameter(s)"
+  policy      = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -33,10 +33,10 @@ EOF
 
 # Instance Policy S3
 resource "aws_iam_policy" "nc-instance-policy-s3" {
-  name                    = "nc-instance-policy-${random_string.nc-random.result}-s3"
-  path                    = "/"
-  description             = "Provides instance access to s3 objects/bucket"
-  policy                  = <<EOF
+  name        = "nc-instance-policy-${random_string.nc-random.result}-s3"
+  path        = "/"
+  description = "Provides instance access to s3 objects/bucket"
+  policy      = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -84,9 +84,9 @@ EOF
 
 # Instance Role
 resource "aws_iam_role" "nc-instance-iam-role" {
-  name                    = "nc-instance-profile-${random_string.nc-random.result}-role"
-  path                    = "/"
-  assume_role_policy      = <<EOF
+  name               = "nc-instance-profile-${random_string.nc-random.result}-role"
+  path               = "/"
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -105,22 +105,22 @@ EOF
 
 # Instance Role Attachments
 resource "aws_iam_role_policy_attachment" "nc-iam-attach-ssm" {
-  role                    = aws_iam_role.nc-instance-iam-role.name
-  policy_arn              = data.aws_iam_policy.nc-instance-policy-ssm.arn
+  role       = aws_iam_role.nc-instance-iam-role.name
+  policy_arn = data.aws_iam_policy.nc-instance-policy-ssm.arn
 }
 
 resource "aws_iam_role_policy_attachment" "nc-iam-attach-ssmparameter" {
-  role                    = aws_iam_role.nc-instance-iam-role.name
-  policy_arn              = aws_iam_policy.nc-instance-policy-ssmparameter.arn
+  role       = aws_iam_role.nc-instance-iam-role.name
+  policy_arn = aws_iam_policy.nc-instance-policy-ssmparameter.arn
 }
 
 resource "aws_iam_role_policy_attachment" "nc-iam-attach-s3" {
-  role                    = aws_iam_role.nc-instance-iam-role.name
-  policy_arn              = aws_iam_policy.nc-instance-policy-s3.arn
+  role       = aws_iam_role.nc-instance-iam-role.name
+  policy_arn = aws_iam_policy.nc-instance-policy-s3.arn
 }
 
 # Instance Profile
 resource "aws_iam_instance_profile" "nc-instance-profile" {
-  name                    = "nc-instance-profile-${random_string.nc-random.result}"
-  role                    = aws_iam_role.nc-instance-iam-role.name
+  name = "nc-instance-profile-${random_string.nc-random.result}"
+  role = aws_iam_role.nc-instance-iam-role.name
 }

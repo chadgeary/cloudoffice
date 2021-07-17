@@ -1,7 +1,7 @@
 # s3 bucket
 resource "aws_s3_bucket" "nc-bucket" {
-  bucket                  = "${var.name_prefix}-${random_string.nc-random.result}"
-  acl                     = "private"
+  bucket = "${var.name_prefix}-${random_string.nc-random.result}"
+  acl    = "private"
   versioning {
     enabled = false
   }
@@ -14,15 +14,15 @@ resource "aws_s3_bucket" "nc-bucket" {
     }
   }
   lifecycle_rule {
-    id                    = "${var.name_prefix}-backup-lifecycle"
-    enabled               = true
-    prefix                = "nextcloud/"
+    id      = "${var.name_prefix}-backup-lifecycle"
+    enabled = true
+    prefix  = "nextcloud/"
     noncurrent_version_expiration {
-      days                  = 7
+      days = 7
     }
   }
-  force_destroy           = true
-  policy                  = <<POLICY
+  force_destroy = true
+  policy        = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -94,9 +94,9 @@ resource "aws_s3_bucket_public_access_block" "nc-bucket-pubaccessblock" {
 
 # s3 objects (playbook)
 resource "aws_s3_bucket_object" "nc-files" {
-  for_each                = fileset("../playbooks/", "**")
-  bucket                  = aws_s3_bucket.nc-bucket.id
-  key                     = "playbook/${each.value}"
-  content_base64          = base64encode(file("${path.module}/../playbooks/${each.value}"))
-  kms_key_id              = aws_kms_key.nc-kmscmk-s3.arn
+  for_each       = fileset("../playbooks/", "**")
+  bucket         = aws_s3_bucket.nc-bucket.id
+  key            = "playbook/${each.value}"
+  content_base64 = base64encode(file("${path.module}/../playbooks/${each.value}"))
+  kms_key_id     = aws_kms_key.nc-kmscmk-s3.arn
 }

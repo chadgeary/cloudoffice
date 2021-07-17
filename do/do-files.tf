@@ -1,6 +1,6 @@
 resource "local_file" "do_setup" {
-  filename                          = "${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
-  content                           = <<FILECONTENT
+  filename = "${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
+  content  = <<FILECONTENT
 # Create systemd service unit file
 sudo tee /etc/systemd/system/cloudoffice-ansible-state.service << EOM
 [Unit]

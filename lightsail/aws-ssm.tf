@@ -1,56 +1,56 @@
 resource "aws_ssm_activation" "nc-ssm-activation" {
-  name                    = "${var.name_prefix}-ssm-activation"
-  description             = "Lightsail activation"
-  iam_role                = aws_iam_role.nc-instance-iam-role.name
-  registration_limit      = "1"
-  tags                    = {
-    Name                    = "${var.name_prefix}-instance"
-    cloudoffice             = random_string.nc-random.result
+  name               = "${var.name_prefix}-ssm-activation"
+  description        = "Lightsail activation"
+  iam_role           = aws_iam_role.nc-instance-iam-role.name
+  registration_limit = "1"
+  tags = {
+    Name        = "${var.name_prefix}-instance"
+    cloudoffice = random_string.nc-random.result
   }
-  depends_on              = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-ssmparameter, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_iam_role.nc-instance-iam-role]
+  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-ssmparameter, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_iam_role.nc-instance-iam-role]
 }
 
 # passwords as encrypted ssm parameters
 resource "aws_ssm_parameter" "nc-ssm-param-admin-pass" {
-  name                    = "${var.name_prefix}-admin-password-${random_string.nc-random.result}"
-  type                    = "SecureString"
-  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = var.admin_password
+  name   = "${var.name_prefix}-admin-password-${random_string.nc-random.result}"
+  type   = "SecureString"
+  key_id = aws_kms_key.nc-kmscmk-ssm.key_id
+  value  = var.admin_password
 }
 
 resource "aws_ssm_parameter" "nc-ssm-param-db-pass" {
-  name                    = "${var.name_prefix}-db-password-${random_string.nc-random.result}"
-  type                    = "SecureString"
-  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = var.db_password
+  name   = "${var.name_prefix}-db-password-${random_string.nc-random.result}"
+  type   = "SecureString"
+  key_id = aws_kms_key.nc-kmscmk-ssm.key_id
+  value  = var.db_password
 }
 
 resource "aws_ssm_parameter" "nc-ssm-param-oo-pass" {
-  name                    = "${var.name_prefix}-oo-password-${random_string.nc-random.result}"
-  type                    = "SecureString"
-  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = var.oo_password
+  name   = "${var.name_prefix}-oo-password-${random_string.nc-random.result}"
+  type   = "SecureString"
+  key_id = aws_kms_key.nc-kmscmk-ssm.key_id
+  value  = var.oo_password
 }
 
 resource "aws_ssm_parameter" "nc-ssm-param-s3-access" {
-  name                    = "${var.name_prefix}-s3-access-${random_string.nc-random.result}"
-  type                    = "SecureString"
-  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = aws_iam_access_key.nc-data-user-key.id
+  name   = "${var.name_prefix}-s3-access-${random_string.nc-random.result}"
+  type   = "SecureString"
+  key_id = aws_kms_key.nc-kmscmk-ssm.key_id
+  value  = aws_iam_access_key.nc-data-user-key.id
 }
 
 resource "aws_ssm_parameter" "nc-ssm-param-s3-secret" {
-  name                    = "${var.name_prefix}-s3-secret-${random_string.nc-random.result}"
-  type                    = "SecureString"
-  key_id                  = aws_kms_key.nc-kmscmk-ssm.key_id
-  value                   = aws_iam_access_key.nc-data-user-key.secret
+  name   = "${var.name_prefix}-s3-secret-${random_string.nc-random.result}"
+  type   = "SecureString"
+  key_id = aws_kms_key.nc-kmscmk-ssm.key_id
+  value  = aws_iam_access_key.nc-data-user-key.secret
 }
 
 # document to install deps and run playbook
 resource "aws_ssm_document" "nc-ssm-doc" {
-  name                    = "${var.name_prefix}-ssm-doc-${random_string.nc-random.result}"
-  document_type           = "Command"
-  content                 = <<DOC
+  name          = "${var.name_prefix}-ssm-doc-${random_string.nc-random.result}"
+  document_type = "Command"
+  content       = <<DOC
   {
     "schemaVersion": "2.2",
     "description": "Ansible Playbooks via SSM for Ubuntu - installs Ansible properly.",
@@ -135,22 +135,22 @@ DOC
 
 # ansible playbook association
 resource "aws_ssm_association" "nc-ssm-assoc" {
-  association_name        = "${var.name_prefix}-ssm-assoc-${random_string.nc-random.result}"
-  name                    = aws_ssm_document.nc-ssm-doc.name
+  association_name = "${var.name_prefix}-ssm-assoc-${random_string.nc-random.result}"
+  name             = aws_ssm_document.nc-ssm-doc.name
   targets {
-    key                   = "tag:cloudoffice"
-    values                = [random_string.nc-random.result]
+    key    = "tag:cloudoffice"
+    values = [random_string.nc-random.result]
   }
   output_location {
-    s3_bucket_name          = aws_s3_bucket.nc-bucket.id
-    s3_key_prefix           = "ssm"
+    s3_bucket_name = aws_s3_bucket.nc-bucket.id
+    s3_key_prefix  = "ssm"
   }
-  parameters              = {
-    ExtraVariables          = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_onlyoffice=${var.docker_onlyoffice} docker_duckdnsupdater=${var.docker_duckdnsupdater} instance_public_ip=${aws_lightsail_static_ip.nc-staticip.ip_address} web_port=${var.web_port} oo_port=${var.oo_port} project_directory=${var.project_directory} enable_duckdns=${var.enable_duckdns} duckdns_domain=${var.duckdns_domain} duckdns_token=${var.duckdns_token} letsencrypt_email=${var.letsencrypt_email}"
-    PlaybookFile            = "cloudoffice_aws.yml"
-    SourceInfo              = "{\"path\":\"https://s3.${var.aws_region}.amazonaws.com/${aws_s3_bucket.nc-bucket.id}/playbook/\"}"
-    SourceType              = "S3"
-    Verbose                 = "-v"
+  parameters = {
+    ExtraVariables = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_onlyoffice=${var.docker_onlyoffice} docker_duckdnsupdater=${var.docker_duckdnsupdater} instance_public_ip=${aws_lightsail_static_ip.nc-staticip.ip_address} web_port=${var.web_port} oo_port=${var.oo_port} project_directory=${var.project_directory} enable_duckdns=${var.enable_duckdns} duckdns_domain=${var.duckdns_domain} duckdns_token=${var.duckdns_token} letsencrypt_email=${var.letsencrypt_email}"
+    PlaybookFile   = "cloudoffice_aws.yml"
+    SourceInfo     = "{\"path\":\"https://s3.${var.aws_region}.amazonaws.com/${aws_s3_bucket.nc-bucket.id}/playbook/\"}"
+    SourceType     = "S3"
+    Verbose        = "-v"
   }
-  depends_on              = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3,aws_s3_bucket_object.nc-files]
+  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_s3_bucket_object.nc-files]
 }

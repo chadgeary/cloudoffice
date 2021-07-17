@@ -1,6 +1,6 @@
 resource "local_file" "nc_init" {
-  filename                          = "${var.nc_prefix}-init-${random_string.nc-random.result}.yml"
-  content                           = <<FILECONTENT
+  filename = "${var.nc_prefix}-init-${random_string.nc-random.result}.yml"
+  content  = <<FILECONTENT
 #cloud-config for cloudoffice on scw (scaleway)
 runcmd:
   - [ bash, -c, "apt-get update" ]
@@ -12,8 +12,8 @@ FILECONTENT
 }
 
 resource "local_file" "nc_setup" {
-  filename                          = "${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
-  content                           = <<FILECONTENT
+  filename = "${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
+  content  = <<FILECONTENT
 # Create systemd service unit file
 sudo tee /etc/systemd/system/cloudoffice-ansible-state.service << EOM
 [Unit]

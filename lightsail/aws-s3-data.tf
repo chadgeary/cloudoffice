@@ -1,7 +1,7 @@
 # s3 bucket
 resource "aws_s3_bucket" "nc-bucket-data" {
-  bucket                  = "${var.name_prefix}-${random_string.nc-random.result}-data"
-  acl                     = "private"
+  bucket = "${var.name_prefix}-${random_string.nc-random.result}-data"
+  acl    = "private"
   versioning {
     enabled = false
   }
@@ -13,8 +13,8 @@ resource "aws_s3_bucket" "nc-bucket-data" {
       }
     }
   }
-  force_destroy           = true
-  policy                  = <<POLICY
+  force_destroy = true
+  policy        = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
