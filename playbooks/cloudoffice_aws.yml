@@ -457,7 +457,7 @@
 
     - name: wait for nextcloud 200OK
       uri:
-        url: "https://127.0.0.1:{{ web_port }}/login"
+        url: "{% if duckdns_domain != '' %}https://{{ duckdns_domain }}:{{ web_port }}/login{% else %}https://127.0.0.1:{{ web_port }}/login{% endif %}"
         status_code: 200
         validate_certs: no
       register: nc_wait_result
@@ -467,7 +467,7 @@
 
     - name: wait for onlyoffice 200OK
       uri:
-        url: "{% if duckdns_domain != '' %}https://{{ duckdns_domain }}:{{ web_port }}/login{% else %}https://127.0.0.1:{{ web_port }}/login{% endif %}"
+        url: "https://127.0.0.1:{{ oo_port }}/"
         status_code: 200
         validate_certs: no
       register: oo_wait_result
