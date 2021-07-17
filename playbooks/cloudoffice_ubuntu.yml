@@ -6,6 +6,18 @@
   become_user: root
   tasks:
 
+    - name: if not defined, set duckdns_domain to blank value
+      set_fact:
+        duckdns_domain: "{% if duckdns_domain is not defined %}{% else %}{{ duckdns_domain }}{% endif %}"
+
+    - name: if not defined, set duckdns_token to blank value
+      set_fact:
+        duckdns_token: "{% if duckdns_token is not defined %}{% else %}{{ duckdns_token }}{% endif %}"
+
+    - name: if not defined, set letsencrypt_email to blank value
+      set_fact:
+        letsencrypt_email: "{% if letsencrypt_email is not defined %}{% else %}{{ letsencrypt_email }}{% endif %}"
+
     - name: check swap file exists
       stat:
         path: /opt/swap.file
