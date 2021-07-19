@@ -1,9 +1,9 @@
 # Local Deployments
-`cloudoffice_raspbian.yml` and `cloudoffice_ubuntu.yml` support standalone deployments. Note OnlyOffice is not available on ARM (yet).
+`cloudoffice_raspbian.yml` and `cloudoffice_ubuntu.yml` support standalone deployments. Note OnlyOffice is not available on ARM (yet) - that includes Raspberry Pis.
 
 # Raspbian Deployment
 - Raspbian 10 (Buster)
-- Tested with Raspberry Pi 4
+- Tested with Raspberry Pi 3 and 4
 
 ```
 # Ansible + Git
@@ -31,6 +31,13 @@ docker_nextcloud=172.18.1.2
 docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
 project_directory=/opt
+
+# New as of July 2021 - visit duckdns.org and get a domain + token then set your variables below
+# This provides a signed, valid HTTPS certificate (instead of self-signed)
+enable_duckdns=1
+duckdns_domain=changeme.duckdns.org
+duckdns_token=changeme-change-me-change-me
+letsencrypt_email=changeme@changeme.changeme
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud_application
@@ -80,6 +87,13 @@ docker_db=172.18.1.3
 docker_webproxy=172.18.1.4
 docker_onlyoffice=172.18.1.6
 project_directory=/opt
+
+# New as of July 2021 - visit duckdns.org and get a domain + token then set your variables below
+# This provides a signed, valid HTTPS certificate (instead of self-signed)
+enable_duckdns=1
+duckdns_domain=changeme.duckdns.org
+duckdns_token=changeme-change-me-change-me
+letsencrypt_email=changeme@changeme.changeme
 
 # Want to set your own admin, database, and onlyoffice passwords instead of something randomly generated?
 sudo mkdir -p /opt/nextcloud_application

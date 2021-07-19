@@ -24,15 +24,3 @@ resource "google_compute_firewall" "nc-firewall-mgmt" {
     ports    = ["22", var.web_port, var.oo_port]
   }
 }
-
-resource "google_compute_firewall" "nc-firewall-mgmt-duckdns" {
-  count         = var.enable_duckdns == 1 ? 1 : 0
-  name          = "${var.nc_prefix}-firewall-mgmt-duckdns"
-  project       = google_project.nc-project.project_id
-  network       = google_compute_network.nc-network.self_link
-  source_ranges = ["0.0.0.0/0"]
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-}

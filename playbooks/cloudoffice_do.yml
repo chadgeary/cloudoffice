@@ -341,7 +341,6 @@
           VALIDATION: "duckdns"
           DUCKDNSTOKEN: "{{ duckdns_token }}"
           EMAIL: "{{ letsencrypt_email }}"
-          VALIDATION: "duckdns"
         ports:
           - "{{ web_port }}:443"
         volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
