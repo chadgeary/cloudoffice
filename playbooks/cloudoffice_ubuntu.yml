@@ -326,8 +326,8 @@
           TOKEN: "{{ duckdns_token }}"
         pull: yes
         purge_networks: yes
+        networks_cli_compatible: no
         restart_policy: "always"
-        container_default_behavior: "compatibility"
       when: duckdns_domain != ""
 
     - name: duckdns web proxy container
@@ -351,8 +351,8 @@
         volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
         pull: yes
         purge_networks: yes
+        networks_cli_compatible: no
         restart_policy: "always"
-        container_default_behavior: "compatibility"
       when: duckdns_domain != ""
 
     - name: wait for db container
