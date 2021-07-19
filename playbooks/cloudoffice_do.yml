@@ -169,6 +169,7 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/nextcloud.conf
+        - nginx/proxy-confs/onlyoffice.conf
 
     - name: determine nextcloud state
       stat:
@@ -343,6 +344,7 @@
           EMAIL: "{{ letsencrypt_email }}"
         ports:
           - "{{ web_port }}:443"
+          - "{{ oo_port }}:8443"
         volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
         pull: yes
         purge_networks: yes
@@ -368,7 +370,7 @@
           - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
           - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
         ports:
-          - "{{ oo_port }}:443"
+          - "{% if duckdns_domain != '' %}{% else %}{{ oo_port }}:443{% endif %}"
         pull: yes
         purge_networks: yes
         restart_policy: "always"
@@ -406,7 +408,7 @@
         - "# install and configure onlyoffice connector"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:install onlyoffice"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:enable onlyoffice"
-        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ instance_public_ip }}:{{ oo_port }}/'"
+        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{% if duckdns_domain != '' %}{{ duckdns_domain }}{% else %}{{ instance_public_ip }}{% endif %}:{{ oo_port }}/'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice jwt_secret --value {{ oo_password }}"
