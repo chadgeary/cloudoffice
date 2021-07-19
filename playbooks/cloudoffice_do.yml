@@ -169,7 +169,6 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/nextcloud.conf
-        - nginx/proxy-confs/onlyoffice.conf
 
     - name: determine nextcloud state
       stat:
@@ -401,8 +400,6 @@
           JWT_SECRET: "{{ oo_password }}"
         volumes:
           - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
-          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
-          - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
         pull: yes
         purge_networks: yes
         restart_policy: "always"
