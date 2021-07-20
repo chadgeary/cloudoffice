@@ -15,12 +15,12 @@ resource "digitalocean_firewall" "nc-firewall" {
   inbound_rule {
     protocol         = "tcp"
     port_range       = var.web_port
-    source_addresses = [var.mgmt_cidr, digitalocean_floating_ip.nc-ip.ip_address]
+    source_addresses = [var.mgmt_cidr, digitalocean_droplet.nc-droplet.ipv4_address]
   }
   inbound_rule {
     protocol         = "tcp"
     port_range       = var.oo_port
-    source_addresses = [var.mgmt_cidr, digitalocean_floating_ip.nc-ip.ip_address]
+    source_addresses = [var.mgmt_cidr, digitalocean_droplet.nc-droplet.ipv4_address]
   }
   outbound_rule {
     protocol              = "tcp"

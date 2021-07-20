@@ -6,21 +6,21 @@ output "cloudblock-output" {
 #############
 
 ## SSH ##
-ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address}
+ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : digitalocean_floating_ip.nc-ip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? var.duckdns_domain : digitalocean_droplet.nc-droplet.ipv4_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ############## ##
 ## One Time Setup ##
 ## ############## ##
-scp ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address}:~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh
-ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address} "chmod +x ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh && ~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
+scp ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address}:~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh
+ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address} "chmod +x ${var.nc_prefix}-setup-${random_string.nc-random.result}.sh && ~/${var.nc_prefix}-setup-${random_string.nc-random.result}.sh"
 
 ## ################### ##
 ## Update Instructions ##
 ## ################### ##
-ssh ubuntu@${digitalocean_floating_ip.nc-ip.ip_address}
+ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address}
 
 # If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
