@@ -168,7 +168,8 @@
         - httpd-ssl.conf
         - httpd.conf
         - nginx/nginx.conf
-        - nginx/proxy-confs/nextcloud.conf
+        - nginx/proxy-confs/cloudoffice.conf
+      register: proxy_conf_files
 
     - name: determine nextcloud state
       stat:
@@ -438,7 +439,7 @@
         - "# install and configure onlyoffice connector"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:install onlyoffice"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:enable onlyoffice"
-        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{% if duckdns_domain != '' %}{{ duckdns_domain }}{% else %}{{ instance_public_ip }}{% endif %}:{{ oo_port }}/'"
+        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}/oo{% else %}{{ instance_public_ip }}:{{ oo_port }}{% endif %}/'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice jwt_secret --value {{ oo_password }}"
@@ -495,7 +496,7 @@
 
     - name: wait for onlyoffice 200OK
       uri:
-        url: "https://127.0.0.1:{{ oo_port }}/"
+        url: "{% if duckdns_domain != '' %}https://{{ duckdns_domain }}:{{ web_port }}/oo{% else %}https://127.0.0.1:{{ oo_port }}/{% endif %}"
         status_code: 200
         validate_certs: no
       register: oo_wait_result
