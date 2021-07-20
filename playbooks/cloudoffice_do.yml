@@ -309,7 +309,7 @@
     - name: duckdnsupdater container
       docker_container:
         name: cloudoffice_duckdnsupdater
-        hostname: cloudoffice_duckdnsupdater
+        hostname: cloudofficeduckdnsupdater
         image: ghcr.io/linuxserver/duckdns
         networks:
           - name: cloudoffice
@@ -328,8 +328,8 @@
 
     - name: duckdns web proxy container
       docker_container:
-        name: cloudofficewebproxy
-        hostname: cloudoffice_webproxy
+        name: cloudoffice_webproxy
+        hostname: cloudofficewebproxy
         image: ghcr.io/linuxserver/swag
         networks:
           - name: cloudoffice
