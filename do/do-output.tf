@@ -9,7 +9,7 @@ output "cloudblock-output" {
 ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : digitalocean_droplet.nc-droplet.ipv4_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : digitalocean_droplet.nc-droplet.ipv4_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ############## ##
 ## One Time Setup ##
