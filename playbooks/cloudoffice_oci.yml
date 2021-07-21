@@ -383,7 +383,7 @@
     - name: duckdns web proxy container
       docker_container:
         name: cloudoffice_webproxy
-        hostname: "{{ duckdns_domain }}"
+        hostname: cloudofficewebproxy
         image: ghcr.io/linuxserver/swag
         networks:
           - name: cloudoffice
