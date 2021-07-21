@@ -182,6 +182,7 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
+      register: proxy_conf_files
 
     - name: Retrieve GCS Token
       uri:
@@ -412,6 +413,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain == ""
 
     - name: duckdnsupdater container
@@ -457,6 +459,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain != ""
 
     - name: minio storage gateway container

@@ -165,6 +165,7 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
+      register: proxy_conf_files
 
     - name: Determine admin_password file exists
       stat:
@@ -312,6 +313,7 @@
         purge_networks: yes
         networks_cli_compatible: no
         restart_policy: "always"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain == ""
 
     - name: duckdnsupdater container
@@ -357,6 +359,7 @@
         purge_networks: yes
         networks_cli_compatible: no
         restart_policy: "always"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain != ""
 
     - name: wait for db container

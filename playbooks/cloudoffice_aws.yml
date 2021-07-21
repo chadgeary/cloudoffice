@@ -169,6 +169,7 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
+      register: proxy_conf_files
 
     - name: Get SSM parameter admin_password
       set_fact:
@@ -323,6 +324,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain == ""
 
     - name: duckdnsupdater container
@@ -368,6 +370,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain != ""
 
     - name: onlyoffice container

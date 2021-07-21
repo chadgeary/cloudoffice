@@ -193,6 +193,7 @@
         - httpd.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
+      register: proxy_conf_files
 
     - name: fetch decrypt admin pass
       oci_key_management_decrypted_data:
@@ -356,7 +357,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
-      no_log: True
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain == ""
 
     - name: duckdnsupdater container
@@ -402,6 +403,7 @@
         purge_networks: yes
         restart_policy: "always"
         container_default_behavior: "compatibility"
+        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
       when: duckdns_domain != ""
 
     - name: onlyoffice container
