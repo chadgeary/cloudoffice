@@ -164,7 +164,7 @@
         - httpd-ssl.conf
         - httpd.conf
         - nginx/nginx.conf
-        - nginx/proxy-confs/nextcloud.conf
+        - nginx/proxy-confs/cloudoffice.conf
 
     - name: Determine admin_password file exists
       stat:
@@ -379,6 +379,7 @@
           NEXTCLOUD_TRUSTED_DOMAINS: "{{ instance_public_ip }} {{ docker_webproxy }} {{ docker_nextcloud }} {{ duckdns_domain }}"
           TRUSTED_PROXIES: "{{ instance_public_ip }} {{ docker_webproxy }} {{ duckdns_domain }}"
           OVERWRITEHOST: "{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}{% else %}{{ instance_public_ip }}:{{ web_port }}{% endif %}"
+          OVERWRITEWEBROOT: "{% if duckdns_domain != '' %}/nc{% else %}{% endif %}"
           OVERWRITEPROTOCOL: https
           MYSQL_PASSWORD: "{{ db_password }}"
           MYSQL_DATABASE: nextcloud
@@ -426,6 +427,39 @@
         read_only: no
         tty: yes
       no_log: True
+      when: duckdns_domain == ""
+
+    - name: onlyoffice container
+      docker_container:
+        name: cloudoffice_onlyoffice
+        hostname: cloudofficeonlyoffice
+        image: onlyoffice/documentserver
+        networks:
+          - name: cloudoffice
+            ipv4_address: "{{ docker_onlyoffice }}"
+        env:
+          ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
+          USE_UNAUTHORIZED_STORAGE: "true"
+          JWT_ENABLED: "true"
+          JWT_SECRET: "{{ oo_password }}"
+        volumes:
+          - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
+          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
+          - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
+        pull: yes
+        purge_networks: yes
+        restart_policy: "always"
+        auto_remove: no
+        detach: yes
+        init: no
+        interactive: no
+        memory: "0"
+        paused: no
+        read_only: no
+        tty: yes
+      no_log: True
+      when: duckdns_domain != ""
+
 
     - name: nextcloud onlyoffice and talk scripts (clear)
       file:
@@ -449,7 +483,7 @@
         - "# install and configure onlyoffice connector"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:install onlyoffice"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:enable onlyoffice"
-        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{{ instance_public_ip }}:{{ oo_port }}/'"
+        - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice DocumentServerUrl --value='https://{% if duckdns_domain != '' %}{{ duckdns_domain }}:{{ web_port }}/{% else %}{{ instance_public_ip }}:{{ oo_port }}{% endif %}/'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:system:set onlyoffice verify_peer_off --value=true --type=boolean"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice jwt_secret --value {{ oo_password }}"
@@ -475,16 +509,6 @@
         validate_certs: no
       register: nc_wait_result
       until: nc_wait_result.status == 200
-      retries: 180
-      delay: 1
-
-    - name: wait for onlyoffice 200OK
-      uri:
-        url: "https://127.0.0.1:{{ oo_port }}/"
-        status_code: 200
-        validate_certs: no
-      register: oo_wait_result
-      until: oo_wait_result.status == 200
       retries: 180
       delay: 1
 

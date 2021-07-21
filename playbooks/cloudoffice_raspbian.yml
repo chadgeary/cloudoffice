@@ -128,7 +128,7 @@
         - httpd-ssl.conf
         - httpd.conf
         - nginx/nginx.conf
-        - nginx/proxy-confs/nextcloud.conf
+        - nginx/proxy-confs/cloudoffice.conf
 
     - name: Determine admin_password file exists
       stat:
