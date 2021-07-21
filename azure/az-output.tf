@@ -9,7 +9,7 @@ output "nc-output" {
 ssh ubuntu@${azurerm_public_ip.nc-public-ip.ip_address}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : azurerm_public_ip.nc-public-ip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : azurerm_public_ip.nc-public-ip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ################### ##
 ## Update Instructions ##

@@ -8,7 +8,7 @@ output "cloudblock-output" {
 ssh ubuntu@${scaleway_instance_ip.nc-ip.address}
 
 # WebUI #
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : scaleway_instance_ip.nc-ip.address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : scaleway_instance_ip.nc-ip.address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ############## ##
 ## One Time Setup ##

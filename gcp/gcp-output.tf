@@ -9,7 +9,7 @@ output "cloudblock-output" {
 ssh ubuntu@${google_compute_address.nc-public-ip.address}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : google_compute_address.nc-public-ip.address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : google_compute_address.nc-public-ip.address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ################### ##
 ## Update Instructions ##

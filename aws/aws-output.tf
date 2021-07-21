@@ -9,7 +9,7 @@ output "cloudblock-output" {
 ssh ubuntu@${aws_eip.nc-eip.public_ip}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : aws_eip.nc-eip.public_ip}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : aws_eip.nc-eip.public_ip}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ####### ##
 ## Updates ##

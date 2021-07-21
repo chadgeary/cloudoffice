@@ -9,7 +9,7 @@ output "cloudoffice-output" {
 ssh ubuntu@${aws_lightsail_static_ip.nc-staticip.ip_address}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? var.duckdns_domain : aws_lightsail_static_ip.nc-staticip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : aws_lightsail_static_ip.nc-staticip.ip_address}${var.web_port == "443" ? "" : ":${var.web_port}"}/
 
 ## ################### ##
 ## Update Instructions ##
