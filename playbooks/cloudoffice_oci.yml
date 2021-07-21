@@ -21,6 +21,10 @@
       set_fact:
         letsencrypt_email: "{% if letsencrypt_email is not defined %}{% else %}{{ letsencrypt_email }}{% endif %}"
 
+    - name: if not defined, set docker_duckdnsupdater to blank value
+      set_fact:
+        docker_duckdnsupdater: "{% if docker_duckdnsupdater is not defined %}{% else %}{{ docker_duckdnsupdater }}{% endif %}"
+
     - name: check swap file exists
       stat:
         path: /opt/swap.file
