@@ -37,5 +37,4 @@ docker_duckdnsupdater = "172.18.1.7"
 
 # if using duckdns, set to 1 and fill in the complete domain, e.g.: duckdns_domain = "chadcloudoffice.duckdns.org", duckdns_token, and your email address (for letsencrypt notices)
 enable_duckdns    = 1
-duckdns_domain    = "weddelcloudoffice.duckdns.org"
 letsencrypt_email = "jczuurmond@protonmail.com"
