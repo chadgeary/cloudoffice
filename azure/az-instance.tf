@@ -46,7 +46,7 @@ resource "azurerm_linux_virtual_machine" "nc-instance" {
   network_interface_ids = [azurerm_network_interface.nc-net-interface.id]
   admin_ssh_key {
     username   = var.ssh_user
-    public_key = var.ssh_key
+    public_key = data.azurerm_key_vault_secret.ssh_key.value
   }
   os_disk {
     caching                = "ReadWrite"
