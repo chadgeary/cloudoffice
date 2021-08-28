@@ -32,6 +32,11 @@ data "azurerm_key_vault_secret" "ssh_key" {
   key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
+data "azurerm_key_vault_secret" "mgmt_cidr" {
+  name         = "mgmt-cidr"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
 resource "random_string" "nc-random" {
   length  = 5
   upper   = false

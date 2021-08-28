@@ -42,7 +42,7 @@ resource "azurerm_network_security_rule" "nc-net-rule-ssh" {
   source_port_range           = "*"
   destination_port_range      = "22"
 
-  source_address_prefix        = var.mgmt_cidr
+  source_address_prefix        = data.azurerm_key_vault_secret.mgmt_cidr.value
   destination_address_prefixes = [var.az_subnet_cidr]
 }
 
