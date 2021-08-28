@@ -1,3 +1,8 @@
+terraform {
+  # Backend variables are initialized by CI
+  backend "azurerm" {}
+}
+
 provider "azurerm" {
   features {
     key_vault {
@@ -73,19 +78,22 @@ variable "mgmt_cidr" {
   description = "A subnet (in CIDR notation) granted SSH, WebUI, and (if dns_novpn = 1) DNS access to virtual machine instance. Deploying from home? This is your public ip with a /32, e.g. 1.2.3.4/32"
 }
 
-variable "admin_password" {
-  type        = string
-  description = "Password for ncadmin (nextcloud administrator user)"
+resource "random_password" "admin_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
-variable "db_password" {
-  type        = string
-  description = "Password for nextcloud to read/write to database"
+resource "random_password" "db_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
-variable "oo_password" {
-  type        = string
-  description = "Password for nextcloud to read/write to onlyoffice"
+resource "random_password" "oo_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
 variable "project_url" {
@@ -158,8 +166,22 @@ variable "duckdns_domain" {
   type = string
 }
 
-variable "duckdns_token" {
+variable "terraform_resource_group_name" {
   type = string
+}
+
+variable "terraform_key_vault_name" {
+  type = string
+}
+
+data "azurerm_key_vault" "terraform" {
+  resource_group_name = var.terraform_resource_group_name
+  name                = var.terraform_key_vault_name
+}
+
+data "azurerm_key_vault_secret" "duckdns_token" {
+  name         = "duckdns-token"
+  key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
 variable "letsencrypt_email" {
