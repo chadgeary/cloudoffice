@@ -37,6 +37,11 @@ data "azurerm_key_vault_secret" "mgmt_cidr" {
   key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
+data "azurerm_key_vault_secret" "mgmt_cidr" {
+  name         = "duckdns-domain"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
 resource "random_string" "nc-random" {
   length  = 5
   upper   = false
@@ -86,11 +91,6 @@ variable "nc_prefix" {
 variable "ssh_user" {
   type        = string
   description = "User for access to the virtual machine instance, e.g. ubuntu"
-}
-
-variable "mgmt_cidr" {
-  type        = string
-  description = "A subnet (in CIDR notation) granted SSH, WebUI, and (if dns_novpn = 1) DNS access to virtual machine instance. Deploying from home? This is your public ip with a /32, e.g. 1.2.3.4/32"
 }
 
 resource "random_password" "admin_password" {
@@ -175,10 +175,6 @@ variable "oo_port" {
 
 variable "enable_duckdns" {
   type = number
-}
-
-variable "duckdns_domain" {
-  type = string
 }
 
 variable "terraform_resource_group_name" {

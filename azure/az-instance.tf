@@ -31,7 +31,7 @@ data "template_file" "nc-custom-data" {
     oo_port                 = var.oo_port
     project_directory       = var.project_directory
     enable_duckdns          = var.enable_duckdns
-    duckdns_domain          = var.duckdns_domain
+    duckdns_domain          = data.azurerm_key_vault_secret.duckdns_domain.value
     duckdns_token           = data.azurerm_key_vault_secret.duckdns_token.value
     letsencrypt_email       = var.letsencrypt_email
   }
