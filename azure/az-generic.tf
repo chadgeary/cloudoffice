@@ -37,7 +37,7 @@ data "azurerm_key_vault_secret" "mgmt_cidr" {
   key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
-data "azurerm_key_vault_secret" "mgmt_cidr" {
+data "azurerm_key_vault_secret" "duckdns_domain" {
   name         = "duckdns-domain"
   key_vault_id = data.azurerm_key_vault.terraform.id
 }
