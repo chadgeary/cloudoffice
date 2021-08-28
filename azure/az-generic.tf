@@ -1,3 +1,8 @@
+terraform {
+  # Backend variables are initialized by CI
+  backend "azurerm" {}
+}
+
 provider "azurerm" {
   features {
     key_vault {
@@ -10,6 +15,31 @@ data "azurerm_client_config" "nc-client-conf" {
 }
 
 data "azurerm_subscription" "nc-subscription" {
+}
+
+data "azurerm_key_vault" "terraform" {
+  resource_group_name = var.terraform_resource_group_name
+  name                = var.terraform_key_vault_name
+}
+
+data "azurerm_key_vault_secret" "duckdns_token" {
+  name         = "duckdns-token"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
+data "azurerm_key_vault_secret" "ssh_key" {
+  name         = "public-ssh-key"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
+data "azurerm_key_vault_secret" "mgmt_cidr" {
+  name         = "mgmt-cidr"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
+data "azurerm_key_vault_secret" "duckdns_domain" {
+  name         = "duckdns-domain"
+  key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
 resource "random_string" "nc-random" {
@@ -63,29 +93,22 @@ variable "ssh_user" {
   description = "User for access to the virtual machine instance, e.g. ubuntu"
 }
 
-variable "ssh_key" {
-  type        = string
-  description = "Public SSH key to access the virtual machine instance"
+resource "random_password" "admin_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
-variable "mgmt_cidr" {
-  type        = string
-  description = "A subnet (in CIDR notation) granted SSH, WebUI, and (if dns_novpn = 1) DNS access to virtual machine instance. Deploying from home? This is your public ip with a /32, e.g. 1.2.3.4/32"
+resource "random_password" "db_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
-variable "admin_password" {
-  type        = string
-  description = "Password for ncadmin (nextcloud administrator user)"
-}
-
-variable "db_password" {
-  type        = string
-  description = "Password for nextcloud to read/write to database"
-}
-
-variable "oo_password" {
-  type        = string
-  description = "Password for nextcloud to read/write to onlyoffice"
+resource "random_password" "oo_password" {
+  length  = 16
+  lower   = true
+  special = true
 }
 
 variable "project_url" {
@@ -154,11 +177,11 @@ variable "enable_duckdns" {
   type = number
 }
 
-variable "duckdns_domain" {
+variable "terraform_resource_group_name" {
   type = string
 }
 
-variable "duckdns_token" {
+variable "terraform_key_vault_name" {
   type = string
 }
 

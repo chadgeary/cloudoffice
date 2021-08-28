@@ -1,0 +1,166 @@
+name: "Terraform Plan"
+
+env:
+  TERRAFORM_RESOURCE_GROUP_NAME: rg-cloudoffice-terra
+  TERRAFORM_LOCATION: westeurope
+  TERRAFORM_KEY_VAULT_NAME: kv-cloudoffice-terra
+  TERRAFORM_CONTAINER_NAME: tfstate
+  TERRAFORM_KEY: terraform.tfstate
+  TERRAFORM_VERSION: 1.0.0
+  TERRAFORM_WORK_DIR: azure/
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      TERRAFORM_BREAK_LEASE:
+        description: 'Break the terraform lease. Choose from (0 | 1)'
+        required: false
+        default: 1
+
+jobs:
+  terraform:
+    name: "Terraform Plan"
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets['AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM'] }}
+
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Setup resources for terraform backend"
+      shell: bash
+      run: |
+        az group create --name $TERRAFORM_RESOURCE_GROUP_NAME --location $TERRAFORM_LOCATION
+
+        key_vault_exists=$(az keyvault list --query "contains([].name, '$TERRAFORM_KEY_VAULT_NAME')")
+        if [ $key_vault_exists == false ]; then
+          az keyvault create --location $TERRAFORM_LOCATION --name $TERRAFORM_KEY_VAULT_NAME --resource-group $TERRAFORM_RESOURCE_GROUP_NAME
+        fi
+
+        az storage account create --resource-group $TERRAFORM_RESOURCE_GROUP_NAME --name $TERRAFORM_STORAGE_ACCOUNT --sku Standard_LRS --encryption-services blob
+
+        export AZURE_STORAGE_ACCOUNT=$TERRAFORM_STORAGE_ACCOUNT
+        export AZURE_STORAGE_KEY=$(az storage account keys list --resource-group $TERRAFORM_RESOURCE_GROUP_NAME --account-name $TERRAFORM_STORAGE_ACCOUNT -o json | jq '.[0].value' --raw-output)
+
+        az storage container create --name $TERRAFORM_CONTAINER_NAME
+
+        if [[ $(az storage blob exists -c "$TERRAFORM_CONTAINER_NAME" -n "$TERRAFORM_KEY" --query exists) = "true" ]]; then
+          if [[ $(az storage blob show -c "$TERRAFORM_CONTAINER_NAME" -n "$TERRAFORM_KEY" --query "properties.lease.status=='locked'") = "true" ]]; then
+            echo "State is leased"
+
+            lock_jwt=$(\
+              az storage blob show \
+              -c "$TERRAFORM_CONTAINER_NAME" \
+              -n "$TERRAFORM_KEY" \
+              --query metadata.terraformlockid \
+              -o tsv)
+            if [ "$lock_jwt" != "" ]; then
+              lock_json=$(base64 -d <<< "$lock_jwt")
+              echo "State is locked"
+              jq . <<< "$lock_json"
+            fi
+
+            if [ $TERRAFORM_BREAK_LEASE != 0 ]; then
+              az storage blob lease break -c "$TERRAFORM_CONTAINER_NAME" -b "$TERRAFORM_KEY"
+            else
+              echo "If you're really sure you want to break the lease, rerun the pipeline with variable TERRAFORM_BREAK_LEASE set to 1."
+              exit 1
+            fi
+          fi
+        fi
+
+      env:
+        TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
+        TERRAFORM_LOCATION: ${{ env.TERRAFORM_LOCATION }}
+        TERRAFORM_KEY_VAULT_NAME: ${{ env.TERRAFORM_KEY_VAULT_NAME }}
+        TERRAFORM_STORAGE_ACCOUNT: ${{ secrets['TERRAFORM_STORAGE_ACCOUNT_NAME'] }}
+        TERRAFORM_CONTAINER_NAME: ${{ env.TERRAFORM_CONTAINER_NAME }}
+        TERRAFORM_KEY: ${{ env.TERRAFORM_KEY }}
+        TERRAFORM_BREAK_LEASE: ${{ github.event.inputs.TERRAFORM_BREAK_LEASE }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+    - name: Set Azure environment variables
+      shell: bash
+      run: |
+        ARM_CLIENT_ID=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.clientId')
+        ARM_CLIENT_SECRET=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.clientSecret')
+        ARM_TENANT_ID=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.tenantId')
+        ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+        echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
+      env:
+        AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM: ${{ secrets['AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM'] }}
+
+    - name: Terraform Fmt
+      id: fmt
+      shell: bash
+      run: terraform -chdir=$TERRAFORM_WORK_DIR fmt -check
+      env:
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+
+    - name: Terraform Init
+      id: init
+      shell: bash
+      run: terraform -chdir=$TERRAFORM_WORK_DIR init -backend-config="storage_account_name=$TERRAFORM_STORAGE_ACCOUNT" -backend-config="container_name=$TERRAFORM_CONTAINER_NAME" -backend-config="key=$TERRAFORM_KEY" -backend-config="resource_group_name=$TERRAFORM_RESOURCE_GROUP_NAME" -backend-config="subscription_id=$ARM_SUBSCRIPTION_ID" -backend-config="tenant_id=$ARM_TENANT_ID" -backend-config="client_id=$ARM_CLIENT_ID" -backend-config="client_secret=$ARM_CLIENT_SECRET"
+      env:
+        TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
+        TERRAFORM_STORAGE_ACCOUNT: ${{ secrets['TERRAFORM_STORAGE_ACCOUNT_NAME'] }}
+        TERRAFORM_CONTAINER_NAME: ${{ env.TERRAFORM_CONTAINER_NAME }}
+        TERRAFORM_KEY: ${{ env.TERRAFORM_KEY }}
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+        ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
+
+    - name: Terraform Validate
+      id: validate
+      shell: bash
+      run: terraform -chdir=$TERRAFORM_WORK_DIR validate -no-color
+      env:
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform -chdir=$TERRAFORM_WORK_DIR plan -input=false -var-file=vars.tfvars -var=terraform_resource_group_name=$TERRAFORM_RESOURCE_GROUP_NAME -var=terraform_key_vault_name=$TERRAFORM_KEY_VAULT_NAME -no-color
+      env:
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+        TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
+        TERRAFORM_KEY_VAULT_NAME: ${{ env.TERRAFORM_KEY_VAULT_NAME }}
+
+    - uses: actions/github-script@v4
+      if: ${{ always() && github.event_name == 'pull_request' }}
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+          <details><summary>Show Plan</summary>
+
+          \`\`\`${process.env.PLAN}\`\`\`
+
+          </details>
+
+          *Pusher: \`@${{ github.actor }}\`, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TERRAFORM_WORK_DIR }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })

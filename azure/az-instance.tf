@@ -31,8 +31,8 @@ data "template_file" "nc-custom-data" {
     oo_port                 = var.oo_port
     project_directory       = var.project_directory
     enable_duckdns          = var.enable_duckdns
-    duckdns_domain          = var.duckdns_domain
-    duckdns_token           = var.duckdns_token
+    duckdns_domain          = data.azurerm_key_vault_secret.duckdns_domain.value
+    duckdns_token           = data.azurerm_key_vault_secret.duckdns_token.value
     letsencrypt_email       = var.letsencrypt_email
   }
 }
@@ -46,7 +46,7 @@ resource "azurerm_linux_virtual_machine" "nc-instance" {
   network_interface_ids = [azurerm_network_interface.nc-net-interface.id]
   admin_ssh_key {
     username   = var.ssh_user
-    public_key = var.ssh_key
+    public_key = data.azurerm_key_vault_secret.ssh_key.value
   }
   os_disk {
     caching                = "ReadWrite"

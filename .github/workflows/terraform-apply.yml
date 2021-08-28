@@ -1,0 +1,71 @@
+name: "Terraform Apply"
+
+env:
+  TERRAFORM_RESOURCE_GROUP_NAME: rg-cloudoffice-terra
+  TERRAFORM_KEY_VAULT_NAME: kv-cloudoffice-terra
+  TERRAFORM_CONTAINER_NAME: tfstate
+  TERRAFORM_KEY: terraform.tfstate
+  TERRAFORM_VERSION: 1.0.0
+  TERRAFORM_WORK_DIR: azure/
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets['AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM'] }}
+
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        creds: ${{ secrets['AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM'] }}
+
+    - name: Set Azure environment variables
+      shell: bash
+      run: |
+        ARM_CLIENT_ID=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.clientId')
+        ARM_CLIENT_SECRET=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.clientSecret')
+        ARM_TENANT_ID=$(echo $AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM | jq -r '.tenantId')
+        ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+        echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
+      env:
+        AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM: ${{ secrets['AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM'] }}
+
+    - name: Terraform Init
+      id: init
+      shell: bash
+      run: terraform -chdir=$TERRAFORM_WORK_DIR init -backend-config="storage_account_name=$TERRAFORM_STORAGE_ACCOUNT" -backend-config="container_name=$TERRAFORM_CONTAINER_NAME" -backend-config="key=$TERRAFORM_KEY" -backend-config="resource_group_name=$TERRAFORM_RESOURCE_GROUP_NAME" -backend-config="subscription_id=$ARM_SUBSCRIPTION_ID" -backend-config="tenant_id=$ARM_TENANT_ID" -backend-config="client_id=$ARM_CLIENT_ID" -backend-config="client_secret=$ARM_CLIENT_SECRET"
+      env:
+        TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
+        TERRAFORM_STORAGE_ACCOUNT: ${{ secrets['TERRAFORM_STORAGE_ACCOUNT_NAME'] }}
+        TERRAFORM_CONTAINER_NAME: ${{ env.TERRAFORM_CONTAINER_NAME }}
+        TERRAFORM_KEY: ${{ env.TERRAFORM_KEY }}
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+        ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
+
+    - name: Terraform Apply
+      run: |
+        terraform -chdir=$TERRAFORM_WORK_DIR apply -input=false -var-file=vars.tfvars -var=terraform_resource_group_name=$TERRAFORM_RESOURCE_GROUP_NAME -var=terraform_key_vault_name=$TERRAFORM_KEY_VAULT_NAME -auto-approve
+      env:
+        TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
+        TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
+        TERRAFORM_KEY_VAULT_NAME: ${{ env.TERRAFORM_KEY_VAULT_NAME }}
