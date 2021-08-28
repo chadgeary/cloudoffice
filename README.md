@@ -26,3 +26,24 @@ Standalone:
 # Changelog
 - July 2021 - Please note, the duckdns domain feature was added (after videos were created). [duckdns.org](https://duckdns.org) is a free service to provide a domain name (that we sign with a [letsencrypt.org](https://letsencrypt.org) certificate with automatically). Though not required, duckdns is suggested for all new deployments. The certificate integrates better with Nextcloud and OnlyOffice apps and web browsers.
 - October 2021 - Azure's security_group and security_group_rule resources conflict and overwrite eachother. The security_group_rule(s) have been put in security_group as inline.
+
+# Github workflow set-up
+
+We need a service principal that has permissions to deploy resources to Azure.
+Create one with:
+
+```
+az account set --subscription "cloudoffice"
+
+az ad sp create-for-rbac \
+    --name sp-cloudoffice-github-actions \
+    --sdk-auth \
+    --role "Owner" \
+    --scopes /subscriptions/$(az account show --query id -o tsv)
+```
+
+The response is the login details for the service principal. Github actions
+needs these details in order to run Terraform. Add a secret
+`AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM` which contains the json response from
+the command above.
+>>>>>>> 9efea26 (Update readme)
