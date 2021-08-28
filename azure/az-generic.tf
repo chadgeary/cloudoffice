@@ -27,6 +27,11 @@ data "azurerm_key_vault_secret" "duckdns_token" {
   key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
+data "azurerm_key_vault_secret" "ssh_key" {
+  name         = "public-ssh-key"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
 resource "random_string" "nc-random" {
   length  = 5
   upper   = false
@@ -76,11 +81,6 @@ variable "nc_prefix" {
 variable "ssh_user" {
   type        = string
   description = "User for access to the virtual machine instance, e.g. ubuntu"
-}
-
-variable "ssh_key" {
-  type        = string
-  description = "Public SSH key to access the virtual machine instance"
 }
 
 variable "mgmt_cidr" {
