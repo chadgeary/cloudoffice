@@ -93,21 +93,21 @@ resource "azurerm_key_vault_key" "nc-storage-key" {
 
 resource "azurerm_key_vault_secret" "nc-admin-secret" {
   name         = "${var.nc_prefix}-admin-secret"
-  value        = var.admin_password
+  value        = random_password.admin_password.result
   key_vault_id = azurerm_key_vault.nc-vault-secret.id
   depends_on   = [time_sleep.wait_for_vaults]
 }
 
 resource "azurerm_key_vault_secret" "nc-db-secret" {
   name         = "${var.nc_prefix}-db-secret"
-  value        = var.db_password
+  value        = random_password.db_password.result
   key_vault_id = azurerm_key_vault.nc-vault-secret.id
   depends_on   = [time_sleep.wait_for_vaults]
 }
 
 resource "azurerm_key_vault_secret" "nc-oo-secret" {
   name         = "${var.nc_prefix}-oo-secret"
-  value        = var.oo_password
+  value        = random_password.oo_password.result
   key_vault_id = azurerm_key_vault.nc-vault-secret.id
   depends_on   = [time_sleep.wait_for_vaults]
 }
