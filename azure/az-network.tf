@@ -69,8 +69,9 @@ resource "azurerm_network_security_group" "nc-net-sec" {
     source_port_range            = "*"
     destination_port_range       = var.web_port
     source_address_prefix        = "${azurerm_public_ip.nc-public-ip.ip_address}/32"
+    source_address_prefix        = data.azurerm_key_vault_secret.mgmt_cidr.value
     destination_address_prefixes = [var.az_subnet_cidr]
-  }
+}
 
   security_rule {
     name                         = "${var.nc_prefix}-net-rule-selfhttpsoo"
