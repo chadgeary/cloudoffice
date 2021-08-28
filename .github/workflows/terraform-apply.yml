@@ -3,7 +3,6 @@ name: "Terraform Apply"
 env:
   TERRAFORM_RESOURCE_GROUP_NAME: rg-cloudoffice-terra
   TERRAFORM_KEY_VAULT_NAME: kv-cloudoffice-terra
-  TERRAFORM_STORAGE_ACCOUNT: stcloudofficeterraform
   TERRAFORM_CONTAINER_NAME: tfstate
   TERRAFORM_KEY: terraform.tfstate
   TERRAFORM_VERSION: 1.0.0
@@ -54,7 +53,7 @@ jobs:
       run: terraform -chdir=$TERRAFORM_WORK_DIR init -backend-config="storage_account_name=$TERRAFORM_STORAGE_ACCOUNT" -backend-config="container_name=$TERRAFORM_CONTAINER_NAME" -backend-config="key=$TERRAFORM_KEY" -backend-config="resource_group_name=$TERRAFORM_RESOURCE_GROUP_NAME" -backend-config="subscription_id=$ARM_SUBSCRIPTION_ID" -backend-config="tenant_id=$ARM_TENANT_ID" -backend-config="client_id=$ARM_CLIENT_ID" -backend-config="client_secret=$ARM_CLIENT_SECRET"
       env:
         TERRAFORM_RESOURCE_GROUP_NAME: ${{ env.TERRAFORM_RESOURCE_GROUP_NAME }}
-        TERRAFORM_STORAGE_ACCOUNT: ${{ env.TERRAFORM_STORAGE_ACCOUNT }}
+        TERRAFORM_STORAGE_ACCOUNT: ${{ secrets['TERRAFORM_STORAGE_ACCOUNT_NAME'] }}
         TERRAFORM_CONTAINER_NAME: ${{ env.TERRAFORM_CONTAINER_NAME }}
         TERRAFORM_KEY: ${{ env.TERRAFORM_KEY }}
         TERRAFORM_WORK_DIR: ${{ env.TERRAFORM_WORK_DIR }}
