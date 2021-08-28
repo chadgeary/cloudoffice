@@ -17,6 +17,16 @@ data "azurerm_client_config" "nc-client-conf" {
 data "azurerm_subscription" "nc-subscription" {
 }
 
+data "azurerm_key_vault" "terraform" {
+  resource_group_name = var.terraform_resource_group_name
+  name                = var.terraform_key_vault_name
+}
+
+data "azurerm_key_vault_secret" "duckdns_token" {
+  name         = "duckdns-token"
+  key_vault_id = data.azurerm_key_vault.terraform.id
+}
+
 resource "random_string" "nc-random" {
   length  = 5
   upper   = false
@@ -172,16 +182,6 @@ variable "terraform_resource_group_name" {
 
 variable "terraform_key_vault_name" {
   type = string
-}
-
-data "azurerm_key_vault" "terraform" {
-  resource_group_name = var.terraform_resource_group_name
-  name                = var.terraform_key_vault_name
-}
-
-data "azurerm_key_vault_secret" "duckdns_token" {
-  name         = "duckdns-token"
-  key_vault_id = data.azurerm_key_vault.terraform.id
 }
 
 variable "letsencrypt_email" {
