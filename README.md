@@ -46,4 +46,8 @@ The response is the login details for the service principal. Github actions
 needs these details in order to run Terraform. Add a secret
 `AZURE_CREDENTIALS_SP_GITHUBCITERRAFORM` which contains the json response from
 the command above.
->>>>>>> 9efea26 (Update readme)
+
+Then, add another secret `TERRAFORM_STORAGE_ACCOUNT_NAME` that defines the
+name of the storage account in which the Terraform state is kept.
+
+Finally, fill in your [variables](azure/vars.tfvars).
