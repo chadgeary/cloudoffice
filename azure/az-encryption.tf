@@ -33,7 +33,7 @@ resource "azurerm_key_vault" "nc-vault-storage" {
   resource_group_name      = azurerm_resource_group.nc-resourcegroup.name
   tenant_id                = data.azurerm_client_config.nc-client-conf.tenant_id
   sku_name                 = "standard"
-  purge_protection_enabled    = false
+  purge_protection_enabled = false
 }
 
 resource "azurerm_key_vault_access_policy" "nc-vault-storage-nc-client-conf" {
