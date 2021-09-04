@@ -21,7 +21,9 @@ ssh ubuntu@${scaleway_instance_ip.nc-ip.address} "chmod +x ${var.nc_prefix}-setu
 ## ################### ##
 ssh ubuntu@${scaleway_instance_ip.nc-ip.address}
 
-# If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
+# If updating containers, update nextcloud, then
+# remove the old containers - this brings down the service until ansible is re-applied.
+sudo docker exec -it cloudoffice_nextcloud updater.phar
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
 
 # Re-apply Ansible playbook via systemd service

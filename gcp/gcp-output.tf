@@ -16,7 +16,9 @@ https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : google_compute_
 ## ################### ##
 ssh ubuntu@${google_compute_address.nc-public-ip.address}
 
-# If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
+# If updating containers, update nextcloud then,
+# remove the old containers - this brings down the service until ansible is re-applied.
+sudo docker exec -it cloudoffice_nextcloud updater.phar
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_storagegateway cloudoffice_onlyoffice
 
 # Re-apply Ansible playbook with custom variables

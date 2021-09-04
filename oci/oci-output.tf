@@ -16,7 +16,9 @@ https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : oci_core_instan
 ## ################### ##
 ssh ubuntu@${oci_core_instance.nc-instance.public_ip}
 
-# If updating containers, remove the old containers - this brings down the service until ansible is re-applied.
+# If updating containers, update nextcloud, then
+# remove the old containers - this brings down the service until ansible is re-applied.
+sudo docker exec -it cloudoffice_nextcloud updater.phar
 sudo docker rm -f cloudoffice_database cloudoffice_nextcloud cloudoffice_webproxy cloudoffice_onlyoffice
 
 # Re-apply Ansible playbook with custom variables
