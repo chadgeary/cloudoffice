@@ -143,9 +143,6 @@ duckdns_domain=changeme.duckdns.org
 duckdns_token=changeme-change-me-change-me
 letsencrypt_email=changeme@changeme.changeme
 
-# Update nextcloud
-sudo docker exec -it cloudoffice_nextcloud updater.phar
-
 # Remove old containers (service is down until Ansible completes, raspberry pis dont have cloudoffice_onlyoffice)
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
 

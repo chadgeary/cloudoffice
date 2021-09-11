@@ -20,10 +20,9 @@ if [ -f pvars.tfvars ]; then echo "pvars exists, not overwriting"; else mv aws.t
 # Pull updates
 git pull
 
-# If updating containers, update nextcloud, then
+# If updating containers
 # remove the old containers - this brings down the service until ansible is re-applied.
 ssh ubuntu@${aws_lightsail_static_ip.nc-staticip.ip_address}
-sudo docker exec -it cloudoffice_nextcloud updater.phar
 sudo docker rm -f cloudblock_application cloudblock_database cloudblock_webproxy cloudblock_onlyoffice
 exit
 

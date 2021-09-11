@@ -22,9 +22,8 @@ ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address} "chmod +x ${var.nc_pr
 ## ################### ##
 ssh ubuntu@${digitalocean_droplet.nc-droplet.ipv4_address}
 
-# If updating containers, update nextcloud, then
+# If updating containers
 # remove the old containers - this brings down the service until ansible is re-applied.
-sudo docker exec -it cloudoffice_nextcloud updater.phar
 sudo docker rm -f cloudoffice_nextcloud cloudoffice_database cloudoffice_webproxy cloudoffice_onlyoffice
 
 # Re-apply Ansible playbook via systemd service
