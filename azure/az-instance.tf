@@ -65,5 +65,5 @@ resource "azurerm_linux_virtual_machine" "nc-instance" {
     identity_ids = [azurerm_user_assigned_identity.nc-instance-id.id]
   }
   custom_data = base64encode(data.template_file.nc-custom-data.rendered)
-  depends_on  = [azurerm_key_vault_access_policy.nc-vault-disk-access-disk, azurerm_role_assignment.nc-instance-role-assignment]
+  depends_on  = [azurerm_key_vault_access_policy.nc-vault-disk-access-disk, azurerm_role_assignment.nc-instance-role-assignment, azurerm_key_vault.nc-vault-disk]
 }

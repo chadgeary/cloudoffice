@@ -9,7 +9,7 @@ output "nc-output" {
 ssh ubuntu@${oci_core_instance.nc-instance.public_ip}
 
 ## WebUI ##
-https://${var.enable_duckdns == 1 ? "${var.duckdns_domain}/nc" : oci_core_instance.nc-instance.public_ip}${var.web_port == "443" ? "" : ":${var.web_port}"}/
+${var.enable_duckdns == 1 && var.web_port == "443" ? "https://${var.duckdns_domain}/nc" : ""}${var.enable_duckdns == 1 && var.web_port != "443" ? "https://${var.duckdns_domain}:${var.web_port}/nc" : ""}${var.enable_duckdns == 0 && var.web_port == "443" ? "https://${oci_core_instance.nc-instance.public_ip}" : ""}${var.enable_duckdns == 0 && var.web_port != "443" ? "https://${oci_core_instance.nc-instance.public_ip}:${var.web_port}/" : ""}
 
 ## ################### ##
 ## Update Instructions ##
