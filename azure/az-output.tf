@@ -9,7 +9,7 @@ output "nc-output" {
 ssh ubuntu@${azurerm_public_ip.nc-public-ip.ip_address}
 
 ## WebUI ##
-${var.enable_duckdns == 1 && var.web_port == "443" ? "https://${var.duckdns_domain}/nc" : ""}${var.enable_duckdns == 1 && var.web_port != "443" ? "https://${var.duckdns_domain}:${var.web_port}/nc" : ""}${var.enable_duckdns == 0 && var.web_port == "443" ? "https://${azurerm_public_ip.nc-public-ip.ip_address}" : ""}${var.enable_duckdns == 0 && var.web_port != "443" ? "https://${azurerm_public_ip.nc-public-ip.ip_address}:${var.web_port}/" : ""}
+${var.enable_duckdns == 1 && var.web_port == "443" ? "https://${var.duckdns_domain}/nc/" : ""}${var.enable_duckdns == 1 && var.web_port != "443" ? "https://${var.duckdns_domain}:${var.web_port}/nc/" : ""}${var.enable_duckdns == 0 && var.web_port == "443" ? "https://${azurerm_public_ip.nc-public-ip.ip_address}/" : ""}${var.enable_duckdns == 0 && var.web_port != "443" ? "https://${azurerm_public_ip.nc-public-ip.ip_address}:${var.web_port}/" : ""}
 
 ## ################### ##
 ## Update Instructions ##
