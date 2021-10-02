@@ -65,7 +65,7 @@ resource "azurerm_key_vault_access_policy" "nc-vault-disk-access-disk" {
   key_vault_id    = azurerm_key_vault.nc-vault-disk.id
   tenant_id       = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.tenant_id
   object_id       = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.principal_id
-  key_permissions = ["get", "decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey", "unwrapKey"]
+  key_permissions = ["Get", "Decrypt", "Encrypt", "Sign", "UnwrapKey", "Verify", "WrapKey", "UnwrapKey"]
 }
 
 resource "time_sleep" "wait_for_vaults" {

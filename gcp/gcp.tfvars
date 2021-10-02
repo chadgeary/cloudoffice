@@ -20,7 +20,7 @@ gcp_image_project = "ubuntu-os-cloud"
 
 ## VERY UNCOMMON ##
 nc_prefix            = "nextcloud"
-gcp_machine_type     = "g1-small"
+gcp_machine_type     = "e2-micro"
 disk_gb              = 30
 project_url          = "https://github.com/chadgeary/cloudoffice"
 gcp_project_services = ["serviceusage.googleapis.com", "cloudkms.googleapis.com", "storage-api.googleapis.com", "secretmanager.googleapis.com"]
