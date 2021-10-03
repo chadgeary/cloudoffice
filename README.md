@@ -25,3 +25,4 @@ Standalone:
 
 # Changelog
 - July 2021 - Please note, the duckdns domain feature was added (after videos were created). [duckdns.org](https://duckdns.org) is a free service to provide a domain name (that we sign with a [letsencrypt.org](https://letsencrypt.org) certificate with automatically). Though not required, duckdns is suggested for all new deployments. The certificate integrates better with Nextcloud and OnlyOffice apps and web browsers.
+- October 2021 - Azure's security_group and security_group_rule resources conflict and overwrite eachother. The security_group_rule(s) have been put in security_group as inline.
