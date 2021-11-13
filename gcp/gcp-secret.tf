@@ -5,6 +5,9 @@ resource "google_secret_manager_secret" "nc-secret-admin-password" {
   replication {
     user_managed {
       replicas {
+        customer_managed_encryption {
+          kms_key_name = google_kms_crypto_key.nc-key-secret.id
+        }
         location = var.gcp_region
       }
     }
