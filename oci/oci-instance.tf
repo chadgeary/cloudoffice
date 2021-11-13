@@ -27,7 +27,7 @@ data "template_file" "nc-user-data" {
     oci_kms_keyid          = oci_kms_key.nc-kms-storage-key.id
     oci_storage_namespace  = data.oci_objectstorage_namespace.nc-bucket-namespace.namespace
     oci_storage_bucketname = "${var.nc_prefix}-bucket"
-    oci_region             = var.oci_region
+    oci_region             = local.oci_region
     oci_root_compartment   = var.oci_root_compartment
     web_port               = var.web_port
     oo_port                = var.oo_port
