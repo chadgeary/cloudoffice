@@ -34,3 +34,18 @@ resource "google_kms_crypto_key_iam_binding" "nc-key-storage-binding" {
   ]
   depends_on = [data.google_storage_project_service_account.nc-storage-account]
 }
+
+resource "google_kms_crypto_key" "nc-key-secret" {
+  name            = "${var.nc_prefix}-key-secret"
+  key_ring        = google_kms_key_ring.nc-keyring.id
+  rotation_period = "100000s"
+}
+
+resource "google_kms_crypto_key_iam_binding" "nc-key-secret-binding" {
+  crypto_key_id = google_kms_crypto_key.nc-key-secret.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members = [
+    "serviceAccount:service-${google_project.nc-project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com",
+    "serviceAccount:service-${google_project.nc-project.number}@compute-system.iam.gserviceaccount.com"
+  ]
+}
