@@ -23,6 +23,10 @@
       set_fact:
         docker_duckdnsupdater: "{% if docker_duckdnsupdater is not defined %}{% else %}{{ docker_duckdnsupdater }}{% endif %}"
 
+    - name: if not defined, set docker_onlyoffice to blank value
+      set_fact:
+        docker_onlyoffice: "{% if docker_onlyoffice is not defined %}{% else %}{{ docker_onlyoffice }}{% endif %}"
+
     - name: add docker apt key
       apt_key:
         url: https://download.docker.com/linux/raspbian/gpg
