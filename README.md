@@ -10,6 +10,8 @@ Several deployment options are available, see the README of each subdirectory fo
 
 # Videos
 Cloud deployments:
+Choosing a cloud provider? [Watch this](https://youtu.be/HB7VwTffdIY) for a mostly un-biased comparison of free options/free trials.
+
 - [Prerequisites](https://youtu.be/SJ0hrXPbMNo) - Watch this first if deploying in the cloud.
 - [AWS](https://youtu.be/Y1kUaYYDMvc)
 - [Azure](https://youtu.be/xS80EdVuJhU)

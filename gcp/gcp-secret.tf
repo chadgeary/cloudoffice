@@ -12,7 +12,7 @@ resource "google_secret_manager_secret" "nc-secret-admin-password" {
       }
     }
   }
-  depends_on = [google_project_service.nc-project-services]
+  depends_on = [google_project_service_identity.nc-project-services-identities, google_kms_crypto_key_iam_binding.nc-key-secret-binding]
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-admin-password-version" {
@@ -31,7 +31,7 @@ resource "google_secret_manager_secret" "nc-secret-db-password" {
       }
     }
   }
-  depends_on = [google_project_service.nc-project-services]
+  depends_on = [google_project_service_identity.nc-project-services-identities, google_kms_crypto_key_iam_binding.nc-key-secret-binding]
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-db-password-version" {
@@ -50,7 +50,7 @@ resource "google_secret_manager_secret" "nc-secret-oo-password" {
       }
     }
   }
-  depends_on = [google_project_service.nc-project-services]
+  depends_on = [google_project_service_identity.nc-project-services-identities, google_kms_crypto_key_iam_binding.nc-key-secret-binding]
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-oo-password-version" {
@@ -69,7 +69,7 @@ resource "google_secret_manager_secret" "nc-secret-storage-key" {
       }
     }
   }
-  depends_on = [google_project_service.nc-project-services]
+  depends_on = [google_project_service_identity.nc-project-services-identities, google_kms_crypto_key_iam_binding.nc-key-secret-binding]
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-storage-key-version" {
@@ -94,7 +94,7 @@ resource "google_secret_manager_secret" "nc-secret-storagegw-password" {
       }
     }
   }
-  depends_on = [google_project_service.nc-project-services]
+  depends_on = [google_project_service_identity.nc-project-services-identities, google_kms_crypto_key_iam_binding.nc-key-secret-binding]
 }
 
 resource "google_secret_manager_secret_version" "nc-secret-storagegw-password-version" {

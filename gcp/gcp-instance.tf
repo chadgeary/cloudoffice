@@ -47,5 +47,5 @@ resource "google_compute_instance" "nc-instance" {
     scopes = ["cloud-platform", "storage-rw"]
   }
   allow_stopping_for_update = true
-  depends_on                = [google_kms_crypto_key_iam_binding.nc-key-compute-binding, google_service_account_iam_policy.nc-service-account-iam-policy, google_storage_bucket.nc-bucket]
+  depends_on                = [google_kms_crypto_key_iam_binding.nc-key-compute-binding, google_service_account_iam_policy.nc-service-account-iam-policy, google_kms_crypto_key_iam_binding.nc-key-secret-binding, google_storage_bucket.nc-bucket]
 }
