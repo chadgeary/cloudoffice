@@ -140,5 +140,5 @@ resource "aws_ssm_association" "nc-ssm-assoc" {
     SourceType     = "S3"
     Verbose        = "-v"
   }
-  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_s3_bucket_object.nc-files]
+  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_s3_object.nc-files]
 }
