@@ -146,11 +146,11 @@ resource "aws_ssm_association" "nc-ssm-assoc" {
     s3_key_prefix  = "ssm"
   }
   parameters = {
-    ExtraVariables = "SSM=True aws_region=${var.aws_region} name_prefix=${var.name_prefix} name_suffix=${random_string.nc-random.result} s3_bucket=${aws_s3_bucket.nc-bucket.id} kms_key_id=${aws_kms_key.nc-kmscmk-s3.key_id} docker_network=${var.docker_network} docker_gw=${var.docker_gw} docker_webproxy=${var.docker_webproxy} docker_nextcloud=${var.docker_nextcloud} docker_db=${var.docker_db} docker_onlyoffice=${var.docker_onlyoffice} docker_duckdnsupdater=${var.docker_duckdnsupdater} instance_public_ip=${aws_lightsail_static_ip.nc-staticip.ip_address} web_port=${var.web_port} oo_port=${var.oo_port} project_directory=${var.project_directory} enable_duckdns=${var.enable_duckdns} duckdns_domain=${var.duckdns_domain} duckdns_token=${var.duckdns_token} letsencrypt_email=${var.letsencrypt_email}"
+    ExtraVariables = local.ansible_vars
     PlaybookFile   = "cloudoffice_aws.yml"
     SourceInfo     = "{\"path\":\"https://s3.${var.aws_region}.amazonaws.com/${aws_s3_bucket.nc-bucket.id}/playbook/\"}"
     SourceType     = "S3"
     Verbose        = "-v"
   }
-  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_s3_bucket_object.nc-files]
+  depends_on = [aws_iam_role_policy_attachment.nc-iam-attach-ssm, aws_iam_role_policy_attachment.nc-iam-attach-s3, aws_s3_object.nc-files]
 }
