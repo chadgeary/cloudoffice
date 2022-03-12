@@ -6,7 +6,6 @@ resource "digitalocean_ssh_key" "nc-sshkey" {
 resource "digitalocean_droplet" "nc-droplet" {
   name               = "${var.nc_prefix}-instance-${random_string.nc-random.result}"
   region             = var.do_region
-  private_networking = "true"
   vpc_uuid           = digitalocean_vpc.nc-network.id
   image              = var.do_image
   size               = var.do_size
