@@ -25,13 +25,13 @@ resource "azurerm_network_security_group" "nc-net-sec" {
   location            = azurerm_resource_group.nc-resourcegroup.location
   resource_group_name = azurerm_resource_group.nc-resourcegroup.name
   security_rule {
-    name                        = "${var.nc_prefix}-net-rule-ssh"
-    priority                    = 100
-    direction                   = "Inbound"
-    access                      = "Allow"
-    protocol                    = "Tcp"
-    source_port_range           = "*"
-    destination_port_range      = "22"
+    name                   = "${var.nc_prefix}-net-rule-ssh"
+    priority               = 100
+    direction              = "Inbound"
+    access                 = "Allow"
+    protocol               = "Tcp"
+    source_port_range      = "*"
+    destination_port_range = "22"
 
     source_address_prefix        = var.mgmt_cidr
     destination_address_prefixes = [var.az_subnet_cidr]
