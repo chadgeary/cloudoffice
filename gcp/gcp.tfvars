@@ -19,15 +19,15 @@ gcp_image_name    = "ubuntu-1804-bionic-v20201014"
 gcp_image_project = "ubuntu-os-cloud"
 
 ## VERY UNCOMMON ##
-nc_prefix            = "nextcloud"
-gcp_machine_type     = "e2-micro"
-disk_gb              = 30
-project_url          = "https://github.com/chadgeary/cloudoffice"
-gcp_project_services = ["serviceusage.googleapis.com", "cloudkms.googleapis.com", "storage-api.googleapis.com", "secretmanager.googleapis.com"]
+nc_prefix                       = "nextcloud"
+gcp_machine_type                = "e2-micro"
+disk_gb                         = 30
+project_url                     = "https://github.com/chadgeary/cloudoffice"
+gcp_project_services            = ["serviceusage.googleapis.com", "cloudkms.googleapis.com", "storage-api.googleapis.com", "secretmanager.googleapis.com"]
 gcp_project_services_identities = ["secretmanager.googleapis.com"]
-ssh_user             = "ubuntu"
-gcp_cidr             = "10.10.13.0/24"
-gcp_instanceip       = "10.10.13.5"
+ssh_user                        = "ubuntu"
+gcp_cidr                        = "10.10.13.0/24"
+gcp_instanceip                  = "10.10.13.5"
 
 # Change if ip settings would interfere with existing networks/ports, should all be within a /24
 web_port              = "443"

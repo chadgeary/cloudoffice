@@ -45,20 +45,21 @@ shutdown /r /t 5
 # After reboot, launch a REGULAR Powershell prompt (left click).
 # Do NOT proceed with an ELEVATED Powershell prompt.
 
-# Download the Ubuntu 1804 package from Microsoft
-curl.exe -L -o ubuntu-1804.appx https://aka.ms/wsl-ubuntu-1804
+# Download the Ubuntu 2204 package from Microsoft
+curl.exe -L -o ubuntu-2204.AppxBundle https://aka.ms/wslubuntu2204
+ 
+# Rename the package, unzip it, and cd (change directory)
+Rename-Item ubuntu-2204.AppxBundle ubuntu-2204.zip
+Expand-Archive ubuntu-2204.zip ubuntu-2204
+cd ubuntu-2204
 
-# Rename the package
-Rename-Item ubuntu-1804.appx ubuntu-1804.zip
-
-# Expand the zip
-Expand-Archive ubuntu-1804.zip ubuntu-1804
-
-# Change to the zip directory
-cd ubuntu-1804
-
-# Execute the ubuntu 1804 installer
-.\ubuntu1804.exe
+# Repeat the above three steps for the x64 file, update 0.10.0 if needed
+Rename-Item ubuntu-2204.0.10.0_x64.zip ubuntu-2204_x64.zip
+Expand-Archive ubuntu-2204_x64.zip ubuntu-2204_x64
+cd ubuntu-2204_x64
+ 
+# Execute the ubuntu installer
+.\ubuntu2204.exe
 
 # Create a username and password when prompted
 ```
@@ -113,8 +114,12 @@ source ~/.bashrc
 # Setup oci CLI with user and tenancy OCID and a default region
 oci setup config
 
-# Copy contents of public key to clipboard
-cat ~/.oci/oci_api_key_public.pem
+# Earlier versions of oci cli did not require entering a passphrase for the private key (including in videos)
+# Instead of generating a separate key, answer this question with your SSH private key's path
+# Enter the location of your API Signing private key file: ~/.ssh/id_rsa
+
+# Copy contents of your SSH's public key in PEM format to clipboard
+openssl rsa -in ~/.ssh/id_rsa -pubout
 
 # Add key via Oracle Web console
 # Navigate to Identity -> Users -> <your user> -> API Keys (Bottom left, under Resource) -> Add Public Key -> Paste Public Keys

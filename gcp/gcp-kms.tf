@@ -6,8 +6,8 @@ resource "google_kms_key_ring" "nc-keyring" {
 }
 
 resource "google_kms_crypto_key" "nc-key-compute" {
-  name            = "${var.nc_prefix}-key-compute"
-  key_ring        = google_kms_key_ring.nc-keyring.id
+  name     = "${var.nc_prefix}-key-compute"
+  key_ring = google_kms_key_ring.nc-keyring.id
 }
 
 resource "google_kms_crypto_key_iam_binding" "nc-key-compute-binding" {
@@ -19,8 +19,8 @@ resource "google_kms_crypto_key_iam_binding" "nc-key-compute-binding" {
 }
 
 resource "google_kms_crypto_key" "nc-key-storage" {
-  name            = "${var.nc_prefix}-key-storage"
-  key_ring        = google_kms_key_ring.nc-keyring.id
+  name     = "${var.nc_prefix}-key-storage"
+  key_ring = google_kms_key_ring.nc-keyring.id
 }
 
 resource "google_kms_crypto_key_iam_binding" "nc-key-storage-binding" {
@@ -34,8 +34,8 @@ resource "google_kms_crypto_key_iam_binding" "nc-key-storage-binding" {
 }
 
 resource "google_kms_crypto_key" "nc-key-secret" {
-  name            = "${var.nc_prefix}-key-secret"
-  key_ring        = google_kms_key_ring.nc-keyring.id
+  name     = "${var.nc_prefix}-key-secret"
+  key_ring = google_kms_key_ring.nc-keyring.id
 }
 
 resource "google_kms_crypto_key_iam_binding" "nc-key-secret-binding" {
