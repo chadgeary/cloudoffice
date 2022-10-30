@@ -14,17 +14,17 @@ resource "azurerm_key_vault_access_policy" "nc-vault-disk" {
   object_id    = data.azurerm_client_config.nc-client-conf.object_id
 
   key_permissions = [
-    "Get", "Create", "Delete", "List", "Restore", "Recover", "Unwrapkey", "Wrapkey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
-
   secret_permissions = [
   ]
-
   certificate_permissions = [
   ]
-
   storage_permissions = [
   ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_key_vault" "nc-vault-storage" {
@@ -42,17 +42,17 @@ resource "azurerm_key_vault_access_policy" "nc-vault-storage-nc-client-conf" {
   object_id    = data.azurerm_client_config.nc-client-conf.object_id
 
   key_permissions = [
-    "Get", "Create", "Delete", "List", "Restore", "Recover", "Unwrapkey", "Wrapkey", "Purge", "Encrypt", "Decrypt", "Sign", "Verify"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
-
   secret_permissions = [
   ]
-
   certificate_permissions = [
   ]
-
   storage_permissions = [
   ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_key_vault_access_policy" "nc-vault-storage-storage-account" {
@@ -61,17 +61,17 @@ resource "azurerm_key_vault_access_policy" "nc-vault-storage-storage-account" {
   object_id    = azurerm_storage_account.nc-storage-account.identity.0.principal_id
 
   key_permissions = [
-    "Get", "Create", "List", "Restore", "Recover", "Unwrapkey", "Wrapkey", "Encrypt", "Decrypt", "Sign", "Verify"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
-
   secret_permissions = [
   ]
-
   certificate_permissions = [
   ]
-
   storage_permissions = [
   ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_key_vault" "nc-vault-secret" {
@@ -90,16 +90,16 @@ resource "azurerm_key_vault_access_policy" "nc-vault-secret-nc-client-conf" {
 
   key_permissions = [
   ]
-
   secret_permissions = [
-    "Set", "Get", "Delete", "List", "Purge", "Recover", "Restore"
+    "Backup", "Delete", "Get", "List", "Purge", "Recover", "Restore", "Set"
   ]
-
   certificate_permissions = [
   ]
-
   storage_permissions = [
   ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_key_vault_access_policy" "nc-vault-secret-nc-instance-id" {
@@ -109,16 +109,16 @@ resource "azurerm_key_vault_access_policy" "nc-vault-secret-nc-instance-id" {
 
   key_permissions = [
   ]
-
   secret_permissions = [
-    "Get", "List",
+    "Get", "List"
   ]
-
   certificate_permissions = [
   ]
-
   storage_permissions = [
   ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "azurerm_disk_encryption_set" "nc-disk-encrypt" {
@@ -132,10 +132,22 @@ resource "azurerm_disk_encryption_set" "nc-disk-encrypt" {
 }
 
 resource "azurerm_key_vault_access_policy" "nc-vault-disk-access-disk" {
-  key_vault_id    = azurerm_key_vault.nc-vault-disk.id
-  tenant_id       = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.tenant_id
-  object_id       = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.principal_id
-  key_permissions = ["Get", "Decrypt", "Encrypt", "Sign", "UnwrapKey", "Verify", "WrapKey", "UnwrapKey"]
+  key_vault_id = azurerm_key_vault.nc-vault-disk.id
+  tenant_id    = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.tenant_id
+  object_id    = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.principal_id
+
+  key_permissions = [
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
+  ]
+  secret_permissions = [
+  ]
+  certificate_permissions = [
+  ]
+  storage_permissions = [
+  ]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "time_sleep" "wait_for_vaults" {

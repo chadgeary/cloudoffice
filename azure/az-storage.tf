@@ -1,13 +1,13 @@
 resource "azurerm_storage_account" "nc-storage-account" {
-  name                     = "${var.nc_prefix}store${random_string.nc-random.result}"
-  location                 = azurerm_resource_group.nc-resourcegroup.location
-  resource_group_name      = azurerm_resource_group.nc-resourcegroup.name
-  account_kind             = "StorageV2"
-  account_tier             = "Standard"
-  access_tier              = "Hot"
-  min_tls_version          = "TLS1_2"
-  account_replication_type = "LRS"
-  allow_blob_public_access = "false"
+  name                            = "${var.nc_prefix}store${random_string.nc-random.result}"
+  location                        = azurerm_resource_group.nc-resourcegroup.location
+  resource_group_name             = azurerm_resource_group.nc-resourcegroup.name
+  account_kind                    = "StorageV2"
+  account_tier                    = "Standard"
+  access_tier                     = "Hot"
+  min_tls_version                 = "TLS1_2"
+  account_replication_type        = "LRS"
+  allow_nested_items_to_be_public = "false"
   identity {
     type = "SystemAssigned"
   }
