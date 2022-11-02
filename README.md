@@ -39,3 +39,4 @@ Standalone:
   * WSL installation
   * Cloud virtual machine images
 * Note about Oracle's private key generation for `oci config`
+* Fixed [13](https://github.com/chadgeary/cloudoffice/issues/13) placeholder email address
