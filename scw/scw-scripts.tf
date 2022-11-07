@@ -53,7 +53,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git
 # pip update pip
 pip3 install --upgrade pip
 # Install ansible
-pip3 install --upgrade ansible
+pip3 install --upgrade ansible cryptography pyOpenssl
 # Make the project directory
 mkdir -p /opt/git/cloudoffice
 # Clone project into project directory

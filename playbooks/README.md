@@ -9,7 +9,7 @@
 # Ansible + Git
 sudo apt update && sudo apt -y upgrade
 sudo apt install git python3-pip
-pip3 install --user --upgrade ansible
+pip3 install --user --upgrade ansible cryptography pyOpenssl
 
 # Add .local/bin to $PATH
 echo PATH="\$PATH:~/.local/bin" >> .bashrc
@@ -58,13 +58,13 @@ ansible-playbook cloudoffice_raspbian.yml --ask-become-pass --extra-vars="web_po
 ```
 
 # Ubuntu Deployment
-- Ubuntu 18.04 or Ubuntu 20.04
+- Ubuntu 18.04, 20.04, 22.04
 
 ```
 # Ansible + Git
 sudo apt update && sudo apt -y upgrade
 sudo apt install git python3-pip
-pip3 install --user --upgrade ansible
+pip3 install --user --upgrade ansible cryptography pyOpenssl
 
 # Add .local/bin to $PATH
 echo PATH="\$PATH:~/.local/bin" >> .bashrc

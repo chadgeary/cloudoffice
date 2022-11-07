@@ -101,7 +101,7 @@ resource "aws_ssm_document" "nc-ssm-doc" {
         "sudo apt-get update",
         "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git",
         "sudo pip3 install --upgrade pip",
-        "sudo pip3 install --upgrade ansible",
+        "sudo pip3 install --upgrade ansible cryptography pyOpenssl",
         "echo \"Running Ansible in `pwd`\"",
         "#this section locates files and unzips them",
         "for zip in $(find -iname '*.zip'); do",

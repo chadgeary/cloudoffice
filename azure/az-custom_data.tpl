@@ -37,7 +37,7 @@ apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git
 pip3 install --upgrade pip
 # Install azure for ansible
-pip3 install ansible[azure]
+pip3 install ansible[azure] cryptography pyOpenssl
 # And the collection
 ansible-galaxy collection install azure.azcollection
 # Grab the python requirements for azure
