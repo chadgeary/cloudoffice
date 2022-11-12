@@ -191,6 +191,7 @@
       with_items:
         - httpd-ssl.conf
         - httpd.conf
+        - nginx/default.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
       register: proxy_conf_files
