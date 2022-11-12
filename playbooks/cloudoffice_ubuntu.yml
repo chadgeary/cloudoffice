@@ -126,6 +126,7 @@
       with_items:
         - "{{ project_directory }}/nextcloud_webproxy"
         - "{{ project_directory }}/nextcloud_webproxy/nginx"
+        - "{{ project_directory }}/nextcloud_webproxy/nginx/site-confs"
         - "{{ project_directory }}/nextcloud_webproxy/nginx/proxy-confs"
 
     - name: various container directories - db
@@ -163,7 +164,7 @@
       with_items:
         - httpd-ssl.conf
         - httpd.conf
-        - nginx/default.conf
+        - nginx/site-confs/default.conf
         - nginx/nginx.conf
         - nginx/proxy-confs/cloudoffice.conf
       register: proxy_conf_files
