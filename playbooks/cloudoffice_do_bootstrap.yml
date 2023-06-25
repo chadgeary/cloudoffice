@@ -1,26 +1,26 @@
 ---
-- name: cloudoffice bootstrap for digital ocean
+- name: Cloudoffice bootstrap for digital ocean
   hosts: localhost
   connection: local
-  become: True
+  become: true
   become_user: root
   tasks:
 
-    - name: ubuntu user
-      user:
+    - name: Ubuntu user
+      ansible.builtin.user:
         name: ubuntu
-        shell: /bin/bash
-        create_home: True
+        ansible.builtin.shell: /bin/bash
+        create_home: true
 
-    - name: ubuntu ssh dir
-      file:
+    - name: Ubuntu ssh dir
+      ansible.builtin.file:
         path: /home/ubuntu/.ssh
         state: directory
         owner: ubuntu
         group: ubuntu
         mode: '0755'
 
-    - name: ubuntu ssh key from root key
+    - name: Ubuntu ssh key from root key
       copy:
         src: /root/.ssh/authorized_keys
         dest: /home/ubuntu/.ssh/authorized_keys
@@ -28,13 +28,13 @@
         group: ubuntu
         mode: '0644'
 
-    - name: remove root's ssh pubkey
-      file:
+    - name: Remove root's ssh pubkey
+      ansible.builtin.file:
         path: /root/.ssh/authorized_keys
         state: absent
 
-    - name: ubuntu gets sudo nopasswd
-      lineinfile:
+    - name: Ubuntu gets sudo nopasswd
+      ansible.builtin.lineinfile:
         dest: /etc/sudoers
         state: present
         line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'

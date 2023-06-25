@@ -14,7 +14,7 @@ resource "azurerm_key_vault_access_policy" "nc-vault-disk" {
   object_id    = data.azurerm_client_config.nc-client-conf.object_id
 
   key_permissions = [
-    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "GetRotationPolicy", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
   secret_permissions = [
   ]
@@ -42,7 +42,7 @@ resource "azurerm_key_vault_access_policy" "nc-vault-storage-nc-client-conf" {
   object_id    = data.azurerm_client_config.nc-client-conf.object_id
 
   key_permissions = [
-    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "GetRotationPolicy", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
   secret_permissions = [
   ]
@@ -61,7 +61,7 @@ resource "azurerm_key_vault_access_policy" "nc-vault-storage-storage-account" {
   object_id    = azurerm_storage_account.nc-storage-account.identity.0.principal_id
 
   key_permissions = [
-    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "GetRotationPolicy", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
   secret_permissions = [
   ]
@@ -137,7 +137,7 @@ resource "azurerm_key_vault_access_policy" "nc-vault-disk-access-disk" {
   object_id    = azurerm_disk_encryption_set.nc-disk-encrypt.identity.0.principal_id
 
   key_permissions = [
-    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
+    "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "GetRotationPolicy", "Import", "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", "Verify", "WrapKey"
   ]
   secret_permissions = [
   ]

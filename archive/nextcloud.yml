@@ -1,7 +1,7 @@
 ---
 - name: nextcloud
   hosts: '{{ target }}'
-  become: True
+  become: true
   become_user: root
   tasks:
     - name: epel and scl repo packages
@@ -13,7 +13,7 @@
           - epel-release
           - centos-release-scl
 
-    - name: nextcloud packages
+    - name: Nextcloud packages
       yum:
         name: "{{ nc_packages }}"
         state: latest
@@ -42,14 +42,14 @@
           - rh-php72-php-opcache
           - rh-php72-php-imagick 
 
-    - name: apache service enabled/started
-      systemd:
+    - name: Apache service enabled/started
+      ansible.builtin.systemd:
         name: httpd
         state: started
-        enabled: yes
+        enabled: true
 
-    - name: php7 symlinks
-      file:
+    - name: Php7 symlinks
+      ansible.builtin.file:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
         state: link
@@ -59,121 +59,121 @@
         - { src: /opt/rh/httpd24/root/etc/httpd/modules/librh-php72-php7.so, dest: /etc/httpd/modules/librh-php72-php7.so }
         - { src: /opt/rh/rh-php72/root/bin/php, dest: /usr/bin/php }
 
-    - name: check nextcloud downloaded
-      stat:
+    - name: Check nextcloud downloaded
+      ansible.builtin.stat:
         path: /opt/nextcloud-{{ nc_release }}.zip
       register: nc_downloaded
 
-    - name: download nextcloud when not downloaded
+    - name: Download nextcloud when not downloaded
       get_url:
         url: https://download.nextcloud.com/server/releases/nextcloud-{{ nc_release }}.zip
         dest: /opt/nextcloud-{{ nc_release }}.zip
         mode: '0440'
       when: nc_downloaded.stat.exists == false
 
-    - name: check nextcloud unarchived (look for AUTHORS file)
-      stat:
+    - name: Check nextcloud unarchived (look for AUTHORS file)
+      ansible.builtin.stat:
         path: /var/www/{{ nc_friendly }}/nextcloud/AUTHORS
       register: nc_unarchived
 
-    - name: nc web dir
-      file:
+    - name: Nc web dir
+      ansible.builtin.file:
         path: "/var/www/{{ nc_friendly }}"
         state: directory
         mode: '0755'
         owner: apache
         group: apache
 
-    - name: unarchive nextcloud if not unarchived
-      unarchive:
+    - name: Unarchive nextcloud if not unarchived
+      ansible.builtin.unarchive:
         src: /opt/nextcloud-{{ nc_release }}.zip
         dest: /var/www/{{ nc_friendly }}
-        remote_src: yes
+        remote_src: true
       when: nc_unarchived.stat.exists == false
 
     - name: 755/644 apache:apache html directory recursively
-      file:
+      ansible.builtin.file:
         path: /var/www/{{ nc_friendly }}
         mode: u=rwX,g=rX,o=rX
         owner: apache
         group: apache
-        recurse: yes
+        recurse: true
 
-    - name: nc_datadir
-      file:
+    - name: Nc_datadir
+      ansible.builtin.file:
         path: "{{ nc_datadir }}"
         state: directory
         mode: '0755'
         owner: apache
         group: apache
 
-    - name: set selinux file context on html directory recursively
+    - name: Set selinux file context on html directory recursively
       sefcontext:
         target: '/var/www/{{ nc_friendly }}(/.*)?'
         setype: httpd_sys_rw_content_t
-        reload: True
+        reload: true
         state: present
 
-    - name: restore selinux file context on html directory recursively
-      shell: restorecon -Rv /var/www/{{ nc_friendly }}
+    - name: Restore selinux file context on html directory recursively
+      ansible.builtin.shell: restorecon -Rv /var/www/{{ nc_friendly }}
 
-    - name: selinux allow ldap auth for httpd
+    - name: Selinux allow ldap auth for httpd
       seboolean:
         name: httpd_can_connect_ldap
-        state: yes
-        persistent: yes
+        state: true
+        persistent: true
 
-    - name: selinux allow nfs for httpd
+    - name: Selinux allow nfs for httpd
       seboolean:
         name: httpd_use_nfs
-        state: yes
-        persistent: yes
+        state: true
+        persistent: true
 
-    - name: set nextcloud.conf
-      template:
+    - name: Set nextcloud.conf
+      ansible.builtin.template:
         src: nextcloud.conf
         dest: /etc/httpd/conf.d/nextcloud.conf
         owner: root
         mode: '0644'
 
-    - name: set httpd-le-ssl.conf
-      template:
+    - name: Set httpd-le-ssl.conf
+      ansible.builtin.template:
         src: httpd-le-ssl.conf
         dest: /etc/httpd/conf/httpd-le-ssl.conf
         owner: root
         mode: '0644'
 
-    - name: check ncadmin.txt credential generated
-      stat:
+    - name: Check ncadmin.txt credential generated
+      ansible.builtin.stat:
         path: "{{ nc_datadir }}/ncadmin.txt"
       register: nc_ncadmin
 
-    - name: generate admin credential if not generated
-      shell: 
+    - name: Generate admin credential if not generated
+      ansible.builtin.shell: 
         echo -n $(openssl rand -base64 32) > {{ nc_datadir }}/ncadmin.txt
       when: nc_ncadmin.stat.exists == false
 
-    - name: set permissions and perform nc bootstrap
-      shell: |
+    - name: Set permissions and perform nc bootstrap
+      ansible.builtin.shell: |
         chown apache:apache {{ nc_datadir }}/ncadmin.txt
         chmod 400 {{ nc_datadir }}/ncadmin.txt
         cd /var/www/{{ nc_friendly }}/nextcloud && sudo -u apache /usr/bin/php occ maintenance:install --database "sqlite" --database-name "nextcloud" --database-user "root" --database-pass "$(cat {{ nc_datadir }}/ncadmin.txt)" --admin-user "admin" --admin-pass "$(cat {{ nc_datadir }}/ncadmin.txt)"
       when: nc_ncadmin.stat.exists == false
 
-    - name: set friendly name as a trusted domain in config.php
-      lineinfile:
+    - name: Set friendly name as a trusted domain in config.php
+      ansible.builtin.lineinfile:
         path: /var/www/{{ nc_friendly }}/nextcloud/config/config.php
         insertafter: "^    0 => 'localhost',"
         line: "    '{{ nc_friendly }}',"
         state: present
 
-    - name: check nextcloud.db in nc_datadir
-      stat:
+    - name: Check nextcloud.db in nc_datadir
+      ansible.builtin.stat:
         path: /opt/nextcloud/data/nextcloud.db
       register: nc_datadir_db
 
-    - name: move nc default data directory to nc_datadir
-      shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}/
+    - name: Move nc default data directory to nc_datadir
+      ansible.builtin.shell: mv /var/www/{{ nc_friendly }}/nextcloud/data {{ nc_datadir }}/
       when: nc_datadir_db.stat.exists == false
 
     - name: ensure datadir var defined in config.php
@@ -183,16 +183,16 @@
         replace: "  'datadirectory' => '{{ nc_datadir }}/data',"
       when: nc_datadir_db.stat.exists == false
 
-    - name: apache service restarted
-      systemd:
+    - name: Apache service restarted
+      ansible.builtin.systemd:
         name: httpd
         state: restarted
 
-    - name: certbot configuration
-      shell: |
+    - name: Certbot configuration
+      ansible.builtin.shell: |
         certbot --apache --non-interactive --agree-tos --email {{ certbot_contact_email|quote }} --domains {{ nc_friendly }} --redirect
 
-    - name: certbot auto renew cron, 4AM on the second day of the month
+    - name: Certbot auto renew cron, 4AM on the second day of the month
       cron:
         name: "certbot renew nextcloud"
         minute: '00'
@@ -200,4 +200,4 @@
         day: '02'
         job: "/usr/bin/certbot renew"
         state: present
-        user: root
+        ansible.builtin.user: root

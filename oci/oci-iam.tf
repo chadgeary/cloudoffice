@@ -35,8 +35,8 @@ resource "oci_identity_group" "nc-bucket-group" {
 resource "oci_identity_user" "nc-bucket-user" {
   compartment_id = data.oci_identity_compartment.nc-root-compartment.id
   description    = "OCI bucket user"
-  name           = "${var.nc_prefix}-bucket-user"
-  email          = "${var.nc_prefix}-bucket-user@${var.nc_prefix}-${random_string.nc-random.result}.internal"
+  name           = "${var.nc_prefix}"
+  email          = "${var.nc_prefix}@${var.nc_prefix}${random_string.nc-random.result}.email"
 }
 
 resource "oci_identity_user_group_membership" "nc-bucket-group-membership" {
