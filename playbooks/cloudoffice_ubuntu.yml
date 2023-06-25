@@ -279,7 +279,7 @@
         hostname: cloudofficedatabase
         image: linuxserver/mariadb:latest
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_db }}"
         env:
           MYSQL_ROOT_PASSWORD: "{{ admin_password }}"
@@ -301,7 +301,7 @@
         hostname: cloudofficewebproxy
         image: httpd:2.4
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_webproxy }}"
         ports:
           - "{{ web_port }}:{{ web_port }}"
@@ -323,7 +323,7 @@
         hostname: cloudoffice_duckdnsupdater
         image: ghcr.io/linuxserver/duckdns
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_duckdnsupdater }}"
         env:
           PUID: "1000"
@@ -343,7 +343,7 @@
         hostname: cloudofficewebproxy
         image: ghcr.io/linuxserver/swag
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_webproxy }}"
         env:
           PUID: "1000"
@@ -375,7 +375,7 @@
         hostname: cloudofficenextcloud
         image: nextcloud:latest
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_nextcloud }}"
         env:
           NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_password }}"
@@ -406,7 +406,7 @@
         hostname: cloudofficeonlyoffice
         image: onlyoffice/documentserver
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_onlyoffice }}"
         env:
           ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
@@ -439,7 +439,7 @@
         hostname: cloudofficeonlyoffice
         image: onlyoffice/documentserver
         networks:
-          - name: Cloudoffice
+          - name: cloudoffice
             ipv4_address: "{{ docker_onlyoffice }}"
         env:
           ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
