@@ -1,41 +1,41 @@
 ---
-- name: cloudoffice for gcp
+- name: Cloudoffice for gcp
   hosts: localhost
   gather_facts: true
   become: true
   tasks:
 
-    - name: if not defined, set duckdns_domain to blank value
-      set_fact:
+    - name: If not defined, set duckdns_domain to blank value
+      ansible.builtin.set_fact:
         duckdns_domain: "{% if duckdns_domain is not defined %}{% else %}{{ duckdns_domain }}{% endif %}"
 
-    - name: if not defined, set duckdns_token to blank value
-      set_fact:
+    - name: If not defined, set duckdns_token to blank value
+      ansible.builtin.set_fact:
         duckdns_token: "{% if duckdns_token is not defined %}{% else %}{{ duckdns_token }}{% endif %}"
 
-    - name: if not defined, set letsencrypt_email to blank value
-      set_fact:
+    - name: If not defined, set letsencrypt_email to blank value
+      ansible.builtin.set_fact:
         letsencrypt_email: "{% if letsencrypt_email is not defined %}{% else %}{{ letsencrypt_email }}{% endif %}"
 
-    - name: if not defined, set docker_duckdnsupdater to blank value
-      set_fact:
+    - name: If not defined, set docker_duckdnsupdater to blank value
+      ansible.builtin.set_fact:
         docker_duckdnsupdater: "{% if docker_duckdnsupdater is not defined %}{% else %}{{ docker_duckdnsupdater }}{% endif %}"
 
-    - name: check swap file exists
-      stat:
+    - name: Check swap file exists
+      ansible.builtin.stat:
         path: /opt/swap.file
       register: swap_file
 
-    - name: create swap file if not exists
-      shell: |
+    - name: Create swap file if not exists
+      ansible.builtin.shell: |
         dd if=/dev/zero of=/opt/swap.file bs=1024 count=1048576
         mkswap /opt/swap.file
       when:
-       - swap_file.stat.exists|bool == false
-       - ansible_swaptotal_mb < 1
+        - not swap_file.stat.exists
+        - ansible_swaptotal_mb < 1
 
-    - name: set swap file permissions
-      file:
+    - name: Set swap file permissions
+      ansible.builtin.file:
         path: /opt/swap.file
         state: file
         owner: root
@@ -44,8 +44,8 @@
       when:
         - ansible_swaptotal_mb < 1
 
-    - name: set swap mount
-      mount:
+    - name: Set swap mount
+      ansible.builtin.mount:
         src: /opt/swap.file
         path: none
         fstype: swap
@@ -56,60 +56,60 @@
       when:
         - ansible_swaptotal_mb < 1
 
-    - name: mount swap now
-      shell: |
+    - name: Mount swap now
+      ansible.builtin.shell: |
         swapon /opt/swap.file
       when:
         - ansible_swaptotal_mb < 1
 
-    - name: required packages
-      apt:
+    - name: Required packages
+      ansible.builtin.apt:
         pkg:
           - docker.io
           - libcap2-bin
           - python3-pip
           - ssl-cert
         state: latest
-        update_cache: yes
+        update_cache: true
 
-    - name: docker python packages
-      pip:
+    - name: Docker python packages
+      ansible.builtin.pip:
         name:
           - docker
         executable: /usr/bin/pip3
         state: latest
 
     - name: IP Forwarding enable/persist
-      sysctl:
+      ansible.builtin.sysctl:
         name: net.ipv4.ip_forward
         value: '1'
         state: present
-        reload: yes
-        sysctl_set: yes
+        reload: true
+        sysctl_set: true
         sysctl_file: /etc/sysctl.conf
 
-    - name: docker service started/enabled
-      systemd:
+    - name: Docker service started/enabled
+      ansible.builtin.systemd:
         name: docker
         state: started
-        enabled: True
+        enabled: true
 
-    - name: db user
-      user:
+    - name: Db user
+      ansible.builtin.user:
         name: nextclouddb
-        shell: /bin/bash
-        create_home: False
+        ansible.builtin.shell: /bin/bash
+        create_home: false
       register: db_user
 
-    - name: storagegw user
-      user:
+    - name: Storagegw user
+      ansible.builtin.user:
         name: storagegw
-        shell: /bin/bash
-        create_home: False
+        ansible.builtin.shell: /bin/bash
+        create_home: false
       register: storagegw_user
 
-    - name: various container directories - application
-      file:
+    - name: Various container directories - application
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: www-data
@@ -123,8 +123,8 @@
         - "{{ project_directory }}/nextcloud_application/var/www/html/config"
         - "{{ project_directory }}/nextcloud_application/var/www/html/data"
 
-    - name: various container directories - webproxy
-      file:
+    - name: Various container directories - webproxy
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: root
@@ -136,8 +136,8 @@
         - "{{ project_directory }}/nextcloud_webproxy/nginx/site-confs"
         - "{{ project_directory }}/nextcloud_webproxy/nginx/proxy-confs"
 
-    - name: various container directories - storagegw
-      file:
+    - name: Various container directories - storagegw
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: "{{ storagegw_user.name }}"
@@ -146,8 +146,8 @@
       with_items:
         - "{{ project_directory }}/nextcloud_storagegw"
 
-    - name: various container directories - db
-      file:
+    - name: Various container directories - db
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: "{{ db_user.name }}"
@@ -156,8 +156,8 @@
       with_items:
         - "{{ project_directory }}/nextcloud_database"
 
-    - name: various container directories - onlyoffice
-      file:
+    - name: Various container directories - onlyoffice
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: '104'
@@ -167,12 +167,12 @@
         - "{{ project_directory }}/nextcloud_onlyoffice"
         - "{{ project_directory }}/nextcloud_onlyoffice/certs"
 
-    - name: web_port if not defined
-      set_fact:
+    - name: Web_port if not defined
+      ansible.builtin.set_fact:
         web_port: "{% if web_port is not defined %}443{% else %}{{ web_port }}{% endif %}"
 
-    - name: secure proxy confs
-      template:
+    - name: Secure proxy confs
+      ansible.builtin.template:
         src: "{{ item }}"
         dest: "/{{ project_directory }}/nextcloud_webproxy/{{ item }}"
         owner: root
@@ -187,20 +187,20 @@
       register: proxy_conf_files
 
     - name: Retrieve GCS Token
-      uri:
+      ansible.builtin.uri:
         url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
         method: GET
         headers:
           Metadata-Flavor: Google
-        return_content: yes
+        return_content: true
       register: gcs_token_resp
 
     - name: Get admin secret from google secret manager
-      uri:
+      ansible.builtin.uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-admin-password/versions/latest:access
         method: GET
-        remote_src: yes
-        return_content: yes
+        remote_src: true
+        return_content: true
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/json
@@ -208,11 +208,11 @@
       register: admin_secret
 
     - name: Get db secret from google secret manager
-      uri:
+      ansible.builtin.uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-db-password/versions/latest:access
         method: GET
-        remote_src: yes
-        return_content: yes
+        remote_src: true
+        return_content: true
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/json
@@ -220,11 +220,11 @@
       register: db_secret
 
     - name: Get oo secret from google secret manager
-      uri:
+      ansible.builtin.uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-oo-password/versions/latest:access
         method: GET
-        remote_src: yes
-        return_content: yes
+        remote_src: true
+        return_content: true
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/json
@@ -232,11 +232,11 @@
       register: oo_secret
 
     - name: Get storage secret from google secret manager
-      uri:
+      ansible.builtin.uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-storage-key/versions/latest:access
         method: GET
-        remote_src: yes
-        return_content: yes
+        remote_src: true
+        return_content: true
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/json
@@ -244,48 +244,48 @@
       register: storage_key
 
     - name: Get storage gateway secret from google secret manager
-      uri:
+      ansible.builtin.uri:
         url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-storagegw-password/versions/latest:access
         method: GET
-        remote_src: yes
-        return_content: yes
+        remote_src: true
+        return_content: true
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/json
           x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
       register: storagegw_secret
 
-    - name: storage secret json (clear)
-      file:
+    - name: Storage secret json (clear)
+      ansible.builtin.file:
         path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         state: absent
 
-    - name: storage secret json (set)
-      lineinfile:
+    - name: Storage secret json (set)
+      ansible.builtin.lineinfile:
         path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         owner: "{{ storagegw_user.name }}"
         group: "{{ storagegw_user.group }}"
         mode: '0440'
-        create: yes
+        create: true
         line: "{{ storage_key.json.payload.data | b64decode | b64decode }}"
-      no_log: True
+      no_log: true
 
-    - name: storage secret json (format)
+    - name: Storage secret json (format)
       replace:
         path: "{{ project_directory }}/nextcloud_storagegw/credentials.json"
         regexp: "'"
         replace: '"'
-      no_log: True
+      no_log: true
 
     - name: Determine nextcloud state
-      stat:
+      ansible.builtin.stat:
         path: "{{ project_directory }}/nextcloud_application/var/www/html/data/ncadmin"
       register: nextcloud_state
 
     - name: Get nextcloud backup from storage if exists
       get_url:
         url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_application_backup.tar.gz
-        force: yes
+        force: true
         owner: root
         group: root
         mode: '0640'
@@ -293,26 +293,26 @@
         dest: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-      when: nextcloud_state.stat.exists|bool == False
-      ignore_errors: True
+      when: not nextcloud_state.stat.exists
+      ignore_errors: true
 
-    - name: unarchive backup if dir not exists
-      unarchive:
+    - name: Unarchive backup if dir not exists
+      ansible.builtin.unarchive:
         src: "{{ project_directory }}/nextcloud_application_backup.tar.gz"
         dest: "{{ project_directory }}/"
-        remote_src: yes
-      when: nextcloud_state.stat.exists|bool == False
-      ignore_errors: True
+        remote_src: true
+      when: not nextcloud_state.stat.exists
+      ignore_errors: true
 
     - name: Determine nextcloud db state
-      stat:
+      ansible.builtin.stat:
         path: "{{ project_directory }}/nextcloud_database/databases/nextcloud"
       register: nextcloud_db_state
 
     - name: Get nextcloud backup db from storage if exists
       get_url:
         url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/nextcloud/nextcloud_database_backup.tar.gz
-        force: yes
+        force: true
         owner: root
         group: root
         mode: '0640'
@@ -320,34 +320,34 @@
         dest: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-      when: nextcloud_db_state.stat.exists|bool == False
-      ignore_errors: True
+      when: not nextcloud_db_state.stat.exists
+      ignore_errors: true
 
-    - name: unarchive db backup if dir not exists
-      unarchive:
+    - name: Unarchive db backup if dir not exists
+      ansible.builtin.unarchive:
         src: "{{ project_directory }}/nextcloud_database_backup.tar.gz"
         dest: "{{ project_directory }}/"
-        remote_src: yes
+        remote_src: true
         owner: nextclouddb
         group: nextclouddb
-      when: nextcloud_db_state.stat.exists|bool == False
-      ignore_errors: True
+      when: not nextcloud_db_state.stat.exists
+      ignore_errors: true
 
-    - name: docker network
-      docker_network:
+    - name: Docker network
+      community.docker.docker_network:
         name: cloudoffice
         driver: bridge
         ipam_config:
           - subnet: "{{ docker_network }}/24"
             gateway: "{{ docker_gw }}"
 
-    - name: db container
-      docker_container:
+    - name: Db container
+      community.docker.docker_container:
         name: cloudoffice_database
         hostname: cloudofficedatabase
         image: linuxserver/mariadb:latest
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_db }}"
         env:
           MYSQL_ROOT_PASSWORD: "{{ admin_secret.json.payload.data | b64decode }}"
@@ -358,19 +358,19 @@
           PGID: "{{ db_user.group }}"
         volumes:
           - "{{ project_directory }}/nextcloud_database:/config:rw"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "compatibility"
-      no_log: True
+      no_log: true
 
-    - name: nextcloud container
-      docker_container:
+    - name: Nextcloud container
+      community.docker.docker_container:
         name: cloudoffice_nextcloud
         hostname: cloudofficenextcloud
         image: nextcloud:latest
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_nextcloud }}"
         env:
           NEXTCLOUD_ADMIN_PASSWORD: "{{ admin_secret.json.payload.data | b64decode }}"
@@ -390,19 +390,19 @@
           - "{{ project_directory }}/nextcloud_application/var/www/html/config:/var/www/html/config:rw"
           - "{{ project_directory }}/nextcloud_application/var/www/html/data:/var/www/html/data:rw"
           - "{{ project_directory }}/nextcloud_application/var/www/html/themes:/var/www/html/themes:rw"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "compatibility"
-      no_log: True
+      no_log: true
 
-    - name: web proxy container
-      docker_container:
+    - name: Web proxy container
+      community.docker.docker_container:
         name: cloudoffice_webproxy
         hostname: cloudofficewebproxy
         image: httpd:2.4
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_webproxy }}"
         ports:
           - "{{ web_port }}:{{ web_port }}"
@@ -411,20 +411,20 @@
           - "{{ project_directory }}/nextcloud_webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro"
           - /etc/ssl/certs/ssl-cert-snakeoil.pem:/usr/local/apache2/conf/server.crt:ro
           - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "compatibility"
-        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
+        restart: "{% if proxy_conf_files.changed %}true{% else %}false{% endif %}"
       when: duckdns_domain == ""
 
-    - name: duckdnsupdater container
-      docker_container:
+    - name: Duckdnsupdater container
+      community.docker.docker_container:
         name: cloudoffice_duckdnsupdater
         hostname: cloudoffice_duckdnsupdater
         image: ghcr.io/linuxserver/duckdns
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_duckdnsupdater }}"
         env:
           PUID: "1000"
@@ -432,19 +432,19 @@
           TZ: "UTC"
           SUBDOMAINS: "{{ duckdns_domain.split('.')[0] }}"
           TOKEN: "{{ duckdns_token }}"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "compatibility"
       when: duckdns_domain != ""
 
-    - name: duckdns web proxy container
-      docker_container:
+    - name: Duckdns web proxy container
+      community.docker.docker_container:
         name: cloudoffice_webproxy
         hostname: cloudofficewebproxy
         image: ghcr.io/linuxserver/swag
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_webproxy }}"
         env:
           PUID: "1000"
@@ -457,41 +457,41 @@
         ports:
           - "{{ web_port }}:443"
         volumes: "{{ project_directory }}/nextcloud_webproxy:/config"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "compatibility"
-        restart: "{% if proxy_conf_files.changed %}yes{% else %}no{% endif %}"
+        restart: "{% if proxy_conf_files.changed %}true{% else %}false{% endif %}"
       when: duckdns_domain != ""
 
-    - name: minio storage gateway container
-      docker_container:
+    - name: Minio storage gateway container
+      community.docker.docker_container:
         name: cloudoffice_storagegateway
         image: minio/minio:latest
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_storagegw }}"
         env:
           GOOGLE_APPLICATION_CREDENTIALS: "/credentials.json"
           MINIO_ACCESS_KEY: "storagegw"
           MINIO_SECRET_KEY: "{{ storagegw_secret.json.payload.data | b64decode }}"
         command: "gateway gcs {{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
-        user: "{{ storagegw_user.uid }}:{{ storagegw_user.group }}"
+        ansible.builtin.user: "{{ storagegw_user.uid }}:{{ storagegw_user.group }}"
         volumes:
           - "{{ project_directory }}/nextcloud_storagegw/credentials.json:/credentials.json:ro"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: always
         container_default_behavior: "compatibility"
-      no_log: True
+      no_log: true
 
-    - name: onlyoffice container
-      docker_container:
+    - name: Onlyoffice container
+      community.docker.docker_container:
         name: cloudoffice_onlyoffice
         hostname: cloudofficeonlyoffice
         image: onlyoffice/documentserver
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_onlyoffice }}"
         env:
           ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
@@ -504,28 +504,28 @@
           - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
         ports:
           - "{{ oo_port }}:443"
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "no_defaults"
-        auto_remove: no
-        detach: yes
-        init: no
-        interactive: no
+        auto_remove: false
+        detach: true
+        init: false
+        interactive: false
         memory: "0"
-        paused: no
-        read_only: no
-        tty: yes
-      no_log: True
+        paused: false
+        read_only: false
+        tty: true
+      no_log: true
       when: duckdns_domain != ""
 
-    - name: onlyoffice container
-      docker_container:
+    - name: Onlyoffice container
+      community.docker.docker_container:
         name: cloudoffice_onlyoffice
         hostname: cloudofficeonlyoffice
         image: onlyoffice/documentserver
         networks:
-          - name: cloudoffice
+          - name: Cloudoffice
             ipv4_address: "{{ docker_onlyoffice }}"
         env:
           ONLYOFFICE_HTTPS_HSTS_ENABLED: "false"
@@ -536,23 +536,23 @@
           - /opt/nextcloud_onlyoffice:/var/www/onlyoffice/Data:rw
           - /etc/ssl/certs/ssl-cert-snakeoil.pem:/var/www/onlyoffice/Data/certs/onlyoffice.crt:ro
           - /etc/ssl/private/ssl-cert-snakeoil.key:/var/www/onlyoffice/Data/certs/onlyoffice.key:ro
-        pull: yes
-        purge_networks: yes
+        pull: true
+        purge_networks: true
         restart_policy: "always"
         container_default_behavior: "no_defaults"
-        auto_remove: no
-        detach: yes
-        init: no
-        interactive: no
+        auto_remove: false
+        detach: true
+        init: false
+        interactive: false
         memory: "0"
-        paused: no
-        read_only: no
-        tty: yes
-      no_log: True
+        paused: false
+        read_only: false
+        tty: true
+      no_log: true
       when: duckdns_domain == ""
 
-    - name: nextcloud onlyoffice storage and talk scripts (clear)
-      file:
+    - name: Nextcloud onlyoffice storage and talk scripts (clear)
+      ansible.builtin.file:
         path: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
         state: absent
       with_items:
@@ -560,15 +560,15 @@
         - storage
         - talk
 
-    - name: nextcloud onlyoffice (set)
-      lineinfile:
+    - name: Nextcloud onlyoffice (set)
+      ansible.builtin.lineinfile:
         path: "{{ project_directory }}/nextcloud_application/nextcloud-onlyoffice.sh"
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0500'
         line: "{{ item }}"
-      no_log: True
+      no_log: true
       with_items:
         - "#!/bin/bash"
         - "# install and configure onlyoffice connector"
@@ -579,15 +579,15 @@
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice disable_certificate_verification --value='yes'"
         - "docker exec --user www-data cloudoffice_nextcloud php occ config:app:set onlyoffice jwt_secret --value {{ oo_secret.json.payload.data | b64decode }}"
 
-    - name: nextcloud storage (set)
-      lineinfile:
+    - name: Nextcloud storage (set)
+      ansible.builtin.lineinfile:
         path: "{{ project_directory }}/nextcloud_application/nextcloud-storage.sh"
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0500'
         line: "{{ item }}"
-      no_log: True
+      no_log: true
       with_items:
         - "#!/bin/bash"
         - "# ensure files_external is enabled"
@@ -605,10 +605,10 @@
         - "  echo 'cloud storage exists, skipping.'"
         - "fi"
 
-    - name: nextcloud talk (set)
-      lineinfile:
+    - name: Nextcloud talk (set)
+      ansible.builtin.lineinfile:
         path: "{{ project_directory }}/nextcloud_application/nextcloud-talk.sh"
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0500'
@@ -619,28 +619,28 @@
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:install spreed"
         - "docker exec --user www-data cloudoffice_nextcloud php occ app:enable spreed"
 
-    - name: wait for nextcloud 200OK
-      uri:
+    - name: Wait for nextcloud 200OK
+      ansible.builtin.uri:
         url: "{% if duckdns_domain != '' %}https://{{ duckdns_domain }}:{{ web_port }}/nc/login{% else %}https://127.0.0.1:{{ web_port }}/login{% endif %}"
         status_code: 200
-        validate_certs: no
+        validate_certs: false
       register: nc_wait_result
       until: nc_wait_result.status == 200
       retries: 180
       delay: 1
 
-    - name: wait for onlyoffice 200OK
-      uri:
+    - name: Wait for onlyoffice 200OK
+      ansible.builtin.uri:
         url: "{% if duckdns_domain != '' %}https://{{ duckdns_domain }}:{{ web_port }}/{% else %}https://127.0.0.1:{{ oo_port }}/{% endif %}"
         status_code: 200
-        validate_certs: no
+        validate_certs: false
       register: oo_wait_result
       until: oo_wait_result.status == 200
       retries: 180
       delay: 1
 
-    - name: nextcloud onlyoffice storage and talk (execute)
-      shell:
+    - name: Nextcloud onlyoffice storage and talk (execute)
+      ansible.builtin.shell:
         cmd: "{{ project_directory }}/nextcloud_application/nextcloud-{{ item }}.sh"
       args:
         executable: /bin/bash
@@ -649,15 +649,15 @@
         - storage
         - talk
 
-    - name: nextcloud backup playbook (clear)
-      file:
+    - name: Nextcloud backup playbook (clear)
+      ansible.builtin.file:
         path: "{{ project_directory }}/nextcloud-backup.yml"
         state: absent
 
-    - name: nextcloud backup playbook (set)
-      lineinfile:
+    - name: Nextcloud backup playbook (set)
+      ansible.builtin.lineinfile:
         path: "{{ project_directory }}/nextcloud-backup.yml"
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0640'
@@ -671,7 +671,7 @@
         - "    - oracle.oci"
         - "  tasks:"
         - "  "
-        - "    - name: archive nextcloud locally"
+        - "    - name: Archive nextcloud locally"
         - "      archive:"
         - "        path: \"{{ project_directory }}/{{ '{{ item }}' }}\""
         - "        dest: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
@@ -684,22 +684,22 @@
         - "        - nextcloud_database"
         - "   "
         - "    - name: Retrieve GCS Token"
-        - "      uri:"
+        - "      ansible.builtin.uri:"
         - "        url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
         - "        method: GET"
         - "        headers:"
         - "          Metadata-Flavor: Google"
-        - "        return_content: yes"
+        - "        return_content: true"
         - "      register: gcs_token_resp"
         - "     "
-        - "    - name: upload nextcloud archive to storage"
-        - "      uri: "
+        - "    - name: Upload nextcloud archive to storage"
+        - "      ansible.builtin.uri: "
         - "        url: \"https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=nextcloud/{{ '{{ item }}' }}_backup.tar.gz\""
         - "        timeout: 720"
         - "        method: POST"
         - "        src: \"{{ project_directory }}/{{ '{{ item }}' }}_backup.tar.gz\""
-        - "        remote_src: yes"
-        - "        return_content: yes "
+        - "        remote_src: true"
+        - "        return_content: true "
         - "        headers: "
         - "          Authorization: \"Bearer {{ '{{ gcs_token_resp.json.access_token }}' }}\""
         - "          Content-Type: application/gzip"
@@ -707,10 +707,10 @@
         - "        - nextcloud_application "
         - "        - nextcloud_database "
 
-    - name: nextcloud backup systemd timer
-      blockinfile:
+    - name: Nextcloud backup systemd timer
+      ansible.builtin.blockinfile:
         path: /etc/systemd/system/nextcloud-backup.timer
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -723,10 +723,10 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: nextcloud backup systemd service
-      blockinfile:
+    - name: Nextcloud backup systemd service
+      ansible.builtin.blockinfile:
         path: /etc/systemd/system/nextcloud-backup.service
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -741,28 +741,28 @@
           [Install]
           WantedBy=multi-user.target
 
-    - name: nextcloud backup service
-      systemd:
+    - name: Nextcloud backup service
+      ansible.builtin.systemd:
         name: nextcloud-backup.service
-        daemon_reload: yes
+        daemon_reload: true
 
-    - name: nextcloud backup timer
-      systemd:
+    - name: Nextcloud backup timer
+      ansible.builtin.systemd:
         name: nextcloud-backup.timer
-        daemon_reload: yes
+        daemon_reload: true
 
-    - name: clear service and timer files
-      file:
+    - name: Clear service and timer files
+      ansible.builtin.file:
         path: "/etc/systemd/system/nextcloudcron.{{ item }}"
         state: absent
       with_items:
         - service
         - timer
 
-    - name: nextcloud background jobs systemd service
-      lineinfile:
+    - name: Nextcloud background jobs systemd service
+      ansible.builtin.lineinfile:
         path: /etc/systemd/system/nextcloudcron.service
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -778,10 +778,10 @@
         - "[Install]"
         - "WantedBy=basic.target"
 
-    - name: nextcloud background jobs systemd timer
-      lineinfile:
+    - name: Nextcloud background jobs systemd timer
+      ansible.builtin.lineinfile:
         path: /etc/systemd/system/nextcloudcron.timer
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -798,12 +798,12 @@
         - "[Install]"
         - "WantedBy=timers.target"
 
-    - name: nextcloud background jobs start/enable
-      systemd:
+    - name: Nextcloud background jobs start/enable
+      ansible.builtin.systemd:
         name: "{{ item }}"
         state: started
-        enabled: yes
-        daemon_reload: yes
+        enabled: true
+        daemon_reload: true
       with_items:
         - nextcloudcron.timer
         - nextcloudcron.service
