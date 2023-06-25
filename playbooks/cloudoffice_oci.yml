@@ -101,7 +101,7 @@
     - name: Db user
       ansible.builtin.user:
         name: nextclouddb
-        ansible.builtin.shell: /bin/bash
+        shell: /bin/bash
         create_home: false
       register: db_user
 
@@ -113,14 +113,14 @@
       register: oci_vnic_metadata
 
     - name: Get oci private ip facts
-      oci_network_private_ip_facts:
+      oracle.oci.oci_network_private_ip_facts:
         auth_type: "instance_principal"
         vnic_id: "{{ oci_vnic_metadata.json[0].vnicId }}"
         tenancy: "{{ oci_root_compartment }}"
       register: private_ip_data
 
     - name: Get oci public ip facts
-      oci_network_public_ip_facts:
+      oracle.oci.oci_network_public_ip_facts:
         auth_type: "instance_principal"
         private_ip_id: "{{ private_ip_data.private_ips[0].id }}"
       register: public_ip_data

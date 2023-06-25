@@ -97,14 +97,14 @@
     - name: Db user
       ansible.builtin.user:
         name: nextclouddb
-        ansible.builtin.shell: /bin/bash
+        shell: /bin/bash
         create_home: false
       register: db_user
 
     - name: Storagegw user
       ansible.builtin.user:
         name: storagegw
-        ansible.builtin.shell: /bin/bash
+        shell: /bin/bash
         create_home: false
       register: storagegw_user
 

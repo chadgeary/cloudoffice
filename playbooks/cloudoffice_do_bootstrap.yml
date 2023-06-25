@@ -9,7 +9,7 @@
     - name: Ubuntu user
       ansible.builtin.user:
         name: ubuntu
-        ansible.builtin.shell: /bin/bash
+        shell: /bin/bash
         create_home: true
 
     - name: Ubuntu ssh dir
